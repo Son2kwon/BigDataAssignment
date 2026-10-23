@@ -1,0 +1,44 @@
+[project]
+name = "agent-failure-prediction"
+version = "0.1.0"
+description = "AI 코딩 에이전트 실패 조기 예측"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "datasets>=5.1.0",
+    "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pandas>=3.1.0",
+    "polars>=2.0.0",
+    "pyarrow>=26.0.0",
+    "scikit-learn>=1.9.1",
+    "shap>=0.54.1",
+    "tqdm>=4.70.1",
+    "xgboost>=3.4.1",
+]
+
+[dependency-groups]
+dl = [
+    "accelerate>=1.15.0",
+    "torch>=2.14.1",
+    "transformers>=5.20.2",
+]
+
+[tool.uv]
+package = false
+environments = [
+    "sys_platform == 'linux'",
+    "sys_platform == 'win32'",
+    "sys_platform == 'darwin' and platform_machine == 'arm64'",
+]
+
+# Windows/Linux는 CUDA 13.0 빌드, macOS는 PyPI 빌드(MPS)를 받는다.
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu130", marker = "sys_platform != 'darwin'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

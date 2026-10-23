@@ -4,8 +4,7 @@
 - 잃는 성공 = 스텝 수 > K인 성공 궤적 / 전체 성공 궤적
 - 절약 스텝 = sum(max(0, 스텝 수 - K)) / 전체 스텝 수
 
-설치: pip install datasets pandas
-실행: python code/fixed_cap_k.py
+실행: uv run python "code/test for K/fixed_cap_k.py"
 """
 import numpy as np
 from datasets import load_dataset

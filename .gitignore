@@ -3,3 +3,7 @@
 # 데이터는 data/download.sh로 받는다
 data/*
 !data/download.sh
+
+# uv 가상환경
+.venv/
+__pycache__/
