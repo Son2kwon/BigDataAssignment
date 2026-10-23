@@ -1,1 +1,5 @@
 .DS_Store
+
+# 데이터는 data/download.sh로 받는다
+data/*
+!data/download.sh
