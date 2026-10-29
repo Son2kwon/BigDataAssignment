@@ -14,9 +14,37 @@ import numpy as np
 import polars as pl
 from sklearn.metrics import average_precision_score, roc_auc_score
 
-from afp import io
+from afp import io, split
 
 TRAJ_COLUMNS = ["traj_id", "instance_id", "target", "n_steps"]
+MAX_LOSS = 0.05  # 운영점 제약: 성공 손실률 상한 (proposal.md §5)
+
+
+def eval_set(name: str) -> pl.DataFrame:
+    """평가 집합 하나의 궤적 = 하네스의 trajs 입력. name은 train, test_same, test_cross 중 하나.
+
+    모든 모델이 같은 집합으로 평가받도록 trajs는 이 함수로만 만든다.
+    - N 전에 끝난 궤적도 들어 있다 (비용 곡선의 분모가 전체 궤적이다). 미리 거르지 않는다
+    - test_same과 test_cross는 같은 테스트 이슈를 공유하므로 합쳐서 평가하지 않는다. 합치면
+      이슈 내 AUROC가 한 이슈 안의 70B 궤적과 8B·405B 궤적을 비교하게 된다
+    - K 고정 상한 같은 기준값도 같은 집합에서 다시 계산한다 (전체 데이터 값을 가져오지 않는다)
+    출력: traj_id, instance_id, target, n_steps, fold (train은 0..4, 테스트는 split.HELDOUT_FOLD).
+    """
+    if name not in split.SPLITS:
+        raise ValueError(f"평가 집합은 {split.SPLITS} 중 하나: {name!r}")
+    ids = io.load_splits().filter(pl.col("split") == name).select("traj_id", "fold")
+    trajs = io.load_trajectories(TRAJ_COLUMNS).join(ids, on="traj_id", how="inner")
+    if trajs.height != ids.height:
+        raise ValueError(f"{name}: splits의 궤적 {ids.height}개 중 {ids.height - trajs.height}개가 trajectories에 없음")
+    return trajs.sort("traj_id")
+
+
+def eval_costs(trajs: pl.DataFrame) -> pl.DataFrame:
+    """trajs 궤적들의 스텝별 맥락 길이 (cost_curve·point_metrics의 costs 입력)."""
+    ids = trajs.select("traj_id")
+    base = io.load_trajectories(["traj_id", "system_len", "issue_msg_len"]).join(ids, on="traj_id", how="semi")
+    steps = io.scan_steps(["traj_id", "step_idx", "ai_len", "obs_len"]).join(ids.lazy(), on="traj_id", how="semi")
+    return context_costs(steps, base)
 
 
 def _columns(df: pl.DataFrame) -> list[str]:
@@ -203,6 +231,41 @@ def cost_curve(
 def at_threshold(curve: pl.DataFrame, tau: float) -> dict:
     """고정한 tau를 적용했을 때의 행 (p_fail >= tau인 궤적을 모두 끊은 상태)."""
     return curve.filter(pl.col("tau") >= tau).row(-1, named=True)
+
+
+def select_operating_point(
+    trajs: pl.DataFrame,
+    preds: pl.DataFrame,
+    n: int,
+    caps=(None,),
+    max_loss: float = MAX_LOSS,
+    by: str = "saved_steps",
+    costs: pl.DataFrame | None = None,
+) -> dict:
+    """운영점 선택: 성공 손실 <= max_loss인 (K, tau) 중 절약(by)이 가장 큰 것.
+
+    trajs·preds는 학습 이슈와 그 out-of-fold 예측이어야 한다. 테스트 예측으로 고르면 절약률이
+    과대평가된다. 고른 값은 테스트에서 point_metrics(..., tau=tau, cap=cap)로 그대로 적용한다.
+    - caps: 결합 정책의 상한 K 후보. None은 상한 없음 ("시점 N에서 p_fail >= tau"만)
+    - tau=inf가 뽑히면 예측기를 쓰지 않는 것이 낫다는 뜻이다 (상한 K만, 또는 아무것도 안 끊음)
+    - 동률이면 손실이 작은 것, 그다음 tau가 큰 것(덜 끊음), 그다음 K가 큰 것을 고른다
+    출력: N, cap, 그리고 그 행의 tau, n_stopped, stop_rate, lost_success, saved_steps(, saved_tokens).
+    """
+    if by == "saved_tokens" and costs is None:
+        raise ValueError("by='saved_tokens'는 costs가 필요하다")
+    cand = pl.concat([
+        cost_curve(trajs, preds, n, costs=costs, cap=cap)
+        .filter(pl.col("lost_success") <= max_loss + 1e-12)  # 비율 계산의 부동소수 오차
+        .with_columns(cap=pl.lit(cap, dtype=pl.Int64))
+        for cap in caps
+    ])
+    if cand.height == 0:
+        raise ValueError(f"N={n}, K 후보 {list(caps)}: 성공 손실 <= {max_loss}인 운영점이 없음")
+    best = cand.sort(
+        [pl.col(by), pl.col("lost_success"), pl.col("tau"), pl.col("cap").fill_null(np.iinfo(np.int64).max)],
+        descending=[True, False, True, True],
+    ).row(0, named=True)
+    return {"N": n, **best}
 
 
 def point_metrics(
