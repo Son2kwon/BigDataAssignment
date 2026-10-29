@@ -7,3 +7,6 @@ data/*
 # uv 가상환경
 .venv/
 __pycache__/
+
+# pytest cache
+.pytest_cache

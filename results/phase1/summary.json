@@ -1,0 +1,98 @@
+{
+  "trajectories": 80036,
+  "issues": 3591,
+  "traj_id_dup": 0,
+  "steps_total": 2115623,
+  "steps_rows": 2115623,
+  "success_rate": 0.1673,
+  "models": {
+    "swe-agent-llama-70b": {
+      "n": 74792,
+      "success_rate": 0.1667
+    },
+    "swe-agent-llama-8b": {
+      "n": 4053,
+      "success_rate": 0.1515
+    },
+    "swe-agent-llama-405b": {
+      "n": 1191,
+      "success_rate": 0.2586
+    }
+  },
+  "median_steps": {
+    "success": 12.0,
+    "failure": 19.0
+  },
+  "max_steps": 408,
+  "running_at_N": {
+    "3": {
+      "n": 79402,
+      "success_rate": 0.168
+    },
+    "5": {
+      "n": 76182,
+      "success_rate": 0.1661
+    },
+    "8": {
+      "n": 67388,
+      "success_rate": 0.1568
+    },
+    "10": {
+      "n": 59708,
+      "success_rate": 0.1379
+    },
+    "15": {
+      "n": 43550,
+      "success_rate": 0.0922
+    },
+    "20": {
+      "n": 34059,
+      "success_rate": 0.0636
+    }
+  },
+  "traj_per_issue": {
+    "median": 16.0,
+    "max": 125
+  },
+  "issues_never_success": 2753,
+  "issues_mixed": {
+    "issues": 807,
+    "trajectories": 34922
+  },
+  "role_pattern_bad": {
+    "n": 0,
+    "examples": []
+  },
+  "system_prompt_hashes": [
+    {
+      "system_hash": "bfc71085e702",
+      "count": 80036
+    }
+  ],
+  "zero_step_trajectories": 1,
+  "steps_stats": {
+    "no_obs": 80035,
+    "no_command": 0,
+    "error_rate": 0.3002,
+    "edit_failed_rate": 0.1164,
+    "other_rate": 0.0326
+  },
+  "fixed_cap": {
+    "30": {
+      "lost_success": 0.0697,
+      "saved_steps": 0.2942
+    },
+    "35": {
+      "lost_success": 0.049,
+      "saved_steps": 0.2456
+    },
+    "40": {
+      "lost_success": 0.0371,
+      "saved_steps": 0.2081
+    },
+    "50": {
+      "lost_success": 0.0219,
+      "saved_steps": 0.1577
+    }
+  }
+}

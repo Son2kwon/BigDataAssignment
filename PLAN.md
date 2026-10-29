@@ -129,6 +129,28 @@ code/
 
 불일치가 있으면 원인을 `docs/proposal-changes.md`에 적고 제안서 수치를 고친다.
 
+#### Phase 1 결과 (2026-10-29 완료)
+
+`uv run python code/01_parse.py` (약 1.5분) → 위 완료 기준 **모두 일치** [확인]. 제안서 수치 수정 없음. 검증 수치는 `results/phase1/summary.json`, 명령 빈도표는 `results/phase1/command_counts.csv`.
+
+- 추가로 일치 확인: 이슈당 궤적 중앙값 16·최대 125, 한 번도 성공 못 한 이슈 2,753개, 성공·실패 섞인 이슈 807개(궤적 34,922개), K=30/35/40/50 고정 상한 값(로컬 parquet 기준이라 0.2의 재현 목적도 겸함)
+- 역할 순서 이상 궤적 **0개**. 마지막 `ai` 뒤 관측이 없는 궤적 80,035개(1개 빼고 전부). 스텝 0개 궤적 1개 (이슈만 있고 `ai` 없음)
+- 시스템 프롬프트 해시가 80,036개 모두 같다 (2.3 (c) 완료)
+- 모든 `ai` 메시지에 코드 블록이 있다 (`command` null 0개)
+
+확정한 규칙 (코드는 `code/afp/parse.py` 한 곳):
+- `step_idx`는 **1부터**. "앞 N스텝" = `step_idx <= N`
+- `command` = 중첩되지 않은 마지막 ``` 블록 (SWE-agent ThoughtActionParser와 같은 규칙)
+- `command_head` = 첫 토큰의 식별자 부분. 모델이 `find. -name`, `cd..`, `ls.github`처럼 공백을 빼먹은 명령을 자주 내서 `find`, `cd`, `ls`로 정규화한다 (원문은 `command`에 남음)
+- `command_name` = 빈도 0.1% 이상 26개(누적 96.7%) 사전, 나머지 `other`(3.3%), 코드 블록 없음 `none`
+- `is_error` (스텝의 30.0%): Traceback, `XxxError:`/`Exception:` 줄, 편집 거부("Your proposed edit has introduced new syntax error"), `command not found`, `No such file or directory`, bash `syntax error near unexpected token`, SWE-agent `File/Directory … not found`, `usage:` 줄. 샘플 2만 개에서 매칭이 모두 실제 에러임을 확인. `edit_failed`(11.6%)는 편집 거부만 따로 표시
+- `open_file`, `cwd`: 관측 끝 `(Open file: …)(Current directory: …)` 줄에서 파싱. M1 "열어 본 고유 파일 수"에 쓴다
+
+산출물 스키마 (Phase 2·3·5와의 인터페이스):
+- `data/processed/trajectories.parquet` (2.4MB): `traj_id, file_idx, row_idx, instance_id, model_name, target, n_steps, exit_status`(분석 전용)`, issue_text`(ISSUE:~INSTRUCTIONS: 사이 본문)`, issue_msg_len, system_len, system_hash, role_pattern_ok, roles_head`
+- `data/processed/steps.parquet` (308MB, 원문 전체 포함): `traj_id, step_idx, action_text, command, command_head, command_name, obs_text, ai_len, obs_len, is_error, edit_failed, open_file, cwd`. 텍스트가 필요 없으면 `pl.scan_parquet(...).select(...)`로 컬럼을 골라 읽는다
+- 3.4 토큰 근사용 길이: `system_len + issue_msg_len + Σ(ai_len + obs_len)`
+
 ### Phase 2. 분할과 누수 점검 (8주차 몫, 1일)
 
 | 작업 | 내용 |
