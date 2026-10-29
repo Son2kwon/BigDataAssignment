@@ -27,8 +27,10 @@
 | 제안서 | `docs/proposal.md`, `docs/proposal.pdf`, 수정 내역 `docs/proposal-changes.md` |
 | 환경 | `pyproject.toml` + `uv.lock` (Python 3.13). 기본 그룹: numpy, pandas, polars, pyarrow, datasets, scikit-learn, xgboost, shap, matplotlib, tqdm, ipykernel. `dl` 그룹: torch(CUDA 13.0), transformers, accelerate. 이 머신의 `.venv`에는 `dl` 그룹까지 설치되어 있다 |
 | 데이터 다운로드 | `data/download.sh`. HF revision 고정 + SHA-256 검증, 이어받기 지원. 이 머신의 `data/`에 4개 데이터셋 모두 받아져 있다 (3.4GB) |
-| 분석 코드 | `code/test for K/fixed_cap_k.py` 하나. 고정 상한 K별 잃는 성공·절약 스텝 계산. `code/test for K/test.py`는 `print("Hello world!")`뿐 |
-| 테스트·린트·CI | 없음 |
+| 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
+| 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet` (git 밖). 검증 수치 `results/phase1/`, `results/phase2/` (git 안) |
+| 테스트·린트·CI | pytest(dev 그룹) 56개, `code/tests/`. 린트·CI 없음 |
+| 진행 | Phase 0(0.2·0.4 일부 제외)~3 완료, 3.5만 남음 (모델 OOF 예측이 필요해서 Phase 4·5와 같이). 다음은 Phase 4 |
 
 ### 데이터 구조 [확인, parquet 스키마와 샘플 행 조회]
 
@@ -55,13 +57,13 @@
 
 ## 4. 격차 (제안서 대비 비어 있는 것)
 
-- 파싱·스텝 테이블, 분할, 평가 하네스, 모든 모델(B1, M1, M2, M3)이 아직 없다. 제안서 일정상 8주차 작업(파싱, 누수 점검, 분할, B0·B1)이 저장소에 없다.
-- `fixed_cap_k.py`는 `load_dataset("nebius/SWE-agent-trajectories")`로 HF Hub에서 **revision 고정 없이** 받는다. `download.sh`가 고정한 로컬 parquet와 같은 데이터라는 보장이 없다.
-- 궤적 ID가 없어서 스텝·피처·예측 결과를 다시 궤적에 붙일 키를 만들어야 한다.
-- 제안서의 "절약 토큰 비율"에 쓸 토큰 수가 swe-agent 데이터에는 없다 (문자 길이 기반 근사 필요).
+2026-10-29 기준. 파싱·스텝 테이블(Phase 1), 분할·누수 점검(Phase 2), 평가 하네스(Phase 3, 3.5 제외)는 끝났다. 궤적 ID(`traj_id`), 토큰 근사(문자 수 기반 맥락 길이), pytest도 생겼다. 남은 것:
+
+- 모든 모델(B1, M1, M2, M3)이 아직 없다. 제안서 일정상 8주차 작업 중 B0·B1(Phase 4)이 남았다.
+- 3.5 운영점 선택(학습 OOF에서 τ·K 고르기)은 모델 OOF 예측이 있어야 해서 아직 없다.
+- `fixed_cap_k.py`는 여전히 `load_dataset("nebius/SWE-agent-trajectories")`로 HF Hub에서 **revision 고정 없이** 받는다. 같은 값은 이제 `01_parse.py`(로컬 parquet)와 하네스가 재현하므로 이 스크립트는 참고용이다 (0.2).
 - README·download.sh는 openhands·terminalbench를 "일반화·도메인 밖 테스트"로 소개하지만 **제안서에는 없다.** 범위 결정 필요 (11절 D1).
-- `proposal.md`의 팀 정보 표(이름·학번·담당)가 비어 있다.
-- 테스트 프레임워크가 없다. 파싱·지표 같은 핵심 함수는 작게라도 검증 코드가 있어야 한다.
+- `proposal.md` 팀 표의 이름·학번은 채워졌지만 **담당 칸이 비어 있다** (0.4).
 
 ## 5. 공통 설계 결정 (권장)
 
@@ -109,6 +111,13 @@ code/
 | 0.4 | `proposal.md` 팀 정보 표 채우기, 담당 분배 (10절) |
 
 완료 기준: `uv run python "code/test for K/fixed_cap_k.py"` 출력이 K=30 → 7.0%/29.4%, K=35 → 4.9%/24.6%, K=40 → 3.7%/20.8%, K=50 → 2.2%/15.8%와 일치. `uv run pytest`가 (빈 테스트라도) 통과.
+
+#### Phase 0 상태 (2026-10-29)
+
+- 0.1 완료: `code/afp/io.py` (경로 상수, `SEED = 42`, 컬럼을 명시하는 로더)
+- 0.2 목적은 달성, 스크립트는 그대로: K=30/35/40/50 값을 로컬 parquet에서 `01_parse.py`(`results/phase1/summary.json`의 `fixed_cap`)와 Phase 3 하네스가 둘 다 재현한다. `fixed_cap_k.py` 자체는 아직 HF Hub에서 로드한다
+- 0.3 완료: pytest가 dev 그룹에 있고 `pyproject.toml`에 `pythonpath`·`testpaths` 설정
+- 0.4 일부: `proposal.md` 팀 표에 이름·학번은 있고 담당 칸은 비어 있다
 
 ### Phase 1. 파싱과 스텝 테이블 (8주차 몫, 1~2일)
 
@@ -221,6 +230,26 @@ code/
 
 완료 기준: 3.8의 테스트 통과. B0(고정 상한)을 하네스로 평가한 결과가 `fixed_cap_k.py`와 일치.
 
+#### Phase 3 결과 (2026-10-29 완료, 3.5 제외)
+
+완료 기준 **모두 충족** [확인, 2026-10-29 main `ea48b0f`에서 다시 실행]. 3.5(운영점 선택)는 학습 OOF 예측이 있어야 하므로 Phase 4·5에서 B1·M1 OOF 예측이 나올 때 같이 만든다. 지금 하네스에는 고른 τ를 적용하는 `at_threshold`만 있고, "OOF 곡선에서 손실 ≤5%인 최대 절약 τ(와 K)를 고르는" 함수는 없다.
+
+- `uv run --no-sync pytest`: **56개 통과** (1.6초). `01_parse.py`·`02_split.py` 검증 모드도 "완료 기준 통과", 다시 실행해도 `results/`가 바뀌지 않는다 (git diff 없음)
+- 3.8 단위 테스트: 완벽 예측기 → AUROC·PR-AUC 1, 상수 예측기 → AUROC 0.5·PR-AUC = 성공률, 고정 상한 = "N=K에서 모두 끊기"(`test_metrics.py`의 합성 데이터 테스트)
+- 3.8 실데이터 (pytest 밖, 별도 스크립트로 확인): 진행 중 궤적에 모두 p_fail=1을 준 하네스 결과가 제안서·`fixed_cap_k.py` 값과 일치하고, numpy로 따로 계산한 값과 1e-12 안에서 같다
+
+| K | 성공 손실 | 절약 스텝 | 절약 토큰(근사) |
+| --- | --- | --- | --- |
+| 30 | 7.0% | 29.4% | 50.0% |
+| 35 | 4.9% | 24.6% | 42.2% |
+| 40 | 3.7% | 20.8% | 35.8% |
+| 50 | 2.2% | 15.8% | 27.1% |
+
+- 분할별 K=35 (손실 / 절약 스텝 / 절약 토큰): train 4.3% / 24.2% / 41.6%, test_same 4.5% / 21.8% / 40.2%, test_cross 12.4% / 32.5% / 49.7%. **모델 비교의 K=35 기준값은 전체(4.9%/24.6%)가 아니라 같은 평가 집합의 값을 쓴다.** test_cross는 궤적이 길어서 K=35가 손실 5%를 넘는다
+- 테스트 이슈(test_same + test_cross)에서 완벽 예측기 N=10 → AUROC·이슈 내 AUROC 1.0, 상수 예측기 → 0.5·0.5, PR-AUC 0.1526 = 성공률. 결합 정책(N=10, K=35)의 τ=inf 행이 K=35 단독(6.73% / 25.80%)과 같다
+
+아래 두 절은 작업 당시 기록이다.
+
 #### Phase 3 진행 (2026-10-29, 3.1~3.4 완료)
 
 `code/afp/metrics.py`, 테스트 `code/tests/test_metrics.py` (13개, 전체 `uv run pytest` 20개 통과). Phase 2 분할 없이 만들었다. 평가 집합은 `trajs` 인자로 받으므로 `splits.parquet`이 나오면 `test_same`·`test_cross`로 거른 `trajs`를 넘기면 된다.
@@ -307,11 +336,11 @@ code/
 
 ## 7. 일정
 
-[가정] 학기 1주차가 8/31에 시작했다면 오늘(10/29)은 9주차이고, 8주차 작업(Phase 1·2·4)이 아직 저장소에 없으므로 약 1주 늦다.
+[가정] 학기 1주차가 8/31에 시작했다면 오늘(10/29)은 9주차다. 10/29 기준 Phase 0~3(3.5 제외)이 끝났고, 8주차 몫 중 Phase 4(B0·B1)가 남았다.
 
 | 주차 | 계획 |
 | --- | --- |
-| 9주차 (지금) | Phase 0~4 (밀린 8주차 몫 포함) |
+| 9주차 (지금) | ~~Phase 0~3~~ 완료 (10/29). Phase 4 (B0·B1) + 3.5 운영점 선택 |
 | 10주차 | Phase 5 (M1, SHAP), 비용 곡선 확정 |
 | 11주차 | Phase 6 (M2), Phase 8.1 |
 | 12주차 | Phase 7 (M3, 선택), Phase 8.2 (선택), Phase 9 |
@@ -367,10 +396,10 @@ Phase 1과 Phase 3은 인터페이스(`steps.parquet` 스키마, 예측 파일 �
 | --- | --- | --- |
 | D1 | openhands·terminalbench를 범위에 넣을지 (README에는 있고 제안서에는 없음) | 최소 범위 밖 선택 과제로 둔다. 하게 되면 제안서 수정 내역에 추가 |
 | D2 | M1을 N별로 따로 학습할지, N을 피처로 넣은 단일 모델로 할지 | N별 따로 (해석·비교가 쉽고 XGBoost는 빠름) |
-| D3 | 이슈 내 AUROC 집계 방식 | 이슈 안 성공×실패 쌍을 모아 계산한 값(쌍 가중)을 주 지표로, 이슈 평균을 보조로 |
-| D4 | 토큰 근사 방법 | 문자 수 기반. 필요하면 ModernBERT 토크나이저로 샘플 보정 |
-| D5 | pytest 도입 (`pyproject.toml`·`uv.lock` 변경) | 도입 |
-| D6 | `results/`를 git에 올릴지 | 작은 CSV·PNG만 올린다 |
+| D3 | 이슈 내 AUROC 집계 방식 | 이슈 안 성공×실패 쌍을 모아 계산한 값(쌍 가중)을 주 지표로, 이슈 평균을 보조로. **하네스는 둘 다 낸다 (Phase 3). 주 지표는 팀 확정 필요** |
+| D4 | 토큰 근사 방법 | 문자 수 기반. 필요하면 ModernBERT 토크나이저로 샘플 보정. **문자 수 기반으로 구현됨 (Phase 3.4), 보정은 안 함** |
+| D5 | pytest 도입 (`pyproject.toml`·`uv.lock` 변경) | **확정: 도입함** |
+| D6 | `results/`를 git에 올릴지 | **확정: 작은 CSV·JSON을 올린다** (`results/phase1/`, `results/phase2/`) |
 | D7 | M3 범위 | N=5, 10, 20만 |
 | D8 | 비용 곡선이 단일 시점 정책만 볼지, 여러 시점(N=5, 10, 20에서 차례로 검사) 정책도 볼지 | 단일 시점을 주 결과로, 다중 시점은 시간이 남으면 |
 
