@@ -72,7 +72,8 @@ code/
 ├── afp/                 공용 모듈 (agent failure prediction)
 │   ├── io.py            로컬 parquet 로드, 경로 상수
 │   ├── parse.py         궤적 → 스텝 테이블, 명령 파싱
-│   ├── split.py         테스트 이슈 고정, GroupKFold
+│   ├── split.py         테스트 이슈 고정, StratifiedGroupKFold (Phase 2 결과 참고)
+│   ├── leakage.py       사후 누수 점검 전용 (채점 로그는 여기서만 읽음)
 │   ├── metrics.py       AUROC, PR-AUC, 이슈 내 AUROC, 비용 곡선, 운영점
 │   └── features.py      M1 피처
 ├── 01_parse.py          실행 스크립트 (번호 = 실행 순서)
@@ -164,6 +165,44 @@ code/
 - 테스트 이슈 578개, 학습 이슈 3,013개, train 70B 궤적 62,460개, test_same 12,332개, test_cross 5,244개
 - train과 test 이슈 교집합 0 (테스트로 검증), fold 간 이슈 교집합 0
 - 누수 점검 결과와 2.4 비교표를 `results/`에 저장
+
+#### Phase 2 결과 (2026-10-29 완료)
+
+`uv run python code/02_split.py` (약 10초, `01_parse.py` 결과 필요) → 위 완료 기준 **모두 일치** [확인]. 제안서 분할 수치 수정 없음. 검증 수치는 `results/phase2/summary.json`. 최종 검증 증거(실행 명령·종료 코드·pytest 요약·재실행 해시 비교)는 `results/phase2/verification.json`.
+
+- 궤적 80,036개 = train 62,460 + test_same 12,332 + test_cross 5,244 (8B 4,053 + 405B 1,191). 학습 이슈 3,013개, 테스트 이슈 578개, 교집합 0, fold를 넘는 학습 이슈 0
+- 출처: 원본 12개의 크기·SHA-256이 `data/download.sh` 고정값과 일치하고, `trajectories.parquet` 80,036행이 원본 (파일, 행)의 `instance_id, model_name, target`과 모두 같다
+- 결정성: 입력 행 순서를 섞어도 같은 분할이 나오고, 다시 실행하면 `splits.parquet`와 `results/phase2/` 전체가 바이트 단위로 같다. 저장된 파일이 재계산과 다르면 멈춘다 (`--force`로 덮어씀)
+- 모르는 `model_name`, null, `traj_id` 중복, bool이 아닌 `target`은 버리지 않고 에러로 멈춘다
+
+확정한 규칙 (코드는 `code/afp/split.py` 한 곳):
+- `splits.parquet`: `traj_id, split, fold`만. `fold`는 train 0~4, **test_same·test_cross는 -1** (`split.HELDOUT_FOLD`, 어떤 fold에도 속하지 않음). 분할 방법·seed·sklearn 버전은 parquet 메타데이터 `afp.split`에 기록
+- fold는 `GroupKFold`가 아니라 **`StratifiedGroupKFold(5, shuffle=True, random_state=42)`** (그룹 = `instance_id`, 층화 = `target`). GroupKFold로는 이슈 성공률 편차 때문에 fold 성공률이 14.4%~17.5%(폭 3.1%p, 상대 19%)로 벌어져 fold마다 PR-AUC 기준값이 달라진다. StratifiedGroupKFold는 16.2%~16.3%(폭 0.09%p), fold 크기 차이 32궤적. `results/phase2/fold_balance.csv` (2.2의 "편차가 크면" 조건 해당)
+- 테스트 이슈 중 70B 궤적이 없는 이슈는 0개 (모든 테스트 이슈에 test_same이 있음)
+
+누수 점검 (2.3):
+- (a) 피처 쪽 로드는 `io.load_trajectories(columns)`, `io.scan_steps(columns)`로 컬럼을 **명시**해서 읽고, 누수 컬럼(`io.LEAKY_COLUMNS`)을 요청하면 에러. `io.read_raw`도 `allow_leaky=True` 없이는 거부. 정적 점검(`leakage.scan_code`, AST 기준이라 주석·docstring은 제외)으로 누수 컬럼 이름을 쓰는 파일이 허용 목록(`afp/io.py`, `afp/leakage.py`, `01_parse.py`) 밖에 생기면 pytest가 실패한다. `splits.parquet`에는 누수 컬럼이 없다. 원본의 결과 전용 컬럼은 사후 점검 모듈 `afp/leakage.py`에서만 읽는다
+- (b) 채점 로그(`eval_logs`) 구조를 전수 조회해서 파서를 만들었다: 모두 SWE-bench 형식 하네스 로그이고 테스트 실행은 전부 `pytest -rA`. 80,036개 중 null 9,397, 테스트 구간 없음(패치 적용 실패 등) 1,454, 구간이 잘림 211. 식별자 = `-rA` 요약 줄·verbose 줄의 node id, 테스트 이름, 실행 대상 테스트 파일, 테스트 패치 파일
+  - **전수(1,208,185개 관측, 앞 20스텝)**: 하네스 전용 문자열(`___TESTS_SECTION___`, `test_patch.patch`, `prediction_patch.patch`, run_tests·apply_patch 안내문 등) **0건**. 하네스 디렉터리 이름 `swebench_matterhorn`은 104개 궤적·137개 관측에 나온다. 124개는 에이전트의 `ls`·`cd`·`find` 명령 결과(주로 `ls /` 루트 목록), 나머지 13개는 `python`(6)·`edit`(4)·`find_file`(2)·`create`(1) 명령 뒤 관측이다. 이 137개 관측에도 위 하네스 전용 문자열은 없다
+  - **표본 4,000개** ((model, target) 층화, seed 42, 테스트 식별자를 꺼낸 궤적 3,158개, 식별자 162,733개): 채점 로그의 테스트 이름이 앞 20스텝 관측에 나온 궤적 295개(9.3%), 흔한 이름(3개 이상 저장소에 나오는 `test_repr` 등) 제외 252개(8.0%), node id 일치 30개(0.95%). 처음 나온 스텝의 명령 맥락을 규칙(`leakage.classify`, 명령 이름·정규식 기반 휴리스틱)으로 나누면: 저장소 파일 보기(`open`·`search_*`·`grep` 등, 기존 테스트 코드) 852건(테스트 파일 경로 2건 포함), 에이전트의 테스트 실행 141건, 에이전트가 직접 쓴 이름(테스트 파일 생성 등) 97건, 이슈 본문에 있는 이름 38건, 어느 범주에도 안 들어가는 경우(`other`)와 하네스 문자열이 함께 나온 경우 각 0건. pytest 결과 줄 형태로 나온 32개 궤적은 모두 그 스텝 명령이 테스트 실행 패턴(`pytest` 등)에 맞았다. 범주는 맥락이 정상 경로와 **부합한다는 뜻일 뿐**이다. 예를 들어 `repo_view`는 "기존 테스트 코드를 봤다"와 맞지만 숨김 테스트가 컨테이너에 없었다는 증명은 아니다
+  - 대조군: 같은 저장소의 다른 이슈 로그를 붙이면 5.8%, 다른 저장소 로그를 붙이면 0.9%(흔한 이름 제외 0.16%)가 겹친다. 관측된 9.3%가 같은 저장소 대조군과 같은 자릿수라서 "같은 저장소의 기존 테스트가 보였다"와 부합한다 (원인을 증명하지는 않음)
+  - 결론: 이 점검들에서 숨김 채점 결과가 앞 20스텝 관측에 섞였다는 **직접 증거(하네스 문자열, 테스트 실행 없이 나온 채점 테스트 결과 줄)는 찾지 못했다**. 이것이 누수가 없다는 증명은 아니다. 맥락 범주는 휴리스틱이고, 숨김 테스트 패치·채점 대상 테스트 목록이 데이터에 없으며, 글자 그대로의 겹침 대조로는 부재를 확립할 수 없다. 관측이 이슈 단위로 묶여 있고(독립 표본이 아님) 탐지 민감도를 모르므로 0건에서 누수율 상한을 계산하지 않는다
+  - 한계: 데이터에 test_patch·FAIL_TO_PASS 목록이 없어 "숨김 테스트 패치가 새로 추가한 테스트"를 직접 알 수 없다. 근사로 쓴 "되돌리지 않은 .py 테스트 패치 파일 = 새 파일" 규칙은 거짓 양성이 있다 (표본에서 걸린 2개 파일은 에이전트가 1스텝 `search_dir`로 본 기존 파일이었음). 채점 로그가 없거나 테스트 구간이 없는 궤적(표본의 21%, 전부 실패 궤적)은 식별자 대조를 못 했고 전수 하네스 문자열 점검만 적용된다. 겹침은 글자 그대로 일치만 본다
+- (c) 시스템 프롬프트 해시 1종(`bfc71085e702`, 80,036개) — Phase 1 메타데이터로 다시 확인
+
+학습/테스트 이슈 비교 (2.4, 두 쪽 모두 70B 궤적, `results/phase2/issue_comparison.csv`, `repo_composition.csv`, `split_counts.csv`):
+
+| | 학습 이슈 | 테스트 이슈 |
+| --- | --- | --- |
+| 이슈 / 저장소 | 3,013 / 1,148 | 578 / 377 |
+| 궤적 성공률 | 16.3% | 18.7% |
+| 이슈 성공률 평균 | 9.7% | 11.8% |
+| 성공 0 / 성공·실패 섞임 이슈 비율 | 77.3% / 21.6% | 73.7% / 25.4% |
+| 스텝 수 중앙값 (평균, p90) | 17 (26.0, 50) | 17 (25.0, 47) |
+
+- 테스트 이슈가 약간 쉽다 (성공률 +2.4%p, 섞인 이슈 비율 +3.8%p). 이슈 내 AUROC를 계산할 수 있는 섞인 테스트 이슈는 test_same 147개, test_cross 98개
+- 저장소 구성이 크게 다르다: 공통 저장소 249개, 테스트 이슈의 76.5%(442개)만 학습에도 있는 저장소에서 나온다. 저장소 비율의 총변동거리 0.63. 학습 최다 저장소 `iterative__dvc`(학습 이슈의 8.6%)는 테스트에 없고, 테스트 최다 `pydantic__pydantic`은 테스트의 8.7%(학습 5.0%). 테스트 결과는 일부 "처음 보는 저장소" 일반화를 포함한다
+- test_cross 궤적은 70B보다 길다 (스텝 중앙값 8B 26, 405B 27 vs 70B 17). 405B 성공률 25.9%, 8B 15.2%
 
 ### Phase 3. 평가 하네스 (모델보다 먼저, 1~2일)
 

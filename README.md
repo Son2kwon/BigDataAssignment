@@ -5,10 +5,13 @@
 ## 구조
 
 ```
-code/      실험 코드
-data/      데이터 (git에는 download.sh만 올라감)
+code/      실험 코드 (afp/ 공용 모듈, 번호 붙은 실행 스크립트, tests/)
+data/      데이터 (git에는 download.sh만 올라감, 중간 산출물은 data/processed/)
 docs/      제안서와 수정 내역
+results/   Phase별 검증 수치·작은 표 (git에 올림)
 ```
+
+작업 계획과 Phase별 결과는 [PLAN.md](PLAN.md)에 있다.
 
 ## 환경 설정
 
@@ -48,6 +51,16 @@ uv sync --group dl    # 기본 + PyTorch, transformers (Windows/Linux 약 6GB)
 ```bash
 uv run python "code/test for K/fixed_cap_k.py"
 ```
+
+파이프라인은 번호 순서대로 실행한다. 각 스크립트는 끝에 완료 기준 수치를 확인하고 다르면 멈춘다.
+
+```bash
+uv run python code/01_parse.py    # Phase 1: 궤적·스텝 테이블 → data/processed/ (약 1.5분)
+uv run python code/02_split.py    # Phase 2: 분할·fold·누수 점검 → data/processed/splits.parquet, results/phase2/ (약 10초)
+uv run pytest                     # 단위 테스트 (data/processed/가 있으면 실제 데이터 통합 테스트도 돈다)
+```
+
+환경을 전혀 바꾸지 않고 실행하려면 `uv run --no-sync ...`를 쓴다 (`dl` 그룹을 받은 뒤 `--group dl` 없는 `uv sync`는 torch를 지운다, 위 참고).
 
 `uv run`은 `.venv`의 Python으로 실행하므로 환경을 따로 켤 필요가 없다. 직접 켜려면 macOS/Linux는 `source .venv/bin/activate`, Windows는 `.venv\Scripts\activate`를 쓴다.
 

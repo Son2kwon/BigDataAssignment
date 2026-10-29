@@ -1,0 +1,5 @@
+split,model_name,n_traj,n_issues,success_rate,n_steps_median
+train,swe-agent-llama-70b,62460,3013,0.1627,17.0000
+test_same,swe-agent-llama-70b,12332,578,0.1867,17.0000
+test_cross,swe-agent-llama-405b,1191,100,0.2586,27.0000
+test_cross,swe-agent-llama-8b,4053,528,0.1515,26.0000

@@ -1,0 +1,352 @@
+{
+  "provenance": {
+    "raw_rows": 80036,
+    "raw_sha256_verified": 12,
+    "trajectory_rows_matching_raw": 80036
+  },
+  "determinism": {
+    "same_result_on_shuffled_input": true,
+    "matches_existing_file": true
+  },
+  "splits": {
+    "trajectories": 80036,
+    "split_trajectories": {
+      "train": 62460,
+      "test_same": 12332,
+      "test_cross": 5244
+    },
+    "train_issues": 3013,
+    "test_issues": 578,
+    "train_test_issue_overlap": 0,
+    "train_issues_crossing_folds": 0,
+    "heldout_fold": -1
+  },
+  "folds": {
+    "GroupKFold": {
+      "success_rate_min": 0.1439,
+      "success_rate_max": 0.1749,
+      "success_rate_range": 0.031,
+      "n_traj_range": 0,
+      "n_issues_range": 1
+    },
+    "StratifiedGroupKFold": {
+      "success_rate_min": 0.1623,
+      "success_rate_max": 0.1632,
+      "success_rate_range": 0.0009,
+      "n_traj_range": 32,
+      "n_issues_range": 18
+    },
+    "chosen": "StratifiedGroupKFold"
+  },
+  "system_prompt": {
+    "n_hashes": 1,
+    "hashes": [
+      {
+        "system_hash": "bfc71085e702",
+        "count": 80036
+      }
+    ]
+  },
+  "leakage_static": {
+    "files_referencing_leaky_columns": {
+      "01_parse.py": [
+        "exit_status"
+      ],
+      "afp/io.py": [
+        "eval_logs",
+        "exit_status",
+        "generated_patch"
+      ],
+      "afp/leakage.py": [
+        "eval_logs"
+      ]
+    },
+    "references_outside_allowlist": {},
+    "allowlist": [
+      "afp/io.py",
+      "afp/leakage.py",
+      "01_parse.py"
+    ],
+    "leaky_columns_in_processed": {
+      "trajectories.parquet": [
+        "exit_status"
+      ]
+    },
+    "splits_columns": [
+      "traj_id",
+      "split",
+      "fold"
+    ],
+    "safe_loader_rejects_leaky": true
+  },
+  "harness_marker_scan_first20": {
+    "observations": 1208185,
+    "___TESTS_SECTION___": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "___TESTS_SECTION_END___": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "___ENVIRONMENT_SET_UP_PATCH_APPLIED___": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "test_patch.patch": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "prediction_patch.patch": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "Will execute following command for run_tests": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "Will execute following command for apply_patch": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "swebench_matterhorn": {
+      "observations": 137,
+      "trajectories": 104
+    }
+  },
+  "leakage_eval_overlap_first20": {
+    "sample": {
+      "n": 4000,
+      "method": "(model_name, target) 층화 무작위, sklearn train_test_split",
+      "seed": 42,
+      "by_model": {
+        "swe-agent-llama-405b": 59,
+        "swe-agent-llama-70b": 3738,
+        "swe-agent-llama-8b": 203
+      },
+      "success_rate": 0.1673
+    },
+    "eval_status": {
+      "ok": 3461,
+      "missing": 459,
+      "no_tests_section": 68,
+      "truncated": 12
+    },
+    "tests_parsed_total": 162733,
+    "generic_test_names": {
+      "n": 249,
+      "rule": "표본 채점 로그에서 3개 이상 저장소에 나오거나 5자 미만"
+    },
+    "overlap": [
+      {
+        "group": "observed",
+        "subset": "all",
+        "n_traj": 4000,
+        "n_with_test_ids": 3158,
+        "any_test_name_hit": 295,
+        "any_specific_name_hit": 252,
+        "any_specific_name_hit_unexplained": 0,
+        "any_node_id_hit": 30,
+        "any_test_file_hit": 729,
+        "any_failed_test_name_hit": 150,
+        "with_new_test_files": 265,
+        "any_new_test_file_hit": 2,
+        "any_new_file_test_name_hit": 9,
+        "any_result_line": 32,
+        "any_result_line_without_test_run": 0,
+        "any_harness_marker": 0,
+        "any_harness_dir": 2,
+        "test_name_share_matched_mean": 0.0289,
+        "cat_harness_artifact": 0,
+        "cat_issue_text": 38,
+        "cat_agent_typed": 97,
+        "cat_agent_test_run": 141,
+        "cat_repo_view": 852,
+        "cat_other": 0
+      },
+      {
+        "group": "observed",
+        "subset": "swe-agent-llama-70b",
+        "n_traj": 3738,
+        "n_with_test_ids": 2945,
+        "any_test_name_hit": 280,
+        "any_specific_name_hit": 237,
+        "any_specific_name_hit_unexplained": 0,
+        "any_node_id_hit": 28,
+        "any_test_file_hit": 682,
+        "any_failed_test_name_hit": 140,
+        "with_new_test_files": 250,
+        "any_new_test_file_hit": 2,
+        "any_new_file_test_name_hit": 9,
+        "any_result_line": 31,
+        "any_result_line_without_test_run": 0,
+        "any_harness_marker": 0,
+        "any_harness_dir": 2,
+        "test_name_share_matched_mean": 0.0293,
+        "cat_harness_artifact": 0,
+        "cat_issue_text": 37,
+        "cat_agent_typed": 92,
+        "cat_agent_test_run": 137,
+        "cat_repo_view": 701,
+        "cat_other": 0
+      },
+      {
+        "group": "observed",
+        "subset": "swe-agent-llama-8b",
+        "n_traj": 203,
+        "n_with_test_ids": 165,
+        "any_test_name_hit": 14,
+        "any_specific_name_hit": 14,
+        "any_specific_name_hit_unexplained": 0,
+        "any_node_id_hit": 2,
+        "any_test_file_hit": 40,
+        "any_failed_test_name_hit": 9,
+        "with_new_test_files": 12,
+        "any_new_test_file_hit": 0,
+        "any_new_file_test_name_hit": 0,
+        "any_result_line": 1,
+        "any_result_line_without_test_run": 0,
+        "any_harness_marker": 0,
+        "any_harness_dir": 0,
+        "test_name_share_matched_mean": 0.0239,
+        "cat_harness_artifact": 0,
+        "cat_issue_text": 1,
+        "cat_agent_typed": 5,
+        "cat_agent_test_run": 4,
+        "cat_repo_view": 144,
+        "cat_other": 0
+      },
+      {
+        "group": "observed",
+        "subset": "swe-agent-llama-405b",
+        "n_traj": 59,
+        "n_with_test_ids": 48,
+        "any_test_name_hit": 1,
+        "any_specific_name_hit": 1,
+        "any_specific_name_hit_unexplained": 0,
+        "any_node_id_hit": 0,
+        "any_test_file_hit": 7,
+        "any_failed_test_name_hit": 1,
+        "with_new_test_files": 3,
+        "any_new_test_file_hit": 0,
+        "any_new_file_test_name_hit": 0,
+        "any_result_line": 0,
+        "any_result_line_without_test_run": 0,
+        "any_harness_marker": 0,
+        "any_harness_dir": 0,
+        "test_name_share_matched_mean": 0.0162,
+        "cat_harness_artifact": 0,
+        "cat_issue_text": 0,
+        "cat_agent_typed": 0,
+        "cat_agent_test_run": 0,
+        "cat_repo_view": 7,
+        "cat_other": 0
+      },
+      {
+        "group": "observed",
+        "subset": "target=True",
+        "n_traj": 669,
+        "n_with_test_ids": 669,
+        "any_test_name_hit": 58,
+        "any_specific_name_hit": 49,
+        "any_specific_name_hit_unexplained": 0,
+        "any_node_id_hit": 5,
+        "any_test_file_hit": 103,
+        "any_failed_test_name_hit": 3,
+        "with_new_test_files": 39,
+        "any_new_test_file_hit": 0,
+        "any_new_file_test_name_hit": 1,
+        "any_result_line": 5,
+        "any_result_line_without_test_run": 0,
+        "any_harness_marker": 0,
+        "any_harness_dir": 0,
+        "test_name_share_matched_mean": 0.0331,
+        "cat_harness_artifact": 0,
+        "cat_issue_text": 9,
+        "cat_agent_typed": 28,
+        "cat_agent_test_run": 26,
+        "cat_repo_view": 126,
+        "cat_other": 0
+      },
+      {
+        "group": "observed",
+        "subset": "target=False",
+        "n_traj": 3331,
+        "n_with_test_ids": 2489,
+        "any_test_name_hit": 237,
+        "any_specific_name_hit": 203,
+        "any_specific_name_hit_unexplained": 0,
+        "any_node_id_hit": 25,
+        "any_test_file_hit": 626,
+        "any_failed_test_name_hit": 147,
+        "with_new_test_files": 226,
+        "any_new_test_file_hit": 2,
+        "any_new_file_test_name_hit": 8,
+        "any_result_line": 27,
+        "any_result_line_without_test_run": 0,
+        "any_harness_marker": 0,
+        "any_harness_dir": 2,
+        "test_name_share_matched_mean": 0.0277,
+        "cat_harness_artifact": 0,
+        "cat_issue_text": 29,
+        "cat_agent_typed": 69,
+        "cat_agent_test_run": 115,
+        "cat_repo_view": 726,
+        "cat_other": 0
+      },
+      {
+        "group": "control_same_repo",
+        "subset": "all",
+        "n_traj": 2206,
+        "n_with_test_ids": 2206,
+        "any_test_name_hit": 127,
+        "any_specific_name_hit": 105,
+        "any_specific_name_hit_unexplained": 0,
+        "any_node_id_hit": 11,
+        "any_test_file_hit": 250,
+        "any_failed_test_name_hit": 62,
+        "with_new_test_files": 134,
+        "any_new_test_file_hit": 3,
+        "any_new_file_test_name_hit": 2,
+        "any_result_line": 15,
+        "any_result_line_without_test_run": 0,
+        "any_harness_marker": 0,
+        "any_harness_dir": 1,
+        "test_name_share_matched_mean": 0.0113,
+        "cat_harness_artifact": 0,
+        "cat_issue_text": 9,
+        "cat_agent_typed": 26,
+        "cat_agent_test_run": 133,
+        "cat_repo_view": 410,
+        "cat_other": 0
+      },
+      {
+        "group": "control_other_repo",
+        "subset": "all",
+        "n_traj": 3158,
+        "n_with_test_ids": 3158,
+        "any_test_name_hit": 28,
+        "any_specific_name_hit": 5,
+        "any_specific_name_hit_unexplained": 0,
+        "any_node_id_hit": 0,
+        "any_test_file_hit": 0,
+        "any_failed_test_name_hit": 8,
+        "with_new_test_files": 206,
+        "any_new_test_file_hit": 0,
+        "any_new_file_test_name_hit": 0,
+        "any_result_line": 1,
+        "any_result_line_without_test_run": 0,
+        "any_harness_marker": 0,
+        "any_harness_dir": 1,
+        "test_name_share_matched_mean": 0.0013,
+        "cat_harness_artifact": 0,
+        "cat_issue_text": 4,
+        "cat_agent_typed": 4,
+        "cat_agent_test_run": 4,
+        "cat_repo_view": 19,
+        "cat_other": 0
+      }
+    ],
+    "examples_saved": 32
+  }
+}

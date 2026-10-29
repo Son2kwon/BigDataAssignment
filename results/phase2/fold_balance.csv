@@ -1,0 +1,11 @@
+method,fold,n_traj,n_issues,success_rate,issues_with_success
+GroupKFold,0,12492,602,0.1721,141
+GroupKFold,1,12492,602,0.1439,127
+GroupKFold,2,12492,603,0.1482,132
+GroupKFold,3,12492,603,0.1746,136
+GroupKFold,4,12492,603,0.1749,147
+StratifiedGroupKFold,0,12477,613,0.1623,148
+StratifiedGroupKFold,1,12487,603,0.1626,128
+StratifiedGroupKFold,2,12502,595,0.1629,130
+StratifiedGroupKFold,3,12509,602,0.1632,142
+StratifiedGroupKFold,4,12485,600,0.1627,135

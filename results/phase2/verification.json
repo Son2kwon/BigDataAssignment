@@ -1,0 +1,185 @@
+{
+  "generated": "2026-10-29",
+  "generated_on_commit": "714bc4aa52de82cc649384e2098eb1ad5e87365f",
+  "note": "rerun_now = 이 파일을 만들 때 다시 실행한 검사. earlier_in_session = 같은 작업 세션 앞 단계에서 실행·기록했고 이번에는 다시 돌리지 않은 검사",
+  "rerun_now": {
+    "git_status_before": "?? results/phase2/verification.json",
+    "pytest": {
+      "command": ".venv/bin/python -m pytest -q -rs",
+      "exit_code": 0,
+      "output_tail": [
+        "........................................................                 [100%]",
+        "56 passed in 1.56s"
+      ]
+    },
+    "pytest_uv_no_sync": {
+      "command": "/home/chaseungjoon/.local/bin/uv run --no-sync pytest -q",
+      "exit_code": 0,
+      "output_tail": [
+        "56 passed in 1.62s"
+      ]
+    },
+    "cli": {
+      "help": {
+        "command": ".venv/bin/python code/02_split.py --help",
+        "exit_code": 0,
+        "output_tail": [
+          "  --skip-leakage        채점 로그 겹침 점검(2.3 b)을 건너뜀 (분할·정적 점검만)"
+        ]
+      },
+      "bad_leak_sample": {
+        "command": ".venv/bin/python code/02_split.py --leak-sample 0",
+        "exit_code": 2,
+        "output_tail": [
+          "02_split.py: error: --leak-sample은 양수여야 한다"
+        ]
+      },
+      "tampered_splits_refused": {
+        "command": ".venv/bin/python code/02_split.py --skip-leakage",
+        "exit_code": 1,
+        "output_tail": [
+          "data/processed/splits.parquet가 다시 계산한 분할과 다르다. 확인 후 --force로 덮어쓴다."
+        ]
+      },
+      "tampered_splits_restored_sha_matches": true,
+      "missing_phase1_input": {
+        "command": ".venv/bin/python code/02_split.py",
+        "exit_code": 1,
+        "output_tail": [
+          "data/processed/trajectories.parquet가 없다. 먼저 uv run python code/01_parse.py 를 실행한다."
+        ]
+      },
+      "phase1_input_restored_sha_matches": true
+    },
+    "phase1_check": {
+      "command": ".venv/bin/python code/01_parse.py",
+      "exit_code": 0,
+      "output_tail": [
+        "완료 기준 통과"
+      ]
+    },
+    "phase1_processed_unchanged": true,
+    "phase1_results_git_diff": "(none)",
+    "phase2_pipeline": {
+      "command": ".venv/bin/python code/02_split.py",
+      "exit_code": 0,
+      "output_tail": [
+        "완료 기준 통과"
+      ]
+    },
+    "determinism": {
+      "compared_files": [
+        "data/processed/splits.parquet",
+        "results/phase2/fold_balance.csv",
+        "results/phase2/issue_comparison.csv",
+        "results/phase2/leakage_categories.csv",
+        "results/phase2/leakage_examples.jsonl",
+        "results/phase2/leakage_overlap.csv",
+        "results/phase2/repo_composition.csv",
+        "results/phase2/split_counts.csv",
+        "results/phase2/summary.json"
+      ],
+      "excluded": [
+        "results/phase2/verification.json"
+      ],
+      "identical_before_after_rerun": true,
+      "results_identical_to_committed_blobs": true,
+      "splits_sha256": "c94dac74ddd967e106c18f7c810b4ab92d87a4c3f59f5e9dd93735bc9564b5f8",
+      "splits_sha256_matches_earlier_session_record": true
+    },
+    "split_invariants_exit_code": 0,
+    "split_invariants": {
+      "trajectories": 80036,
+      "splits_rows": 80036,
+      "unique_traj_id_in_splits": 80036,
+      "joined_rows": 80036,
+      "rows_missing_split": 0,
+      "rows_missing_trajectory": 0,
+      "split_counts": {
+        "test_cross": 5244,
+        "test_same": 12332,
+        "train": 62460
+      },
+      "train_issues": 3013,
+      "test_issues": 578,
+      "test_issues_equal_8b_405b_attempted": true,
+      "train_test_issue_overlap": 0,
+      "train_issues_crossing_folds": 0,
+      "train_folds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "heldout_folds": [
+        -1
+      ],
+      "non_70b_in_train_or_test_same": 0,
+      "70b_in_test_cross": 0,
+      "splits_columns": [
+        "traj_id",
+        "split",
+        "fold"
+      ],
+      "validate_splits": {
+        "trajectories": 80036,
+        "split_trajectories": {
+          "train": 62460,
+          "test_same": 12332,
+          "test_cross": 5244
+        },
+        "train_issues": 3013,
+        "test_issues": 578,
+        "train_test_issue_overlap": 0,
+        "train_issues_crossing_folds": 0,
+        "heldout_fold": -1
+      }
+    },
+    "phase3_harness_k35_on_real_splits": {
+      "all": {
+        "n": 80036,
+        "lost_success": 0.049,
+        "saved_steps": 0.2456
+      },
+      "train": {
+        "n": 62460,
+        "lost_success": 0.0432,
+        "saved_steps": 0.2419
+      },
+      "test_same": {
+        "n": 12332,
+        "lost_success": 0.0447,
+        "saved_steps": 0.2181
+      },
+      "test_cross": {
+        "n": 5244,
+        "lost_success": 0.1236,
+        "saved_steps": 0.3253
+      }
+    },
+    "dl_packages": {
+      "command": ".venv/bin/python -c import torch, transformers, accelerate; print(torch.__version__, transformers.__version__, accelerate.__version__)",
+      "exit_code": 0,
+      "output_tail": [
+        "2.14.1+cu130 5.20.2 1.15.0"
+      ]
+    },
+    "git": {
+      "branch": "phase/2",
+      "local_main": "643a6bc9e10b08eca90297c1611663f5d2d41824",
+      "origin_main": "4cc4de3af8c4d5b07f6626e92ab63bc00289abbd",
+      "origin_main_is_ancestor_of_head": true,
+      "merge_tree_head_vs_origin_main_exit_code": 0,
+      "ahead_behind_vs_origin_main": "5\t0",
+      "status_after": "?? results/phase2/verification.json"
+    }
+  },
+  "earlier_in_session": {
+    "phase1_full_reparse": "code/01_parse.py 전체 파싱(data/processed 재생성) exit 0, '완료 기준 통과', 1분 24초, 최대 RSS 5.7GB. results/phase1 git 변경 없음",
+    "baseline_tests_on_main_before_changes": "main 643a6bc에서 pytest 8 passed",
+    "mutation_checks": "split.py 규칙 4가지를 일부러 깨뜨림(test_same→test_cross, 405B 제외, fold 넘는 이슈, seed 없는 shuffle) → 각각 7 failed / import error / 5 failed / 2 failed, 원본 복원 후 통과",
+    "force_overwrite_path": "변조한 splits.parquet에 --force → exit 0, 재작성 파일 SHA-256이 원래 값과 같음",
+    "shuffled_input_determinism": "02_split.py가 매 실행 내부에서 확인 (summary.json determinism.same_result_on_shuffled_input)"
+  }
+}

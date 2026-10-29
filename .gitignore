@@ -9,4 +9,4 @@ data/*
 __pycache__/
 
 # pytest cache
-.pytest_cache
+.pytest_cache/
