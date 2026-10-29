@@ -168,7 +168,7 @@ code/
 
 #### Phase 2 결과 (2026-10-29 완료)
 
-`uv run python code/02_split.py` (약 10초, `01_parse.py` 결과 필요) → 위 완료 기준 **모두 일치** [확인]. 제안서 분할 수치 수정 없음. 검증 수치는 `results/phase2/summary.json`.
+`uv run python code/02_split.py` (약 10초, `01_parse.py` 결과 필요) → 위 완료 기준 **모두 일치** [확인]. 제안서 분할 수치 수정 없음. 검증 수치는 `results/phase2/summary.json`. 최종 검증 증거(실행 명령·종료 코드·pytest 요약·재실행 해시 비교)는 `results/phase2/verification.json`.
 
 - 궤적 80,036개 = train 62,460 + test_same 12,332 + test_cross 5,244 (8B 4,053 + 405B 1,191). 학습 이슈 3,013개, 테스트 이슈 578개, 교집합 0, fold를 넘는 학습 이슈 0
 - 출처: 원본 12개의 크기·SHA-256이 `data/download.sh` 고정값과 일치하고, `trajectories.parquet` 80,036행이 원본 (파일, 행)의 `instance_id, model_name, target`과 모두 같다
