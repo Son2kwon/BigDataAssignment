@@ -18,6 +18,9 @@ dependencies = [
 ]
 
 [dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
 dl = [
     "accelerate>=1.15.0",
     "torch>=2.14.1",
@@ -42,3 +45,7 @@ torch = [
 name = "pytorch-cu130"
 url = "https://download.pytorch.org/whl/cu130"
 explicit = true
+
+[tool.pytest.ini_options]
+pythonpath = ["code"]
+testpaths = ["code/tests"]
