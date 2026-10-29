@@ -6,7 +6,7 @@ import polars as pl
 import pytest
 from sklearn.metrics import roc_auc_score
 
-from afp import metrics
+from afp import io, metrics
 
 
 def trajs_frame(rows):
@@ -26,6 +26,64 @@ TRAJS = trajs_frame([
 
 def preds_frame(n, mapping):
     return pl.DataFrame({"traj_id": list(mapping), "N": n, "p_fail": list(mapping.values())})
+
+
+# ---- 평가 집합 로더 ----
+
+@pytest.fixture
+def processed(tmp_path, monkeypatch):
+    """작은 trajectories·steps·splits parquet를 만들고 io 경로를 그쪽으로 돌린다."""
+    traj = pl.DataFrame({
+        "traj_id": ["a", "b", "c", "d", "e"],
+        "instance_id": ["i1", "i1", "i2", "i3", "i3"],
+        "target": [True, False, False, True, False],
+        "n_steps": [2, 1, 0, 3, 1],
+        "system_len": [100] * 5,
+        "issue_msg_len": [10, 10, 20, 30, 30],
+    })
+    steps = pl.DataFrame({
+        "traj_id": ["a", "a", "b", "d", "d", "d", "e"],
+        "step_idx": [1, 2, 1, 1, 2, 3, 1],
+        "ai_len": [1, 2, 3, 4, 5, 6, 7],
+        "obs_len": [10, 20, 30, 40, 50, 60, 70],
+    })
+    splits = pl.DataFrame(
+        {"traj_id": ["a", "b", "c", "d", "e"], "split": ["train", "train", "train", "test_same", "test_cross"], "fold": [0, 1, 0, -1, -1]},
+        schema={"traj_id": pl.String, "split": pl.String, "fold": pl.Int8},
+    )
+    for name, df in [("TRAJECTORIES_PATH", traj), ("STEPS_PATH", steps), ("SPLITS_PATH", splits)]:
+        path = tmp_path / f"{name}.parquet"
+        df.write_parquet(path)
+        monkeypatch.setattr(io, name, path)
+    return traj, splits
+
+
+def test_eval_set_returns_one_split_with_harness_columns(processed):
+    train = metrics.eval_set("train")
+    assert train.columns == [*metrics.TRAJ_COLUMNS, "fold"]
+    assert train["traj_id"].to_list() == ["a", "b", "c"]  # 0스텝 궤적 c도 남는다 (비용 곡선 분모)
+    assert train["fold"].to_list() == [0, 1, 0]
+    assert metrics.eval_set("test_same")["traj_id"].to_list() == ["d"]
+
+    with pytest.raises(ValueError, match="중 하나"):
+        metrics.eval_set("test")  # test_same·test_cross를 합친 집합은 없다
+
+
+def test_eval_set_stops_on_missing_files_or_trajectories(processed, monkeypatch, tmp_path):
+    traj, splits = processed
+    traj.filter(pl.col("traj_id") != "b").write_parquet(io.TRAJECTORIES_PATH)
+    with pytest.raises(ValueError, match="1개가 trajectories에 없음"):
+        metrics.eval_set("train")
+
+    monkeypatch.setattr(io, "SPLITS_PATH", tmp_path / "none.parquet")
+    with pytest.raises(FileNotFoundError, match="02_split.py"):
+        metrics.eval_set("train")
+
+
+def test_eval_costs_covers_only_given_trajectories(processed):
+    costs = metrics.eval_costs(metrics.eval_set("train")).sort("traj_id", "step_idx")
+    # a: 110, 110+11 / b: 110. c는 스텝이 없다. 다른 분할의 d·e는 빠진다
+    assert costs.rows() == [("a", 1, 110), ("a", 2, 121), ("b", 1, 110)]
 
 
 # ---- 3.1 정렬, AUROC, PR-AUC ----
@@ -242,6 +300,72 @@ def test_at_threshold_picks_all_at_or_above_tau():
     assert metrics.at_threshold(curve, 0.0)["n_stopped"] == 4
 
 
+# ---- 3.5 운영점 선택 ----
+
+def test_select_operating_point_by_hand():
+    # N=5 곡선: tau inf/0.9/0.6/0.2 → 손실 0/0/0.5/0.5, 절약 0/5/9/16 (분모 42)
+    preds = preds_frame(5, {"t2": 0.9, "t3": 0.6, "t4": 0.6, "t5": 0.2})
+    op = metrics.select_operating_point(TRAJS, preds, 5)
+    assert (op["N"], op["cap"], op["tau"], op["n_stopped"]) == (5, None, 0.9, 1)
+    assert op["saved_steps"] == pytest.approx(5 / 42)
+
+    # 손실 0.5까지 허용하면 0.6과 0.2 중 절약이 큰 0.2
+    assert metrics.select_operating_point(TRAJS, preds, 5, max_loss=0.5)["tau"] == 0.2
+
+    # K=9를 더하면 tau=0.9 + K=9가 8/42로 가장 많이 아낀다 (손실 0)
+    op = metrics.select_operating_point(TRAJS, preds, 5, caps=(None, 9))
+    assert (op["cap"], op["tau"], op["lost_success"]) == (9, 0.9, 0)
+    assert op["saved_steps"] == pytest.approx(8 / 42)
+
+
+def test_select_operating_point_prefers_no_predictor_when_nothing_fits():
+    # 모든 예측이 성공 궤적 t4를 같이 끊으면 손실 0.5라서, 예측기를 쓰지 않는 tau=inf만 남는다
+    preds = preds_frame(5, {"t2": 0.6, "t3": 0.6, "t4": 0.6, "t5": 0.6})
+    op = metrics.select_operating_point(TRAJS, preds, 5, caps=(None, 9))
+    assert (op["cap"], op["tau"], op["n_stopped"]) == (9, float("inf"), 0)
+
+    # K=6은 t4(8스텝, 성공)를 끊어 상한만으로 손실 0.5 → 후보 없음
+    with pytest.raises(ValueError, match="운영점이 없음"):
+        metrics.select_operating_point(TRAJS, preds, 5, caps=(6,))
+    with pytest.raises(ValueError, match="costs"):
+        metrics.select_operating_point(TRAJS, preds, 5, by="saved_tokens")
+
+
+@pytest.mark.parametrize("by", ["saved_steps", "saved_tokens"])
+def test_select_operating_point_matches_brute_force(by):
+    rng = np.random.default_rng(11)
+    m, n, caps = 400, 5, (None, 15, 25, 40)
+    n_steps = rng.integers(0, 50, m)
+    target = rng.random(m) < 0.3
+    ctx = [list(rng.integers(1, 100, s)) for s in n_steps]
+    trajs = trajs_frame([(f"t{i}", f"i{i % 20}", bool(target[i]), int(n_steps[i])) for i in range(m)])
+    costs = pl.DataFrame(
+        [(f"t{i}", s + 1, int(c)) for i in range(m) for s, c in enumerate(ctx[i])],
+        schema=["traj_id", "step_idx", "ctx"], orient="row",
+    )
+    alive = n_steps > n
+    # 실패일수록 p_fail이 높은 약한 예측기 (무작위면 손실 5% 안에서 고를 게 거의 없다)
+    p_fail = np.round(np.clip(0.5 * ~target + 0.6 * rng.random(m), 0, 1), 2)
+    preds = pl.DataFrame({"traj_id": trajs["traj_id"].filter(alive), "N": n, "p_fail": p_fail[alive]})
+
+    col = {"saved_steps": 1, "saved_tokens": 2}[by]
+    best = max(
+        (sim[col], -sim[0])
+        for k in caps
+        for tau in [float("inf"), *np.unique(p_fail[alive])]
+        if (sim := simulate_policy(n_steps, target, p_fail, ctx, n, tau, k))[0] <= metrics.MAX_LOSS
+    )
+    op = metrics.select_operating_point(trajs, preds, n, caps=caps, by=by, costs=costs)
+    assert op[by] == pytest.approx(best[0])
+    assert op["lost_success"] == pytest.approx(-best[1])
+    assert op["n_stopped"] > 0  # 예측기를 실제로 쓰는 운영점이 뽑혀야 이 테스트가 의미 있다
+
+    # 고른 운영점을 그대로 다시 적용하면 같은 값 (테스트 쪽 적용 경로)
+    again = metrics.point_metrics(trajs, preds, n, tau=op["tau"], costs=costs, cap=op["cap"])
+    assert again["lost_success"] == pytest.approx(op["lost_success"])
+    assert again[by] == pytest.approx(op[by])
+
+
 # ---- 3.7 가중치, 이슈 단위 부트스트랩 ----
 
 def random_setup(m=400, n_issues=25, seed=3):
@@ -312,3 +436,23 @@ def test_bootstrap_perfect_predictor_has_degenerate_interval():
 
     with pytest.raises(ValueError, match="weight"):
         metrics.bootstrap(trajs.with_columns(weight=pl.lit(1)), preds, lambda t, p: {}, n_boot=1)
+
+
+# ---- 실제 데이터 (data/processed에 Phase 1·2 결과가 있을 때만) ----
+
+@pytest.mark.skipif(
+    not (io.TRAJECTORIES_PATH.exists() and io.STEPS_PATH.exists() and io.SPLITS_PATH.exists()),
+    reason="data/processed에 trajectories·steps·splits가 없음 (01_parse.py, 02_split.py 실행 필요)",
+)
+def test_real_eval_sets_and_fixed_cap_baseline():
+    sizes = {"train": 62_460, "test_same": 12_332, "test_cross": 5_244}
+    # K=35 고정 상한 (성공 손실, 절약 스텝). PLAN.md Phase 3 결과의 분할별 기준값
+    k35 = {"train": (0.043, 0.242), "test_same": (0.045, 0.218), "test_cross": (0.124, 0.325)}
+    for name, size in sizes.items():
+        trajs = metrics.eval_set(name)
+        assert trajs.height == size
+        alive = metrics.running(trajs, 35)
+        preds = alive.select("traj_id", N=pl.lit(35), p_fail=pl.lit(1.0))
+        row = metrics.cost_curve(trajs, preds, 35).row(-1, named=True)
+        assert (row["lost_success"], row["saved_steps"]) == pytest.approx(k35[name], abs=5e-4), name
+    assert set(metrics.eval_costs(metrics.eval_set("test_cross"))["traj_id"]) <= set(metrics.eval_set("test_cross")["traj_id"])
