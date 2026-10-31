@@ -57,6 +57,7 @@ uv run python "code/test for K/fixed_cap_k.py"
 ```bash
 uv run python code/01_parse.py    # Phase 1: 궤적·스텝 테이블 → data/processed/ (약 1.5분)
 uv run python code/02_split.py    # Phase 2: 분할·fold·누수 점검 → data/processed/splits.parquet, results/phase2/ (약 10초)
+uv run python code/03_baselines.py  # Phase 4: 기준선 B0·B1·오라클 예측 → data/processed/preds/, 지표·운영점 → results/phase4/ (16코어 약 3분)
 uv run pytest                     # 단위 테스트 (data/processed/가 있으면 실제 데이터 통합 테스트도 돈다)
 ```
 

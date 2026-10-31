@@ -1,0 +1,21 @@
+analyzer,C,weighting,min_df,max_features,sublinear_tf,ngram_range,oof_auroc,oof_pr_auc,seen_issue_scores,selected
+word,0.030000,traj,2,200000,true,"(1, 2)",0.628182,0.239015,0,false
+word,0.030000,issue,2,200000,true,"(1, 2)",0.634737,0.246973,0,false
+word,0.100000,traj,2,200000,true,"(1, 2)",0.630728,0.242597,0,false
+word,0.100000,issue,2,200000,true,"(1, 2)",0.639067,0.252224,0,false
+word,0.300000,traj,2,200000,true,"(1, 2)",0.629571,0.241384,0,false
+word,0.300000,issue,2,200000,true,"(1, 2)",0.636070,0.250862,0,false
+word,1.000000,traj,2,200000,true,"(1, 2)",0.627000,0.241994,0,false
+word,1.000000,issue,2,200000,true,"(1, 2)",0.629860,0.246857,0,false
+word,3.000000,traj,2,200000,true,"(1, 2)",0.624658,0.241781,0,false
+word,3.000000,issue,2,200000,true,"(1, 2)",0.625368,0.244172,0,false
+char_wb,0.030000,traj,2,200000,true,"(3, 5)",0.641851,0.237614,0,false
+char_wb,0.030000,issue,2,200000,true,"(3, 5)",0.646808,0.242754,0,false
+char_wb,0.100000,traj,2,200000,true,"(3, 5)",0.644861,0.241012,0,false
+char_wb,0.100000,issue,2,200000,true,"(3, 5)",0.652215,0.248874,0,true
+char_wb,0.300000,traj,2,200000,true,"(3, 5)",0.644272,0.241539,0,false
+char_wb,0.300000,issue,2,200000,true,"(3, 5)",0.650738,0.249209,0,false
+char_wb,1.000000,traj,2,200000,true,"(3, 5)",0.642833,0.242476,0,false
+char_wb,1.000000,issue,2,200000,true,"(3, 5)",0.644412,0.247895,0,false
+char_wb,3.000000,traj,2,200000,true,"(3, 5)",0.641013,0.242592,0,false
+char_wb,3.000000,issue,2,200000,true,"(3, 5)",0.639641,0.245071,0,false
