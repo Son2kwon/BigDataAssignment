@@ -30,7 +30,7 @@
 | 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
 | 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet` (git 밖). 검증 수치 `results/phase1/`, `results/phase2/` (git 안) |
 | 테스트·린트·CI | pytest(dev 그룹) 56개, `code/tests/`. 린트·CI 없음 |
-| 진행 | Phase 0(0.2·0.4 일부 제외)~3 완료, 3.5만 남음 (모델 OOF 예측이 필요해서 Phase 4·5와 같이). 다음은 Phase 4 |
+| 진행 | Phase 0(0.2·0.4 일부 제외)~3 완료 (3.5 운영점 선택 포함). 다음은 Phase 4 |
 
 ### 데이터 구조 [확인, parquet 스키마와 샘플 행 조회]
 
@@ -57,10 +57,10 @@
 
 ## 4. 격차 (제안서 대비 비어 있는 것)
 
-2026-10-29 기준. 파싱·스텝 테이블(Phase 1), 분할·누수 점검(Phase 2), 평가 하네스(Phase 3, 3.5 제외)는 끝났다. 궤적 ID(`traj_id`), 토큰 근사(문자 수 기반 맥락 길이), pytest도 생겼다. 남은 것:
+2026-10-29 기준. 파싱·스텝 테이블(Phase 1), 분할·누수 점검(Phase 2), 평가 하네스(Phase 3)는 끝났다. 궤적 ID(`traj_id`), 토큰 근사(문자 수 기반 맥락 길이), pytest도 생겼다. 남은 것:
 
 - 모든 모델(B1, M1, M2, M3)이 아직 없다. 제안서 일정상 8주차 작업 중 B0·B1(Phase 4)이 남았다.
-- 3.5 운영점 선택(학습 OOF에서 τ·K 고르기)은 모델 OOF 예측이 있어야 해서 아직 없다.
+- 3.5 운영점 선택 함수는 있지만, 넣을 모델 OOF 예측이 아직 없다 (Phase 4 B1부터).
 - `fixed_cap_k.py`는 여전히 `load_dataset("nebius/SWE-agent-trajectories")`로 HF Hub에서 **revision 고정 없이** 받는다. 같은 값은 이제 `01_parse.py`(로컬 parquet)와 하네스가 재현하므로 이 스크립트는 참고용이다 (0.2).
 - README·download.sh는 openhands·terminalbench를 "일반화·도메인 밖 테스트"로 소개하지만 **제안서에는 없다.** 범위 결정 필요 (11절 D1).
 - `proposal.md` 팀 표의 이름·학번은 채워졌지만 **담당 칸이 비어 있다** (0.4).
@@ -76,7 +76,7 @@ code/
 │   ├── parse.py         궤적 → 스텝 테이블, 명령 파싱
 │   ├── split.py         테스트 이슈 고정, StratifiedGroupKFold (Phase 2 결과 참고)
 │   ├── leakage.py       사후 누수 점검 전용 (채점 로그는 여기서만 읽음)
-│   ├── metrics.py       AUROC, PR-AUC, 이슈 내 AUROC, 비용 곡선, 운영점
+│   ├── metrics.py       평가 집합 로더, AUROC, PR-AUC, 이슈 내 AUROC, 비용 곡선, 운영점
 │   └── features.py      M1 피처
 ├── 01_parse.py          실행 스크립트 (번호 = 실행 순서)
 ├── 02_split.py
@@ -230,9 +230,9 @@ code/
 
 완료 기준: 3.8의 테스트 통과. B0(고정 상한)을 하네스로 평가한 결과가 `fixed_cap_k.py`와 일치.
 
-#### Phase 3 결과 (2026-10-29 완료, 3.5 제외)
+#### Phase 3 결과 (2026-10-29 완료)
 
-완료 기준 **모두 충족** [확인, 2026-10-29 main `ea48b0f`에서 다시 실행]. 3.5(운영점 선택)는 학습 OOF 예측이 있어야 하므로 Phase 4·5에서 B1·M1 OOF 예측이 나올 때 같이 만든다. 지금 하네스에는 고른 τ를 적용하는 `at_threshold`만 있고, "OOF 곡선에서 손실 ≤5%인 최대 절약 τ(와 K)를 고르는" 함수는 없다.
+완료 기준 **모두 충족** [확인, 2026-10-29 main `ea48b0f`에서 다시 실행]. 3.5(운영점 선택)는 아래 "Phase 3.5 결과"에서 따로 마쳤다.
 
 - `uv run --no-sync pytest`: **56개 통과** (1.6초). `01_parse.py`·`02_split.py` 검증 모드도 "완료 기준 통과", 다시 실행해도 `results/`가 바뀌지 않는다 (git diff 없음)
 - 3.8 단위 테스트: 완벽 예측기 → AUROC·PR-AUC 1, 상수 예측기 → AUROC 0.5·PR-AUC = 성공률, 고정 상한 = "N=K에서 모두 끊기"(`test_metrics.py`의 합성 데이터 테스트)
@@ -247,6 +247,29 @@ code/
 
 - 분할별 K=35 (손실 / 절약 스텝 / 절약 토큰): train 4.3% / 24.2% / 41.6%, test_same 4.5% / 21.8% / 40.2%, test_cross 12.4% / 32.5% / 49.7%. **모델 비교의 K=35 기준값은 전체(4.9%/24.6%)가 아니라 같은 평가 집합의 값을 쓴다.** test_cross는 궤적이 길어서 K=35가 손실 5%를 넘는다
 - 테스트 이슈(test_same + test_cross)에서 완벽 예측기 N=10 → AUROC·이슈 내 AUROC 1.0, 상수 예측기 → 0.5·0.5, PR-AUC 0.1526 = 성공률. 결합 정책(N=10, K=35)의 τ=inf 행이 K=35 단독(6.73% / 25.80%)과 같다
+
+#### Phase 3.5 결과 (2026-10-29 완료)
+
+`metrics.select_operating_point(trajs, preds, N, caps=(None, 30, 35, ...), max_loss=0.05, by="saved_steps", costs=None)`. 평가 집합 로더 `metrics.eval_set`·`eval_costs`도 같이 추가했다 (아래). 테스트 `uv run --no-sync pytest` 64개 통과.
+
+- 상한 후보 K마다(`None` = 상한 없음) 비용 곡선을 만들고, 성공 손실 ≤ `max_loss`(`metrics.MAX_LOSS` = 5%)인 행 중 `by`(`saved_steps` 또는 `saved_tokens`)가 가장 큰 (K, τ)를 고른다. 동률이면 손실이 작은 것 → τ가 큰 것(덜 끊음) → K가 큰 것
+- τ=inf가 뽑히면 예측기를 쓰지 않는 쪽(상한 K만)이 낫다는 뜻이다. 손실 ≤5%인 행이 하나도 없으면 멈춘다 (예: K 후보가 모두 상한만으로 5%를 넘을 때)
+- 사용법: **학습 이슈(`eval_set("train")`) 궤적과 그 OOF 예측**을 넣어 고르고, 테스트에서는 `point_metrics(test, test_preds, N, tau=op["tau"], cap=op["cap"], costs=)`로 그대로 적용한다. 함수는 입력이 OOF인지 검사하지 않으므로 호출하는 쪽이 지킨다
+- 테스트: 손으로 센 예제, 후보가 없는 경우, 궤적마다 정책을 직접 적용한 참조 구현으로 모든 (K, τ)를 훑은 최적값과 일치 (`saved_steps`·`saved_tokens` 각각), 고른 값을 `point_metrics`로 다시 적용하면 같은 값
+- 실데이터 동작 확인 [확인, 무작위 점수라 결과가 아닌 동작 확인용]: train 62,460궤적, N=10, K 후보 (없음, 30, 35, 40, 50) → K=35 + τ=0.989 (1.2%를 추가로 끊음), 손실 4.94%, 절약 스텝 24.7%, 0.1초. K=35 단독의 train 손실(4.3%)과 5% 사이 여유를 예측기로 채운다. **학습 OOF에서 한도에 거의 맞춰 고르므로 테스트 손실은 5%를 넘을 수 있다.** 테스트 운영점의 손실은 부트스트랩 구간(3.7)과 함께 보고한다
+
+평가 집합 로더 — 모든 모델이 같은 평가 집합을 쓰도록 하네스 입력은 이것으로만 만든다:
+
+```python
+trajs = metrics.eval_set("test_same")   # train / test_same / test_cross
+costs = metrics.eval_costs(trajs)       # 절약 토큰이 필요할 때
+op = metrics.select_operating_point(metrics.eval_set("train"), oof_preds, N, caps=(None, 30, 35, 40, 50))
+metrics.point_metrics(trajs, test_preds, N, tau=op["tau"], cap=op["cap"], costs=costs)
+```
+
+- `eval_set(name)`: 출력 `traj_id, instance_id, target, n_steps, fold`. N 전에 끝난 궤적도 포함한다 (비용 곡선 분모). splits의 궤적이 trajectories에 없으면 멈춘다. `io.load_splits()`는 `splits.parquet`가 없으면 `02_split.py` 실행을 안내하고 멈춘다
+- **test_same·test_cross를 합친 집합은 받지 않는다.** 두 분할은 테스트 이슈 578개를 공유해서, 합치면 578개 이슈 모두에 70B와 8B·405B 궤적이 섞이고 이슈 내 AUROC가 모델 종류 차이까지 잰다. 위 "Phase 3 결과"의 합친 테스트 집합 값(6.73% / 25.80%)은 동작 점검용이고, 결과는 분할별로 따로 보고한다
+- 실데이터 테스트(`test_real_eval_sets_and_fixed_cap_baseline`, 데이터가 있을 때만): 세 집합의 궤적 수와 분할별 K=35 기준값(위 표)이 맞는지 확인한다
 
 아래 두 절은 작업 당시 기록이다.
 
@@ -336,11 +359,11 @@ code/
 
 ## 7. 일정
 
-[가정] 학기 1주차가 8/31에 시작했다면 오늘(10/29)은 9주차다. 10/29 기준 Phase 0~3(3.5 제외)이 끝났고, 8주차 몫 중 Phase 4(B0·B1)가 남았다.
+[가정] 학기 1주차가 8/31에 시작했다면 오늘(10/29)은 9주차다. 10/29 기준 Phase 0~3이 끝났고, 8주차 몫 중 Phase 4(B0·B1)가 남았다.
 
 | 주차 | 계획 |
 | --- | --- |
-| 9주차 (지금) | ~~Phase 0~3~~ 완료 (10/29). Phase 4 (B0·B1) + 3.5 운영점 선택 |
+| 9주차 (지금) | ~~Phase 0~3~~ 완료 (10/29, 3.5 포함). Phase 4 (B0·B1) |
 | 10주차 | Phase 5 (M1, SHAP), 비용 곡선 확정 |
 | 11주차 | Phase 6 (M2), Phase 8.1 |
 | 12주차 | Phase 7 (M3, 선택), Phase 8.2 (선택), Phase 9 |

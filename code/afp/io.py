@@ -50,6 +50,13 @@ def scan_steps(columns) -> pl.LazyFrame:
     return pl.scan_parquet(STEPS_PATH).select(check_safe_columns(columns))
 
 
+def load_splits() -> pl.DataFrame:
+    """splits.parquet (traj_id, split, fold). 없으면 02_split.py 실행을 안내하고 멈춘다."""
+    if not SPLITS_PATH.exists():
+        raise FileNotFoundError(f"{SPLITS_PATH}가 없음. uv run python code/02_split.py 를 실행하세요.")
+    return pl.read_parquet(SPLITS_PATH, columns=["traj_id", "split", "fold"])
+
+
 def raw_files() -> list[Path]:
     """swe-agent parquet 12개를 파일 번호 순서로 돌려준다. 하나라도 없으면 멈춘다."""
     files = [RAW_DIR / f"train-{i:05d}-of-{N_RAW_FILES:05d}.parquet" for i in range(N_RAW_FILES)]
