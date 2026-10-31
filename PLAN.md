@@ -27,10 +27,10 @@
 | 제안서 | `docs/proposal.md`, `docs/proposal.pdf`, 수정 내역 `docs/proposal-changes.md` |
 | 환경 | `pyproject.toml` + `uv.lock` (Python 3.13). 기본 그룹: numpy, pandas, polars, pyarrow, datasets, scikit-learn, xgboost, shap, matplotlib, tqdm, ipykernel. `dl` 그룹: torch(CUDA 13.0), transformers, accelerate. 이 머신의 `.venv`에는 `dl` 그룹까지 설치되어 있다 |
 | 데이터 다운로드 | `data/download.sh`. HF revision 고정 + SHA-256 검증, 이어받기 지원. 이 머신의 `data/`에 4개 데이터셋 모두 받아져 있다 (3.4GB) |
-| 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
-| 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet` (git 밖). 검증 수치 `results/phase1/`, `results/phase2/` (git 안) |
-| 테스트·린트·CI | pytest(dev 그룹) 56개, `code/tests/`. 린트·CI 없음 |
-| 진행 | Phase 0(0.2·0.4 일부 제외)~3 완료 (3.5 운영점 선택 포함). 다음은 Phase 4 |
+| 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics, preds, oof, evaluate, baselines`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2), `code/03_baselines.py`(Phase 4). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
+| 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet, context_costs.parquet, preds/*.parquet` (git 밖). 검증 수치·결과 표 `results/phase1/`, `results/phase2/`, `results/phase4/` (git 안) |
+| 테스트·린트·CI | pytest(dev 그룹) 95개, `code/tests/`. 린트·CI 없음 |
+| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 다음은 Phase 5 (M1) |
 
 ### 데이터 구조 [확인, parquet 스키마와 샘플 행 조회]
 
@@ -57,10 +57,9 @@
 
 ## 4. 격차 (제안서 대비 비어 있는 것)
 
-2026-10-29 기준. 파싱·스텝 테이블(Phase 1), 분할·누수 점검(Phase 2), 평가 하네스(Phase 3)는 끝났다. 궤적 ID(`traj_id`), 토큰 근사(문자 수 기반 맥락 길이), pytest도 생겼다. 남은 것:
+2026-10-31 기준. 파싱·스텝 테이블(Phase 1), 분할·누수 점검(Phase 2), 평가 하네스(Phase 3, 3.5 포함), 기준선 B0·B1·오라클(Phase 4)은 끝났다. 궤적 ID(`traj_id`), 토큰 근사(문자 수 기반 맥락 길이), pytest, 공용 예측 파일·OOF·평가 드라이버도 생겼다. 남은 것:
 
-- 모든 모델(B1, M1, M2, M3)이 아직 없다. 제안서 일정상 8주차 작업 중 B0·B1(Phase 4)이 남았다.
-- 3.5 운영점 선택 함수는 있지만, 넣을 모델 OOF 예측이 아직 없다 (Phase 4 B1부터).
+- 제안 모델 M1, M2, M3가 아직 없다 (Phase 5~7). B1 OOF 점수(`preds/b1_n.parquet`)는 M1 입력으로 준비됐다.
 - `fixed_cap_k.py`는 여전히 `load_dataset("nebius/SWE-agent-trajectories")`로 HF Hub에서 **revision 고정 없이** 받는다. 같은 값은 이제 `01_parse.py`(로컬 parquet)와 하네스가 재현하므로 이 스크립트는 참고용이다 (0.2).
 - README·download.sh는 openhands·terminalbench를 "일반화·도메인 밖 테스트"로 소개하지만 **제안서에는 없다.** 범위 결정 필요 (11절 D1).
 - `proposal.md` 팀 표의 이름·학번은 채워졌지만 **담당 칸이 비어 있다** (0.4).
@@ -76,7 +75,11 @@ code/
 │   ├── parse.py         궤적 → 스텝 테이블, 명령 파싱
 │   ├── split.py         테스트 이슈 고정, StratifiedGroupKFold (Phase 2 결과 참고)
 │   ├── leakage.py       사후 누수 점검 전용 (채점 로그는 여기서만 읽음)
-│   ├── metrics.py       평가 집합 로더, AUROC, PR-AUC, 이슈 내 AUROC, 비용 곡선, 운영점
+│   ├── metrics.py       평가 집합 로더, AUROC, PR-AUC, 이슈 내 AUROC, 비용 곡선, 고정 상한, 운영점
+│   ├── preds.py         예측 파일 data/processed/preds/<model>.parquet 쓰기·읽기·검증 (Phase 4)
+│   ├── oof.py           fold별 OOF 예측 + 테스트 fold 평균 (Phase 4, M1~M3 재사용)
+│   ├── evaluate.py      모델 하나 → 분할×N 판별 표, 비용 곡선, 운영점, 부트스트랩 stat (Phase 4)
+│   ├── baselines.py     B0 규칙, B1 TF-IDF+LR, 오라클 (Phase 4)
 │   └── features.py      M1 피처
 ├── 01_parse.py          실행 스크립트 (번호 = 실행 순서)
 ├── 02_split.py
@@ -310,6 +313,75 @@ metrics.point_metrics(trajs, test_preds, N, tau=op["tau"], cap=op["cap"], costs=
 
 완료 기준: N별 B0·B1 AUROC/PR-AUC/이슈 내 AUROC 표. B1의 이슈 내 AUROC는 정의상 0.5여야 한다 (이슈 안에서는 점수가 같음) — 이 값이 하네스 검증 역할도 한다.
 
+#### Phase 4 결과 (2026-10-31 완료)
+
+상세 계획은 [PLAN_4.md](PLAN_4.md). 실행 `uv run --no-sync python code/03_baselines.py` (16코어 2분 24초: B1 그리드·OOF 54초, 운영점 선택 36초, 부트스트랩 82개 × 1,000회 50초). 완료 기준 C1~C8 **모두 충족**(스크립트가 assert, `results/phase4/summary.json`의 `criteria`). C9: `uv run --no-sync pytest` **95개 통과**, 다시 실행해도 `results/phase4/`와 `preds/*.parquet`이 바이트 단위로 같다 [확인].
+
+| # | 기준 | 결과 |
+| --- | --- | --- |
+| C1 | 예측 파일 6개가 모든 분할·N에서 진행 중 궤적과 1:1 | ✓ (`preds.write`가 저장 전에 검사) |
+| C2 | B1 이슈 내 AUROC = 0.5 | ✓ 최대 편차 0 (train_oof·test_same·test_cross × N 7개) |
+| C3 | OOF 자기 이슈 점수 0개, 정리 후 이슈마다 본문 1개 | ✓ 0개, 3,591개 (꼬리 제거 13개) |
+| C4 | 고정 상한 Phase 3 값 재현 | ✓ 전체 K=30/35/40/50 → 7.0/4.9/3.7/2.2%, 29.4/24.6/20.8/15.8%, K=35 토큰 42.2%. test_same K=35 4.47%/21.81% |
+| C5 | train에서 고른 K\* = 34 | ✓ (train 손실 4.71%, 절약 25.06%, fold 4.16~5.27%) |
+| C6 | 오라클 전체 LOO AUROC 0.945 | ✓ 0.9448 (궤적 2개 이상 이슈 3,581개, 80,026궤적) |
+| C7 | 판별 표 + 테스트 구간 | ✓ `discrimination.csv`, `discrimination_ci.csv` |
+| C8 | 단독·결합 운영점 + K\* 대비 차이 구간 | ✓ `operating_points.csv` |
+
+확정한 규칙
+- **B1 입력 정리**: 이슈 13개(모두 train)의 한쪽 본문 끝에 붙은 "고칠 파일 목록"(정답 패치 정보)을 지운다. 꼬리 앞에는 `\n\n\n`(4개는 `\r\n\n\n\n`)이 있어서, 꼬리 시작부터 지우고 끝 공백을 `rstrip()`한다. 13쌍 모두 꼬리 없는 본문과 정확히 같아진다 (`test_real_issue_text_unique_after_strip`)
+- **B1 학습 단위**: 이슈마다 (실패, 성공) 2행에 궤적 수 가중치 = 궤적 단위 LR (합성 데이터에서 계수 1e-5 안에서 같음). `issue` 가중은 이슈마다 무게를 같게 하고 가중치 합을 궤적 수로 맞춰 C의 의미를 `traj`와 같게 했다. 벡터라이저(어휘·IDF)는 fold 안에서 다시 학습한다
+- **B1 설정**: 20개 그리드(분석 단위 2 × C 5 × 가중 2)를 train OOF AUROC(N=0)로 골랐다 → **char_wb (3,5)-gram, C=0.1, `issue` 가중**, OOF AUROC 0.652 (word 최고 0.639). 고른 설정을 모든 N의 `b1_n`에 그대로 쓴다. 전체 표 `b1_grid.csv`
+- **테스트 점수 = 5개 fold 모델 평균** (P4-D2). 전체 재학습과 비교하면 테스트 AUROC 차이 0.004 이하, 중앙값 차이 0.0012 이하이고, 재학습 쪽 q95가 0.002~0.006 높다 (더 자신 있게 냄, `b1_scale.csv`)
+- **누수 크기** (4.3이 막는 것): 같은 설정을 학습 이슈 전체로 학습해 train에 채점하면 N=0 AUROC 0.907, OOF는 0.652. in-fold 점수를 M1에 넣으면 이 차이만큼 이슈 난이도가 샌다
+- **오라클**: LOO(같은 집합·같은 이슈 다른 궤적 성공률)는 이슈 내 AUROC가 정의상 0이라 `discrimination.csv`에서 비웠다. `ref_oracle_xmodel`(test_cross ↔ test_same 성공률)은 이슈 안에서 상수(0.5). 점수를 못 받는 궤적은 train 이슈 10개(궤적 1개짜리)뿐이고 학습 성공률로 채웠다
+- **운영점** (3.5 적용): train OOF 곡선 하나(62,460궤적)에서 손실 ≤5%·절약 스텝 최대로 고르고 테스트에 그대로 적용. 단독 = 상한 없음, 결합 = K ∈ N+1..60. 비교 기준은 같은 부트스트랩 표본의 K\*=34 (짝지은 95% 구간). 분할마다 같은 시드라 모델 사이에서도 같은 재표본이다
+
+판별 (테스트, 이슈 단위 부트스트랩 95% 구간. B0 이슈 내 AUROC는 쌍 가중)
+
+| 모델 | test_same N=0 | N=10 | 이슈 내 N=10 | test_cross N=0 | N=10 | 이슈 내 N=10 |
+| --- | --- | --- | --- | --- | --- | --- |
+| B0 에러 수 | — | 0.534 [0.502, 0.566] | 0.545 [0.519, 0.571] | — | 0.532 [0.485, 0.582] | 0.609 [0.550, 0.667] |
+| B0 편집 실패 수 | — | 0.542 [0.517, 0.567] | 0.532 [0.510, 0.555] | — | 0.553 [0.518, 0.586] | 0.571 [0.529, 0.608] |
+| B1 (`b1_n`) | 0.632 [0.585, 0.677] | 0.621 [0.569, 0.668] | 0.5 | 0.678 [0.614, 0.732] | 0.646 [0.585, 0.708] | 0.5 |
+| 오라클 LOO (참고) | 0.941 | 0.930 | — | 0.914 | 0.905 | — |
+| 오라클 다른 모델 (참고) | 0.843 | 0.830 | 0.5 | 0.917 | 0.907 | 0.5 |
+
+- B1 PR-AUC: test_same N=0 0.260(기준값 0.187), test_cross 0.276(0.176). train OOF는 0.652 / 0.249
+- B0 규칙은 전체 AUROC가 0.5 근처(0.48~0.56)지만 **이슈 내 AUROC는 0.51~0.61로 대부분 0.5 위**다. 이슈 난이도와 섞이면 묻히는 약한 궤적 신호가 있다
+- 오라클과 B1 사이(0.63 vs 0.94)가 이슈 난이도 중 본문 TF-IDF로 못 잡는 부분이다
+
+운영점 (N=10, train에서 고른 τ·K 그대로 적용. 절약 스텝 차이는 같은 표본 K\*=34 대비)
+
+| 정책 | τ, K | train 손실 / 절약 | test_same 손실 / 절약 | test_same 차이 [95%] | test_cross 손실 / 절약 | test_cross 차이 [95%] |
+| --- | --- | --- | --- | --- | --- | --- |
+| K\*=34 | —, 34 | 4.71% / 25.06% | 4.95% / 22.64% | — | 12.91% / 33.61% | — |
+| K=35 (제안서) | —, 35 | 4.32% / 24.19% | 4.47% / 21.81% | −0.83%p [−0.85, −0.79] | 12.36% / 32.53% | −1.09%p |
+| B0 에러 단독 | 5, — | 2.59% / 9.06% | 2.22% / 8.02% | −14.6%p | 2.71% / 11.13% | −22.5%p |
+| B0 에러 결합 | 8, 34 | 4.80% / 25.76% | 4.95% / 23.14% | **+0.50%p [+0.32, +0.70]** | 12.91% / 34.49% | **+0.88%p [+0.51, +1.24]** |
+| B1 단독 | 0.936, — | 5.00% / 14.72% | 2.43% / 4.71% | −17.9%p | 2.17% / 7.10% | −26.5%p |
+| B1 결합 | 0.949, 35 | 4.96% / 26.45% | 4.91% / 21.92% | −0.72%p [−0.84, −0.53] | 12.69% / 32.97% | −0.65%p [−1.10, +0.20] |
+
+- **어떤 단독 정책도 K\*를 넘지 못한다** (N=3~20 모두, 차이 구간 상한 < 0). 이 기준선들로는 "N에서 한 번 보고 끊기"만으로 고정 상한의 절약을 따라가지 못한다
+- **B0 결합 정책은 K\* 대비 절약 차이 구간이 0 위**다 (에러 수는 N=3~20 전부, 편집 실패 수는 N=5~20. test_same +0.2~+2.6%p, N=20 에러 결합이 최대 +2.6%p [+2.1, +3.0]). 대신 test_same 손실도 0~0.4%p 늘어서(5.0~5.3%, 구간 상한 6.0~6.5%) "같은 손실에서 더 아낀다"는 아직 아니다
+- **B1의 τ가 테스트로 옮겨지지 않는다.** train OOF에서 진행 중 궤적의 18.8%를 끊던 τ(N=10)가 test_same에서는 7.8%만 끊는다. 테스트 이슈가 더 쉽고(성공률 18.7% vs 16.3%) 점수 분포가 낮아서다 (`b1_scale.csv`: OOF 중앙값 0.917, 테스트 0.908). 결합 정책도 τ가 거의 아무것도 끊지 않아 K=35 단독과 비슷해지고 K\*보다 0.7%p 적게 아낀다. M1부터는 테스트 정지율을 train 정지율과 같이 본다
+- test_cross는 K\*만으로 손실 12.9%라 어떤 정책도 5%를 지키지 못한다. test_cross 운영점은 "train에서 고른 값을 그대로 쓴 결과"로만 읽는다
+- 고른 운영점의 fold별 train 손실은 결합 정책에서 3.8~6.1%, B1 단독에서 2.4~9.2%까지 흔들린다 (`fold_lost_success_*`). 5% 경계 판정은 구간과 같이 본다
+
+산출물
+- `data/processed/preds/{b0_err, b0_editfail, b1_static, b1_n, ref_oracle_loo, ref_oracle_xmodel}.parquet` (git 밖). 메타데이터에 설정·N 목록·분할·git 커밋·생성 시각. 내용이 같으면 다시 쓰지 않는다
+- `results/phase4/`: `discrimination.csv`, `discrimination_ci.csv`, `fixed_cap.csv`(분할·전체 × K 1..80), `operating_points.csv`, `operating_points_sensitivity.csv`(max_loss 2~10% × 목적 함수 2), `cost_curves/`(113개, 행 ≤200), `b1_grid.csv`, `b1_scale.csv`, `summary.json`
+- Phase 5로 넘기는 것: `preds.load_feature("b1_n")`을 `(traj_id, N)`으로 join (`ref_*`는 거부됨), `oof.oof_predict(train, fit, predict, test=)`, `evaluate.*`, `metrics.select_operating_point / select_from_curves / select_cap / fixed_cap_curve`, 앞 N스텝 누수 테스트 틀 `test_error_count_ignores_steps_after_n`
+
+PLAN_4.md와 다르게 한 것
+- 3.5는 팀원이 먼저 `metrics.select_operating_point(..., caps=)`로 main에 넣어서(#4) 계획의 `select_combined`는 따로 만들지 않았다. 결합 정책 = `caps=range(N+1, 61)`. 같은 곡선에서 max_loss·목적 함수를 바꿔 고르려고 선택 단계만 `select_from_curves`로 떼어냈다 (시그니처 변경 없음)
+- `summary.json`에 실행 시간·커밋을 넣지 않았다 (재실행 시 `git diff results/` 없음 기준 C9와 충돌). 커밋·생성 시각은 예측 파일 메타데이터에, 실행 시간은 표준 출력에만 남는다
+- `--models` 옵션은 만들지 않았다 (전체 실행이 2.5분이라 필요 없음). 대신 `--jobs`(B1 그리드·부트스트랩 병렬 프로세스 수)를 추가했다
+- LR은 BLAS 스레드를 1개로 묶는다 (`threadpoolctl`). 이 크기에서 다중 스레드 BLAS가 50배 느렸다 (단어 TF-IDF 1회 학습 2.4초 → 0.04초)
+- 부트스트랩은 반복마다 맥락 길이를 경계 {N, K, K\*} 구간 합으로 줄여 넣는다 (`metrics.compress_costs`, cost_curve 결과가 같음을 테스트)
+- 운영점 표의 `stop_rate`: 모델 행은 "시점 N 진행 중 궤적 중 예측기가 끊은 비율", `b0_cap` 행은 "전체 궤적 중 상한에 걸린 비율"
+
+
 ### Phase 5. M1 피처 모델 + SHAP (9~10주차, 2~3일) — 최소 범위의 핵심
 
 | 작업 | 내용 |
@@ -359,11 +431,11 @@ metrics.point_metrics(trajs, test_preds, N, tau=op["tau"], cap=op["cap"], costs=
 
 ## 7. 일정
 
-[가정] 학기 1주차가 8/31에 시작했다면 오늘(10/29)은 9주차다. 10/29 기준 Phase 0~3이 끝났고, 8주차 몫 중 Phase 4(B0·B1)가 남았다.
+[가정] 학기 1주차가 8/31에 시작했다면 10/29는 9주차다. 10/31 기준 Phase 0~4가 끝났다.
 
 | 주차 | 계획 |
 | --- | --- |
-| 9주차 (지금) | ~~Phase 0~3~~ 완료 (10/29, 3.5 포함). Phase 4 (B0·B1) |
+| 9주차 (지금) | ~~Phase 0~3~~ 완료 (10/29, 3.5 포함). ~~Phase 4 (B0·B1)~~ 완료 (10/31) |
 | 10주차 | Phase 5 (M1, SHAP), 비용 곡선 확정 |
 | 11주차 | Phase 6 (M2), Phase 8.1 |
 | 12주차 | Phase 7 (M3, 선택), Phase 8.2 (선택), Phase 9 |
@@ -379,6 +451,7 @@ bash data/download.sh                                # 데이터 (이미 받았�
 uv run python "code/test for K/fixed_cap_k.py"       # K 기준선 재현
 uv run python code/01_parse.py                       # Phase 1 → data/processed/
 uv run python code/02_split.py                       # Phase 2 → 분할 수치 출력
+uv run --no-sync python code/03_baselines.py         # Phase 4 → preds/, results/phase4/ (16코어 약 2.5분. --n-boot 100, --skip-bootstrap은 개발용)
 uv run pytest                                        # 파서·지표·누수 테스트 (Phase 0.3 이후)
 ```
 
@@ -425,13 +498,18 @@ Phase 1과 Phase 3은 인터페이스(`steps.parquet` 스키마, 예측 파일 �
 | D6 | `results/`를 git에 올릴지 | **확정: 작은 CSV·JSON을 올린다** (`results/phase1/`, `results/phase2/`) |
 | D7 | M3 범위 | N=5, 10, 20만 |
 | D8 | 비용 곡선이 단일 시점 정책만 볼지, 여러 시점(N=5, 10, 20에서 차례로 검사) 정책도 볼지 | 단일 시점을 주 결과로, 다중 시점은 시간이 남으면 |
+| P4-D1 | 모델 비교의 고정 상한 기준선 | **train에서 고른 K\*=34를 주 기준으로 구현**, 제안서 K=35는 같은 표의 참고 행(`cap_proposal`). 팀 확정 필요 |
+| P4-D2 | OOF 모델의 테스트 점수 | **5개 fold 모델 평균으로 구현.** 전체 재학습과의 차이는 작다 (`b1_scale.csv`: test_same N=0 AUROC 0.6318 vs 0.6316) |
+| P4-D3 | B1 대표 행 | **`b1_n`을 주 결과로**, `b1_static` 보조. 두 값은 N≤8에서 거의 같다 |
+| P4-D4 | 운영점 목적 함수 | **절약 스텝으로 구현.** 토큰 기준 선택은 `operating_points_sensitivity.csv`(objective=saved_tokens)에만 |
+| P4-D5 | B1 가중 방식 | 그리드 OOF로 선택됨: `issue` 가중 (char_wb (3,5)-gram, C=0.1) |
 
 ## 12. 리스크
 
 | 리스크 | 영향 | 대응 |
 | --- | --- | --- |
 | 제안서 수치가 로컬 데이터에서 재현되지 않음 (HF Hub 로드 vs 고정 revision, 스텝 정의 차이) | 모든 비교 기준이 흔들림 | Phase 0.2·1에서 먼저 대조하고 차이를 문서화 |
-| B1 점수 누수 (in-fold 점수를 M1에 넣음) | M1 성능 과대평가 | Phase 4.3 out-of-fold 강제, 테스트로 확인 |
+| B1 점수 누수 (in-fold 점수를 M1에 넣음) | M1 성능 과대평가 | Phase 4.3 out-of-fold 강제, 테스트로 확인. 실측 누수 크기: train N=0 in-fold AUROC 0.907 vs OOF 0.652 |
 | 운영점 τ를 테스트 셋에서 고름 | 절약률 과대평가 | Phase 3.5: τ·K는 학습 OOF에서만 선택 |
 | `exit_context`(맥락 초과 종료) 궤적이 길이·라벨과 얽힘 | "길다 = 실패"만 학습 | 시점별 진행 중 궤적만 비교 + 고정 상한과 대조 (제안서 대응 유지), `exit_status`는 분석에만 |
 | 테스트 이슈 578개가 무작위 표본이 아님 | 일반화 해석 왜곡 | Phase 2.4 분포 비교를 결과에 첨부 |
