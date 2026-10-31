@@ -253,19 +253,100 @@ def select_operating_point(
     """
     if by == "saved_tokens" and costs is None:
         raise ValueError("by='saved_tokens'는 costs가 필요하다")
+    curves = {cap: cost_curve(trajs, preds, n, costs=costs, cap=cap) for cap in caps}
+    return select_from_curves(curves, n, max_loss=max_loss, by=by)
+
+
+def select_from_curves(curves: dict, n: int, max_loss: float = MAX_LOSS, by: str = "saved_steps") -> dict:
+    """select_operating_point의 선택 단계. curves = {K 후보: cost_curve(..., cap=K)} (None = 상한 없음).
+
+    곡선은 max_loss와 무관하므로, 같은 곡선에서 여러 max_loss·by로 고를 때 곡선을 다시 만들지 않으려고 따로 둔다.
+    """
+    if any(by not in c.columns for c in curves.values()):
+        raise ValueError(f"곡선에 {by} 컬럼이 없음 (saved_tokens는 costs를 넣어 만든 곡선이 필요하다)")
     cand = pl.concat([
-        cost_curve(trajs, preds, n, costs=costs, cap=cap)
-        .filter(pl.col("lost_success") <= max_loss + 1e-12)  # 비율 계산의 부동소수 오차
+        c.filter(pl.col("lost_success") <= max_loss + 1e-12)  # 비율 계산의 부동소수 오차
         .with_columns(cap=pl.lit(cap, dtype=pl.Int64))
-        for cap in caps
+        for cap, c in curves.items()
     ])
     if cand.height == 0:
-        raise ValueError(f"N={n}, K 후보 {list(caps)}: 성공 손실 <= {max_loss}인 운영점이 없음")
+        raise ValueError(f"N={n}, K 후보 {list(curves)}: 성공 손실 <= {max_loss}인 운영점이 없음")
     best = cand.sort(
         [pl.col(by), pl.col("lost_success"), pl.col("tau"), pl.col("cap").fill_null(np.iinfo(np.int64).max)],
         descending=[True, False, True, True],
     ).row(0, named=True)
     return {"N": n, **best}
+
+
+def fixed_cap_curve(trajs: pl.DataFrame, costs: pl.DataFrame | None = None, ks=None) -> pl.DataFrame:
+    """B0 고정 상한 "스텝 > K면 종료"의 K별 (성공 손실률, 절약 스텝, 절약 맥락). 닫힌 식으로 한 번에 계산한다.
+
+    cost_curve에 "N=K에서 진행 중 궤적 전부 p_fail=1"을 넣은 결과(그 곡선의 마지막 행)와 같다.
+    - n_stopped, stop_rate = 상한에 걸린 궤적 수(n_steps > K)와 trajs 전체 대비 비율
+    - lost_success, saved_steps, saved_tokens의 분모는 cost_curve와 같다
+    ks: K 목록 (기본 1..최대 스텝). weight 컬럼이 있으면 궤적 가중치로 쓴다 (부트스트랩).
+    """
+    pop = trajs.select(_columns(trajs)).with_columns(w=_weight(trajs))
+    n_steps = pop["n_steps"].to_numpy().astype(np.int64)
+    w = pop["w"].to_numpy().astype(float)
+    succ = pop["target"].to_numpy().astype(bool)
+    ks = np.arange(1, n_steps.max() + 1) if ks is None else np.asarray(list(ks), dtype=np.int64)
+    if (ks < 0).any():
+        raise ValueError("K는 0 이상이어야 한다")
+    size = int(max(n_steps.max(), ks.max())) + 2
+
+    def above(x):  # above(x)[k] = sum_{n_steps > k} x
+        return np.cumsum(np.bincount(n_steps, weights=x, minlength=size)[::-1])[::-1][1:]
+
+    cnt, lost, steps = above(w), above(w * succ), above(w * n_steps)
+    out = {
+        "K": ks,
+        "n_stopped": cnt[ks],
+        "stop_rate": cnt[ks] / w.sum(),
+        "lost_success": lost[ks] / (w * succ).sum(),
+        "saved_steps": (steps[ks] - ks * cnt[ks]) / (w * n_steps).sum(),
+    }
+    if costs is not None:
+        c = costs.join(pop.select("traj_id", "w"), on="traj_id", how="inner")
+        step_idx = c["step_idx"].to_numpy().astype(np.int64)
+        size_c = int(max(step_idx.max(initial=0), ks.max())) + 2
+        tok = c["w"].to_numpy() * c["ctx"].to_numpy().astype(float)
+        tok_above = np.cumsum(np.bincount(step_idx, weights=tok, minlength=size_c)[::-1])[::-1][1:]
+        out["saved_tokens"] = tok_above[ks] / tok.sum()
+    return pl.DataFrame(out).with_columns(pl.col("n_stopped").cast(pl.Int64))
+
+
+def select_cap(cap_curve: pl.DataFrame, max_loss: float = MAX_LOSS) -> dict:
+    """fixed_cap_curve에서 성공 손실 <= max_loss인 가장 작은 K (= 그 제약에서 절약이 가장 큰 고정 상한).
+
+    학습 이슈 곡선에서 고르고 테스트에는 고른 K를 그대로 쓴다 (select_operating_point와 같은 원칙).
+    """
+    ok = cap_curve.filter(pl.col("lost_success") <= max_loss + 1e-12)
+    if ok.height == 0:
+        raise ValueError(f"성공 손실 <= {max_loss}인 K가 없음 (K {cap_curve['K'].min()}..{cap_curve['K'].max()})")
+    return ok.sort("K").row(0, named=True)
+
+
+def compress_costs(costs: pl.DataFrame, breakpoints) -> pl.DataFrame:
+    """costs를 궤적마다 경계 구간 합으로 줄인다. 경계 b에서 "step_idx > b인 맥락 합"과 전체 합이 그대로 남는다.
+
+    cost_curve(n=N, cap=K)는 경계 {N, K}의 이 합만 쓰므로, 같은 (N, K)를 수천 번 다시 계산하는
+    부트스트랩에서 행 수를 줄이는 데 쓴다. 궤적마다 구간 (b_{j-1}, b_j] (마지막은 (b_max, ∞))의 스텝을
+    한 행으로 합치고, 그 행의 step_idx는 구간 안 마지막 스텝이다 (궤적 길이를 넘지 않아서, 상한 없는
+    cost_curve가 쓰는 "최대 스텝 뒤 = 0"도 그대로다).
+    """
+    bps = np.unique(np.asarray([b for b in breakpoints if b is not None], dtype=np.int64))
+    if len(bps) == 0:
+        raise ValueError("경계가 하나는 있어야 한다")
+    bucket = np.searchsorted(bps, costs["step_idx"].to_numpy().astype(np.int64), side="left")
+    return (
+        costs.select("traj_id", "step_idx", "ctx")
+        .with_columns(_bucket=pl.Series(bucket))
+        .group_by("traj_id", "_bucket")
+        .agg(pl.col("step_idx").max(), pl.col("ctx").sum())
+        .sort("traj_id", "step_idx")
+        .select("traj_id", "step_idx", "ctx")
+    )
 
 
 def point_metrics(
