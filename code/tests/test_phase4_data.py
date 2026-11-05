@@ -89,4 +89,25 @@ def test_real_preds_cover_running(sets):
     for m in PHASE4_MODELS:
         assert preds.read(m).join(other, on="traj_id", how="semi").height == 0, m
     with pytest.raises(ValueError, match="피처로 쓸 수 없다"):
-        preds.load_feature("ref_oracle_loo")
+        preds.load_feature("ref_oracle_loo", "train")
+
+
+def test_real_b1_test_fold_scores(sets):
+    # P4-D6·P4-D7: fold별 test 점수 파일, 평균 = 주 파일 test 점수, M1 입력 API
+    if not preds.fold_path("b1_n").exists():
+        pytest.skip("preds/b1_n.test_folds.parquet 없음 (03_baselines.py 실행 필요)")
+    for m in ("b1_static", "b1_n"):
+        f = preds.read_test_folds(m)
+        assert sorted(f["fold"].unique().to_list()) == list(range(5))
+        assert f.join(sets["train"].select("traj_id"), on="traj_id", how="semi").height == 0  # test 궤적만
+        mean = f.group_by("traj_id", "N").agg(pl.col("p_fail").mean())
+        main = preds.read(m).join(sets["test"].select("traj_id"), on="traj_id", how="semi")
+        j = main.join(mean, on=["traj_id", "N"], how="full", coalesce=True)
+        assert j.null_count().sum_horizontal().item() == 0
+        assert (j["p_fail"] - j["p_fail_right"]).abs().max() <= preds.FOLD_MEAN_TOL
+    k2 = preds.load_feature("b1_n", "test", fold=2)
+    assert k2.equals(preds.read_test_folds("b1_n").filter(pl.col("fold") == 2).drop("fold"))
+    with pytest.raises(ValueError, match="fold를 지정"):
+        preds.load_feature("b1_n", "test")
+    tr = preds.load_feature("b1_n", "train")
+    assert tr.height > 0 and tr.join(sets["test"].select("traj_id"), on="traj_id", how="semi").height == 0

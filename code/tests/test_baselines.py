@@ -156,5 +156,6 @@ def test_ref_preds_rejected_as_features(tmp_path, monkeypatch):
     preds.write("ref_oracle_loo", p, {"train": trajs}, [0], {}, "none")
     preds.write("b1_n", p, {"train": trajs}, [0], {}, "none")
     with pytest.raises(ValueError, match="피처로 쓸 수 없다"):
-        preds.load_feature("ref_oracle_loo")
-    assert preds.load_feature("b1_n")["p_fail"].to_list() == [0.4]
+        preds.load_feature("ref_oracle_loo", "train")
+    splits = pl.DataFrame({"traj_id": ["a"], "split": ["train"]})
+    assert preds.load_feature("b1_n", "train", splits=splits)["p_fail"].to_list() == [0.4]

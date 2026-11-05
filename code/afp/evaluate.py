@@ -8,6 +8,9 @@
   K*와의 차이(짝지은 구간)로 비교한다
 - 손실 기준 (회의 2026-11-05 §4.1): 고를 때는 train 손실 <= metrics.SELECT_MAX_LOSS(3.5%), 테스트 충족 판정은
   손실 95% 구간 상한 <= metrics.JUDGE_MAX_LOSS(5%) (loss_flags)
+- OOF로 학습하는 모델의 테스트 운영점 (P4-D6): 테스트 예측에 fold 모델별 점수 컬럼(attach_fold_scores)을 붙이면
+  test_point·bootstrap_stat·model_curves가 같은 τ·K를 fold 점수마다 적용하고 결과를 평균한다 (min~max도).
+  판별 지표는 그대로 p_fail(5개 fold 평균 점수, P4-D2)로 잰다. 모델 종류와 무관하게 fold별 점수만 있으면 된다
 """
 import numpy as np
 import polars as pl
@@ -29,6 +32,7 @@ COSTS_PATH = io.PROCESSED_DIR / "context_costs.parquet"
 SPLIT_LABEL = {"train": "train_oof", "test": "test"}
 TEST_SPLITS = ("test",)
 POINT_COLUMNS = ("stop_rate", "lost_success", "saved_steps", "saved_tokens")
+FOLD_SCORE_PREFIX = "p_fail_fold"  # attach_fold_scores가 붙이는 fold k 점수 컬럼: p_fail_fold0, p_fail_fold1, ...
 
 
 def load_eval_sets() -> dict[str, pl.DataFrame]:
@@ -87,6 +91,66 @@ def discrimination_table(model_id: str, preds: pl.DataFrame, sets: dict[str, pl.
     return pl.DataFrame(rows)
 
 
+# ---- fold 모델별 테스트 점수 (P4-D6) ----
+
+def attach_fold_scores(preds: pl.DataFrame, fold_preds: pl.DataFrame) -> pl.DataFrame:
+    """preds(traj_id, N, p_fail)의 행에 fold k 모델 점수 컬럼 p_fail_fold{k}를 붙인다.
+
+    fold_preds: traj_id, N, fold, p_fail (preds.read_test_folds 형식, test 궤적만). preds의 행마다 모든 fold 점수가
+    있어야 한다 (테스트 행만 넘긴다). 한 프레임에 같이 두므로 부트스트랩에서 fold 점수가 모두 같은 재표본을 쓴다.
+    """
+    folds = sorted(fold_preds["fold"].unique().to_list())
+    wide = fold_preds.select("traj_id", pl.col("N").cast(preds["N"].dtype), pl.col("fold").cast(pl.Int64), "p_fail") \
+        .pivot(on="fold", index=["traj_id", "N"], values="p_fail", sort_columns=True) \
+        .rename({str(k): f"{FOLD_SCORE_PREFIX}{k}" for k in folds})
+    out = preds.join(wide, on=["traj_id", "N"], how="left")
+    cols = fold_columns(out)
+    if out.select(pl.any_horizontal(pl.col(cols).is_null())).to_series().any():
+        raise ValueError("fold 점수가 없는 예측 행이 있음 (테스트 행만, 모든 fold 점수와 함께 넘긴다)")
+    return out
+
+
+def fold_columns(preds: pl.DataFrame) -> list[str]:
+    return sorted((c for c in preds.columns if c.startswith(FOLD_SCORE_PREFIX)), key=lambda c: int(c[len(FOLD_SCORE_PREFIX):]))
+
+
+def fold_preds_list(preds: pl.DataFrame) -> list[pl.DataFrame]:
+    """fold 점수 컬럼마다 (traj_id, N, p_fail) 예측 하나."""
+    return [preds.select("traj_id", "N", pl.col(c).alias("p_fail")) for c in fold_columns(preds)]
+
+
+def test_point(trajs: pl.DataFrame, preds: pl.DataFrame, n: int, tau: float, cap: int | None, costs: pl.DataFrame | None,
+               spread: bool = True) -> dict:
+    """테스트에 고정한 (τ, K) 적용. fold 점수 컬럼이 있으면 fold마다 적용해 평균하고 (P4-D6),
+    spread면 <지표>_fold_min/_fold_max도 낸다. 없으면(B0 규칙 등) apply_point 그대로."""
+    cols = fold_columns(preds)
+    if not cols:
+        return apply_point(trajs, preds.select("traj_id", "N", "p_fail"), n, tau, cap, costs)
+    pts = [apply_point(trajs, p, n, tau, cap, costs) for p in fold_preds_list(preds)]
+    out = {c: float(np.mean([pt[c] for pt in pts])) for c in pts[0]}
+    if spread:
+        for c in pts[0]:
+            out[f"{c}_fold_min"] = float(min(pt[c] for pt in pts))
+            out[f"{c}_fold_max"] = float(max(pt[c] for pt in pts))
+    return out
+
+
+def fold_mean_curve(curves: list[pl.DataFrame]) -> pl.DataFrame:
+    """fold별 비용 곡선(같은 trajs·N·K)을 τ마다 평균한 곡선. τ = 모든 곡선 τ의 합집합 (큰 쪽부터).
+
+    각 곡선의 τ 값은 at_threshold와 같은 규칙(그 τ 이상인 마지막 행)으로 읽는다. n_stopped는 평균이라 실수다.
+    """
+    taus = np.unique(np.concatenate([c["tau"].to_numpy() for c in curves]))[::-1]
+    value_cols = [c for c in curves[0].columns if c != "tau"]
+    acc = {c: np.zeros(len(taus)) for c in value_cols}
+    for c in curves:
+        t = c["tau"].to_numpy()  # 큰 쪽부터 (inf가 맨 앞)
+        idx = np.searchsorted(-t, -taus, side="right") - 1
+        for col in value_cols:
+            acc[col] += c[col].to_numpy().astype(float)[idx]
+    return pl.DataFrame({"tau": taus, **{c: v / len(curves) for c, v in acc.items()}})
+
+
 # ---- 비용 곡선 ----
 
 def thin_curve(curve: pl.DataFrame, max_rows: int = CURVE_MAX_ROWS) -> pl.DataFrame:
@@ -99,15 +163,26 @@ def thin_curve(curve: pl.DataFrame, max_rows: int = CURVE_MAX_ROWS) -> pl.DataFr
     return curve[idx]
 
 
-def model_curves(preds: pl.DataFrame, sets: dict, costs: dict, n_grid) -> dict[tuple[str, int], pl.DataFrame]:
-    """(split, N) → 상한 없는 비용 곡선 (saved_tokens 포함). preds에 없는 분할은 건너뛴다."""
+def model_curves(preds: pl.DataFrame, sets: dict, costs: dict, n_grid,
+                 fold_preds: pl.DataFrame | None = None) -> dict[tuple[str, int], pl.DataFrame]:
+    """(split, N) → 상한 없는 비용 곡선 (saved_tokens 포함). preds에 없는 분할은 건너뛴다.
+
+    fold_preds(테스트 fold별 점수)가 있으면 테스트 분할 곡선은 fold별 곡선을 τ마다 평균한 것 (P4-D6).
+    train은 OOF 점수 하나의 곡선이다.
+    """
     out = {}
     for name, trajs in sets.items():
         sp = split_preds(preds, trajs)
         if sp.height == 0:
             continue
+        if fold_preds is not None and name in TEST_SPLITS:
+            sp = attach_fold_scores(sp, fold_preds)
         for n in n_grid:
-            out[(name, n)] = metrics.cost_curve(trajs, sp.filter(pl.col("N") == n), n, costs=costs[name])
+            pn = sp.filter(pl.col("N") == n)
+            if fold_columns(pn):
+                out[(name, n)] = fold_mean_curve([metrics.cost_curve(trajs, p, n, costs=costs[name]) for p in fold_preds_list(pn)])
+            else:
+                out[(name, n)] = metrics.cost_curve(trajs, pn, n, costs=costs[name])
     return out
 
 
@@ -177,16 +252,18 @@ def bootstrap_stat(n: int | None, points: dict, k_ref: int | None, costs: pl.Dat
 
     - discrimination: AUROC, PR-AUC, 이슈 내 AUROC 2종
     - points마다 <이름>.<지표>와 K_ref 대비 차이 <이름>.d_<지표> (같은 표본에서 계산 → 짝지은 구간)
+    - preds에 fold 점수 컬럼(attach_fold_scores)이 있으면 운영점 지표는 test_point로 fold마다 적용한 값의 평균
+      (P4-D6). 반복마다 같은 재표본에서 5개를 평균하므로 구간은 "평균"의 구간이다. 판별 지표는 p_fail(평균 점수)
     costs는 metrics.compress_costs로 경계 {N, K들, K_ref}만 남겨 넣는다 (반복마다 수십만 행을 집계하지 않게).
     """
     def stat(trajs, preds):
         out = {}
         if discrimination:
-            d = discrimination_row(trajs, preds, n)
+            d = discrimination_row(trajs, preds.select("traj_id", "N", "p_fail"), n)
             out.update({k: d[k] for k in ("auroc", "pr_auc", "within_pair", "within_issue_mean")})
         ref = cap_point(trajs, k_ref, costs) if k_ref is not None and points else None
         for name, (tau, cap) in points.items():
-            pt = apply_point(trajs, preds, n, tau, cap, costs)
+            pt = test_point(trajs, preds, n, tau, cap, costs, spread=False)
             out.update({f"{name}.{c}": v for c, v in pt.items()})
             if ref is not None:
                 out.update({f"{name}.d_{c}": pt[c] - ref[c] for c in pt if c != "stop_rate"})
@@ -222,7 +299,8 @@ def transfer_rows(train: pl.DataFrame, train_preds: pl.DataFrame | None, test: p
 
     - source=train-fold{k}: fold k를 뺀 학습 이슈 OOF 곡선에서 고른 운영점을 target=fold{k}(같은 방식으로
       뽑힌 처음 보는 학습 이슈)와 target=test에 각각 적용한다. 같은 운영점이라 두 target을 짝지어 비교한다
-    - source=train: 학습 이슈 전체에서 고른 주 운영점(full_op)을 test에 적용 (operating_points.csv와 같은 값)
+    - source=train: 학습 이슈 전체에서 고른 주 운영점(full_op)을 test(평균 점수)에 적용. B0는 operating_points.csv와
+      같은 값이고, OOF 모델은 2026-11-05 P4-D6부터 operating_points.csv가 fold 모델별 채점 평균이라 다르다 (이 표는 진단용)
     - test_fold_preds[k] (OOF로 학습하는 모델): 테스트를 fold k 모델 하나로만 채점한 예측. 있으면 같은 운영점을
       target=test_fold_model에도 적용한다. fold{k}와 채점 모델이 같아서, test(5개 fold 모델 평균 점수)와의 차이가
       "점수 평균" 때문인지 "이슈 차이" 때문인지 가른다

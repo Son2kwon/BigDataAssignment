@@ -282,3 +282,96 @@ def test_transfer_rows_fixed_cap():
         src = train.filter(pl.col("fold") != kf)
         assert r["cap"] == metrics.select_cap(metrics.fixed_cap_curve(src), 0.05)["K"]
         assert r["dst_lost_success"] == evaluate.cap_point(train.filter(pl.col("fold") == kf), r["cap"], None)["lost_success"]
+
+
+# ---- fold 모델별 테스트 채점 (P4-D6) ----
+
+def fold_setup(seed=5, n_folds=5, n=5):
+    trajs, costs, rng = random_population(seed=seed, n_traj=400)
+    alive = metrics.running(trajs, n)
+    base = rng.random(alive.height)
+    # fold마다 다른 점수 (실패 쪽으로 약하게 치우침), 평균 점수 = p_fail
+    fold_scores = np.clip(base[None, :] * 0.5 + 0.5 * rng.random((n_folds, alive.height)) * (~alive["target"].to_numpy() + 0.5), 0, 1).round(3)
+    long = pl.concat([alive.select("traj_id", N=pl.lit(n, dtype=pl.Int64), fold=pl.lit(k, dtype=pl.Int8), p_fail=pl.Series(fold_scores[k]))
+                      for k in range(n_folds)])
+    mean = alive.select("traj_id", N=pl.lit(n, dtype=pl.Int64), p_fail=pl.Series(fold_scores.mean(axis=0)))
+    return trajs, costs, n, long, mean
+
+
+def test_test_point_averages_fold_results():
+    trajs, costs, n, long, mean = fold_setup()
+    wide = evaluate.attach_fold_scores(mean, long)
+    assert evaluate.fold_columns(wide) == [f"p_fail_fold{k}" for k in range(5)]
+    for tau, cap in ((0.6, None), (0.55, 20), (float("inf"), 15)):
+        got = evaluate.test_point(trajs, wide, n, tau, cap, costs)
+        per = [evaluate.apply_point(trajs, long.filter(pl.col("fold") == k).drop("fold"), n, tau, cap, costs) for k in range(5)]
+        for c in evaluate.POINT_COLUMNS:
+            vals = [p[c] for p in per]
+            assert got[c] == pytest.approx(np.mean(vals), abs=1e-15)
+            assert got[f"{c}_fold_min"] == min(vals) and got[f"{c}_fold_max"] == max(vals)
+        # 평균 점수에 τ를 적용한 것과는 다르다 (P4-D6이 바꾸는 것)
+        assert set(evaluate.test_point(trajs, mean, n, tau, cap, costs)) == set(evaluate.POINT_COLUMNS)
+    # fold 점수가 모두 같으면 평균 점수 적용과 같다
+    same = long.with_columns(p_fail=pl.col("traj_id").replace_strict(dict(mean.select("traj_id", "p_fail").rows())))
+    w2 = evaluate.attach_fold_scores(mean, same)
+    a, b = evaluate.test_point(trajs, w2, n, 0.6, 20, costs, spread=False), evaluate.apply_point(trajs, mean, n, 0.6, 20, costs)
+    assert a == pytest.approx(b, abs=1e-15)
+
+
+def test_attach_fold_scores_requires_every_row():
+    trajs, costs, n, long, mean = fold_setup()
+    with pytest.raises(ValueError, match="fold 점수가 없는"):
+        evaluate.attach_fold_scores(mean, long.filter(~((pl.col("fold") == 3) & (pl.col("traj_id") == mean["traj_id"][0]))))
+
+
+def test_bootstrap_averages_folds_within_each_resample():
+    # 구간 = 반복마다 (같은 재표본에서) 5개 결과를 평균한 값의 구간. 평균 점수나 fold별 구간의 평균이 아니다
+    trajs, costs, n, long, mean = fold_setup()
+    wide = evaluate.attach_fold_scores(mean, long)
+    k_ref = 25
+    stat = evaluate.bootstrap_stat(n, {"single": (0.6, None), "combined": (0.55, 20)}, k_ref, costs, discrimination=True)
+    got = metrics.bootstrap(trajs, wide, stat, n_boot=60)
+
+    def manual(t, p):
+        out = {}
+        ref = evaluate.cap_point(t, k_ref, costs)
+        for name, (tau, cap) in {"single": (0.6, None), "combined": (0.55, 20)}.items():
+            per = [evaluate.apply_point(t, fp, n, tau, cap, costs) for fp in evaluate.fold_preds_list(p)]
+            for c in evaluate.POINT_COLUMNS:
+                out[f"{name}.{c}"] = float(np.mean([x[c] for x in per]))
+                if c != "stop_rate":
+                    out[f"{name}.d_{c}"] = out[f"{name}.{c}"] - ref[c]
+        return out
+    want = metrics.bootstrap(trajs, wide, manual, n_boot=60)
+    g = {r["stat"]: r for r in got.iter_rows(named=True)}
+    for r in want.iter_rows(named=True):
+        for c in ("estimate", "lo", "hi"):
+            assert g[r["stat"]][c] == pytest.approx(r[c], abs=1e-15), (r["stat"], c)
+    # 판별 지표는 평균 점수(p_fail) 그대로
+    plain = metrics.bootstrap(trajs, mean, evaluate.bootstrap_stat(n, {}, None, None, discrimination=True), n_boot=60)
+    for r in plain.iter_rows(named=True):
+        assert g[r["stat"]]["lo"] == r["lo"] and g[r["stat"]]["hi"] == r["hi"]
+
+
+def test_fold_mean_curve_matches_at_threshold():
+    trajs, costs, n, long, mean = fold_setup()
+    curves = [metrics.cost_curve(trajs, long.filter(pl.col("fold") == k).drop("fold"), n, costs=costs) for k in range(5)]
+    avg = evaluate.fold_mean_curve(curves)
+    assert avg["tau"][0] == float("inf") and (avg["tau"].diff().drop_nulls() < 0).all()
+    for tau in avg["tau"].to_list()[::17]:
+        row = avg.filter(pl.col("tau") == tau).row(0, named=True)
+        for c in ("lost_success", "saved_steps", "saved_tokens", "stop_rate"):
+            assert row[c] == pytest.approx(np.mean([metrics.at_threshold(cv, tau)[c] for cv in curves]), abs=1e-15)
+    # 곡선 하나면 그대로
+    one = evaluate.fold_mean_curve(curves[:1])
+    assert one.select(curves[0].columns).with_columns(pl.col("n_stopped").cast(pl.Int64)).equals(curves[0].with_columns(pl.col("n_stopped").cast(pl.Int64)))
+    # model_curves: test 분할은 fold 곡선 평균, train은 그대로
+    sets = {"train": trajs.filter(pl.col("traj_id") < "t0200"), "test": trajs.filter(pl.col("traj_id") >= "t0200")}
+    test_long = long.join(sets["test"].select("traj_id"), on="traj_id", how="semi")
+    allp = mean.with_columns(pl.col("N").cast(pl.Int16))
+    cs = {k: costs.join(v.select("traj_id"), on="traj_id", how="semi") for k, v in sets.items()}
+    mc = evaluate.model_curves(allp, sets, cs, [n], fold_preds=test_long)
+    ref_test = evaluate.fold_mean_curve([metrics.cost_curve(sets["test"], test_long.filter(pl.col("fold") == k).drop("fold"), n, costs=cs["test"])
+                                         for k in range(5)])
+    assert mc[("test", n)].equals(ref_test)
+    assert mc[("train", n)].equals(metrics.cost_curve(sets["train"], evaluate.split_preds(allp, sets["train"]), n, costs=cs["train"]))
