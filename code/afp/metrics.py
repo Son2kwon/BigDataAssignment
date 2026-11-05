@@ -17,7 +17,26 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 from afp import io, split
 
 TRAJ_COLUMNS = ["traj_id", "instance_id", "target", "n_steps"]
-MAX_LOSS = 0.05  # 운영점 제약: 성공 손실률 상한 (proposal.md §5)
+# 성공 손실 기준 (회의 2026-11-05 §4.1, proposal-changes.md 15번). 두 값은 여기에만 둔다.
+# - SELECT_MAX_LOSS: train(OOF)에서 운영점 (τ, K)와 고정 상한 K*를 고를 때의 "train 손실 <= 3.5%" (기준선·모델 같은 규칙)
+# - JUDGE_MAX_LOSS:  테스트에서 "충족" = 성공 손실의 이슈 단위 부트스트랩 95% 구간 상한 <= 5% (점추정이 아님)
+# 3.5%는 고정값이다 (예전 분할에서 테스트 손실 95% 구간 폭 약 ±1.4%p → 상한 5%를 지키려면 점추정 약 3.5~3.6%).
+# 테스트 결과를 보고 바꾸지 않는다.
+SELECT_MAX_LOSS = 0.035
+JUDGE_MAX_LOSS = 0.05
+LOSS_EPS = 1e-12  # 비율 계산의 부동소수 오차
+
+
+def meets_select_loss(lost_success: float) -> bool:
+    """train 행 표시: 점추정 손실 <= SELECT_MAX_LOSS (구간이 없는 train 행에 쓴다)."""
+    return bool(lost_success <= SELECT_MAX_LOSS + LOSS_EPS)
+
+
+def meets_judge_loss(lost_success_hi: float) -> bool:
+    """테스트 판정: 성공 손실의 부트스트랩 95% 구간 상한 <= JUDGE_MAX_LOSS. 점추정은 받지 않는다."""
+    if lost_success_hi is None or not np.isfinite(lost_success_hi):
+        raise ValueError("판정에는 성공 손실의 부트스트랩 95% 구간 상한(lost_success_hi)이 필요하다")
+    return bool(lost_success_hi <= JUDGE_MAX_LOSS + LOSS_EPS)
 
 
 def eval_set(name: str) -> pl.DataFrame:
@@ -237,11 +256,11 @@ def select_operating_point(
     preds: pl.DataFrame,
     n: int,
     caps=(None,),
-    max_loss: float = MAX_LOSS,
+    max_loss: float = SELECT_MAX_LOSS,
     by: str = "saved_steps",
     costs: pl.DataFrame | None = None,
 ) -> dict:
-    """운영점 선택: 성공 손실 <= max_loss인 (K, tau) 중 절약(by)이 가장 큰 것.
+    """운영점 선택: 성공 손실 <= max_loss(기본 SELECT_MAX_LOSS = 3.5%)인 (K, tau) 중 절약(by)이 가장 큰 것.
 
     trajs·preds는 학습 이슈와 그 out-of-fold 예측이어야 한다. 테스트 예측으로 고르면 절약률이
     과대평가된다. 고른 값은 테스트에서 point_metrics(..., tau=tau, cap=cap)로 그대로 적용한다.
@@ -256,7 +275,7 @@ def select_operating_point(
     return select_from_curves(curves, n, max_loss=max_loss, by=by)
 
 
-def select_from_curves(curves: dict, n: int, max_loss: float = MAX_LOSS, by: str = "saved_steps") -> dict:
+def select_from_curves(curves: dict, n: int, max_loss: float = SELECT_MAX_LOSS, by: str = "saved_steps") -> dict:
     """select_operating_point의 선택 단계. curves = {K 후보: cost_curve(..., cap=K)} (None = 상한 없음).
 
     곡선은 max_loss와 무관하므로, 같은 곡선에서 여러 max_loss·by로 고를 때 곡선을 다시 만들지 않으려고 따로 둔다.
@@ -264,7 +283,7 @@ def select_from_curves(curves: dict, n: int, max_loss: float = MAX_LOSS, by: str
     if any(by not in c.columns for c in curves.values()):
         raise ValueError(f"곡선에 {by} 컬럼이 없음 (saved_tokens는 costs를 넣어 만든 곡선이 필요하다)")
     cand = pl.concat([
-        c.filter(pl.col("lost_success") <= max_loss + 1e-12)  # 비율 계산의 부동소수 오차
+        c.filter(pl.col("lost_success") <= max_loss + LOSS_EPS)
         .with_columns(cap=pl.lit(cap, dtype=pl.Int64))
         for cap, c in curves.items()
     ])
@@ -315,12 +334,12 @@ def fixed_cap_curve(trajs: pl.DataFrame, costs: pl.DataFrame | None = None, ks=N
     return pl.DataFrame(out).with_columns(pl.col("n_stopped").cast(pl.Int64))
 
 
-def select_cap(cap_curve: pl.DataFrame, max_loss: float = MAX_LOSS) -> dict:
-    """fixed_cap_curve에서 성공 손실 <= max_loss인 가장 작은 K (= 그 제약에서 절약이 가장 큰 고정 상한).
+def select_cap(cap_curve: pl.DataFrame, max_loss: float = SELECT_MAX_LOSS) -> dict:
+    """fixed_cap_curve에서 성공 손실 <= max_loss(기본 SELECT_MAX_LOSS)인 가장 작은 K (= 그 제약에서 절약이 가장 큰 고정 상한).
 
     학습 이슈 곡선에서 고르고 테스트에는 고른 K를 그대로 쓴다 (select_operating_point와 같은 원칙).
     """
-    ok = cap_curve.filter(pl.col("lost_success") <= max_loss + 1e-12)
+    ok = cap_curve.filter(pl.col("lost_success") <= max_loss + LOSS_EPS)
     if ok.height == 0:
         raise ValueError(f"성공 손실 <= {max_loss}인 K가 없음 (K {cap_curve['K'].min()}..{cap_curve['K'].max()})")
     return ok.sort("K").row(0, named=True)

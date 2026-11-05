@@ -42,10 +42,13 @@ def test_real_fixed_cap_values(sets, costs):
         assert ts[c] == pytest.approx(h[c], abs=1e-12)
 
 
-def test_real_cap_selected_on_train_is_35(sets):
-    k = metrics.select_cap(metrics.fixed_cap_curve(sets["train"], ks=range(1, 81)), evaluate.MAX_LOSS)
-    assert k["K"] == 35  # 70B 무작위 분할. K=34는 train 손실 5.04%로 5%를 넘는다
-    assert round(k["lost_success"], 4) == 0.0460 and round(k["saved_steps"], 4) == 0.2388
+def test_real_cap_selected_on_train_is_40(sets):
+    curve = metrics.fixed_cap_curve(sets["train"], ks=range(1, 81))
+    k = metrics.select_cap(curve)  # 기본값 = 선택 기준 SELECT_MAX_LOSS (3.5%)
+    assert k["K"] == 40  # 70B 무작위 분할. K=39는 train 손실 3.72%로 3.5%를 넘는다
+    assert round(k["lost_success"], 4) == 0.0349 and round(k["saved_steps"], 4) == 0.2021
+    # 제안서 기준(5%)으로 고르면 35 (민감도 표의 max_loss=0.05 행, K=34는 5.04%)
+    assert metrics.select_cap(curve, 0.05)["K"] == 35
 
 
 def test_real_issue_text_unique_after_strip():

@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # 프로젝트 데이터 다운로드 스크립트 (macOS / Linux / Windows Git Bash·WSL)
 #
-#   bash data/download.sh                      # 기본 데이터셋 3개 (swe-agent, openhands, terminalbench)
+#   bash data/download.sh                      # 기본 데이터셋 3개 (swe-agent + 선택 과제용 openhands, terminalbench)
 #   bash data/download.sh swe-agent openhands  # 이름을 주면 그 데이터셋만 받는다
 #   bash data/download.sh all                  # swebench까지 전부
 #
 # 데이터셋
 #   swe-agent      nebius/SWE-agent-trajectories              1.1GB  학습·검증·테스트 (주 데이터)
-#   openhands      nebius/SWE-rebench-openhands-trajectories  2.1GB  다른 프레임워크·모델 (OpenHands, Qwen3-Coder)
-#   terminalbench  yoonholee/terminalbench-trajectories       0.2GB  도메인 밖 테스트 (Terminal-Bench 2.0)
+#   openhands      nebius/SWE-rebench-openhands-trajectories  2.1GB  선택 과제(제안서 범위 밖): 다른 프레임워크·모델 (OpenHands, Qwen3-Coder)
+#   terminalbench  yoonholee/terminalbench-trajectories       0.2GB  선택 과제(제안서 범위 밖): 다른 도메인 (Terminal-Bench 2.0)
 #   swebench       SWE-bench/experiments 저장소 (git)          0.2GB  외부 테스트용 리더보드 기록. 기본값에서 빠짐
+#
+# 평가(학습·테스트)는 swe-agent의 70B 궤적만 쓴다. openhands·terminalbench는 최소 범위 밖 선택 과제다
+# (PLAN.md 11절 D1). 필요 없으면 bash data/download.sh swe-agent 로 주 데이터만 받는다.
 #
 # 다시 실행해도 안전하다. 이미 받은 파일은 SHA-256을 확인하고 건너뛰고,
 # 중간에 끊긴 파일은 이어서 받는다.

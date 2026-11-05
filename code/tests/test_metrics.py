@@ -345,7 +345,7 @@ def test_select_operating_point_matches_brute_force(by):
         schema=["traj_id", "step_idx", "ctx"], orient="row",
     )
     alive = n_steps > n
-    # 실패일수록 p_fail이 높은 약한 예측기 (무작위면 손실 5% 안에서 고를 게 거의 없다)
+    # 실패일수록 p_fail이 높은 약한 예측기 (무작위면 손실 3.5% 안에서 고를 게 거의 없다)
     p_fail = np.round(np.clip(0.5 * ~target + 0.6 * rng.random(m), 0, 1), 2)
     preds = pl.DataFrame({"traj_id": trajs["traj_id"].filter(alive), "N": n, "p_fail": p_fail[alive]})
 
@@ -354,7 +354,7 @@ def test_select_operating_point_matches_brute_force(by):
         (sim[col], -sim[0])
         for k in caps
         for tau in [float("inf"), *np.unique(p_fail[alive])]
-        if (sim := simulate_policy(n_steps, target, p_fail, ctx, n, tau, k))[0] <= metrics.MAX_LOSS
+        if (sim := simulate_policy(n_steps, target, p_fail, ctx, n, tau, k))[0] <= metrics.SELECT_MAX_LOSS
     )
     op = metrics.select_operating_point(trajs, preds, n, caps=caps, by=by, costs=costs)
     assert op[by] == pytest.approx(best[0])

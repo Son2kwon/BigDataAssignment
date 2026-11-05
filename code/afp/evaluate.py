@@ -6,6 +6,8 @@
   - combined: "스텝 > K면 종료 또는 시점 N에서 p_fail >= τ면 종료", K ∈ N+1..COMBINED_MAX_K
 - 고정 상한 기준선 K*는 train에서 metrics.select_cap으로 고른 값. 모델 운영점은 같은 부트스트랩 표본의
   K*와의 차이(짝지은 구간)로 비교한다
+- 손실 기준 (회의 2026-11-05 §4.1): 고를 때는 train 손실 <= metrics.SELECT_MAX_LOSS(3.5%), 테스트 충족 판정은
+  손실 95% 구간 상한 <= metrics.JUDGE_MAX_LOSS(5%) (loss_flags)
 """
 import numpy as np
 import polars as pl
@@ -15,8 +17,9 @@ from afp import io, metrics, split
 
 N_GRID = (3, 5, 8, 10, 15, 20)  # 제안서 시점 N
 N_GRID_ISSUE = (0, *N_GRID)  # 궤적을 보지 않는 모델(B1, 오라클)은 시작 전 N=0도 낸다
-MAX_LOSS = metrics.MAX_LOSS
-MAX_LOSS_GRID = (0.02, 0.03, 0.05, 0.08, 0.10)  # 민감도
+# 손실 기준은 metrics.SELECT_MAX_LOSS(선택 3.5%)·metrics.JUDGE_MAX_LOSS(판정 구간 상한 5%)에만 둔다.
+# 민감도: 선택 기준을 바꿔 다시 고른 결과. 0.05는 제안서 "손실 <= 5%"로 골랐을 때와 비교하려고 남긴다
+MAX_LOSS_GRID = (0.02, 0.03, 0.035, 0.05, 0.08, 0.10)
 N_BOOT = 1000
 COMBINED_MAX_K = 60
 OBJECTIVES = ("saved_steps", "saved_tokens")
@@ -136,8 +139,24 @@ def cap_point(trajs: pl.DataFrame, k: int, costs: pl.DataFrame | None) -> dict:
     return {c: row[c] for c in POINT_COLUMNS if c in row}
 
 
+LOSS_FLAG_COLUMNS = ("meets_select_point", "meets_judge_ci_hi")
+
+
+def loss_flags(row: dict) -> dict:
+    """운영점 표 한 행의 손실 기준 표시. 어느 기준인지 컬럼 이름으로 구분한다 (해당 없는 쪽은 None).
+
+    - meets_select_point (train 행): 점추정 손실 <= metrics.SELECT_MAX_LOSS. train에는 구간이 없다
+    - meets_judge_ci_hi  (테스트 행): 부트스트랩 95% 구간 상한 lost_success_hi <= metrics.JUDGE_MAX_LOSS.
+      점추정이 5% 이하여도 상한이 5%를 넘으면 불충족. 구간이 없으면(부트스트랩 생략) None
+    """
+    if row["split"] == "train":
+        return {"meets_select_point": metrics.meets_select_loss(row["lost_success"]), "meets_judge_ci_hi": None}
+    hi = row.get("lost_success_hi")
+    return {"meets_select_point": None, "meets_judge_ci_hi": None if hi is None else metrics.meets_judge_loss(hi)}
+
+
 def fold_spread(train: pl.DataFrame, preds: pl.DataFrame, n: int, tau: float, cap: int | None, costs: pl.DataFrame | None) -> dict:
-    """train에서 고른 운영점의 fold별 손실·절약 (최소·최대). "손실 <= 5%"가 fold 사이에서 얼마나 흔들리는지.
+    """train에서 고른 운영점의 fold별 손실·절약 (최소·최대). "train 손실 <= 선택 기준"이 fold 사이에서 얼마나 흔들리는지.
 
     preds가 None이면 고정 상한 K=cap 하나의 fold별 값.
     """
@@ -197,7 +216,7 @@ def _transfer_row(source: str, target: str, op: dict, dst: dict) -> dict:
 
 
 def transfer_rows(train: pl.DataFrame, train_preds: pl.DataFrame | None, test: pl.DataFrame, test_preds: pl.DataFrame | None,
-                  n: int | None, policy: str, full_op: dict, max_loss: float = MAX_LOSS, by: str = "saved_steps",
+                  n: int | None, policy: str, full_op: dict, max_loss: float = metrics.SELECT_MAX_LOSS, by: str = "saved_steps",
                   test_fold_preds: list[pl.DataFrame] | None = None) -> list[dict]:
     """train에서 고른 운영점이 처음 보는 이슈로 옮겨지는지 (정지율·손실이 유지되는지).
 

@@ -1,4 +1,6 @@
 """Phase 4.5 운영점 선택 보강: 고정 상한 닫힌 식, K 선택, 곡선에서 고르기, 맥락 압축."""
+import inspect
+
 import numpy as np
 import polars as pl
 import pytest
@@ -96,6 +98,48 @@ def test_select_cap_smallest_feasible_k():
     assert metrics.select_cap(curve, max_loss=1.0)["K"] == 1
     with pytest.raises(ValueError, match="K가 없음"):
         metrics.select_cap(curve.filter(pl.col("K") < 8), max_loss=0.0)
+
+
+def test_loss_criteria_values():
+    # 회의 2026-11-05 §4.1: 선택 3.5%, 판정 5% (고정값). 민감도 표에 두 값이 모두 있다
+    assert metrics.SELECT_MAX_LOSS == 0.035 and metrics.JUDGE_MAX_LOSS == 0.05
+    assert {metrics.SELECT_MAX_LOSS, metrics.JUDGE_MAX_LOSS} <= set(evaluate.MAX_LOSS_GRID)
+
+
+def test_selection_defaults_to_select_criterion():
+    # (a) 선택은 3.5%를 쓴다: 손실 4%(<= 5%, > 3.5%)인 K는 기본값으로는 못 고르고 3%인 K를 고른다
+    cap_curve = pl.DataFrame({"K": [10, 20, 30], "n_stopped": [3, 2, 1], "stop_rate": [0.3, 0.2, 0.1],
+                              "lost_success": [0.06, 0.04, 0.03], "saved_steps": [0.4, 0.3, 0.2]})
+    assert metrics.select_cap(cap_curve)["K"] == 30
+    assert metrics.select_cap(cap_curve, metrics.JUDGE_MAX_LOSS)["K"] == 20
+    # 경계: 정확히 3.5%는 고를 수 있다
+    assert metrics.select_cap(cap_curve.with_columns(lost_success=pl.Series([0.06, 0.035, 0.03])))["K"] == 20
+    # 운영점 (τ, K)도 같은 기본값: 손실 4%인 τ=0.5 대신 3%인 τ=0.9
+    curve = pl.DataFrame({
+        "tau": [float("inf"), 0.9, 0.5], "n_stopped": [0, 1, 2], "stop_rate": [0.0, 0.5, 1.0],
+        "lost_success": [0.0, 0.03, 0.04], "saved_steps": [0.0, 0.1, 0.2],
+    })
+    assert metrics.select_from_curves({None: curve}, 5)["tau"] == 0.9
+    assert metrics.select_from_curves({None: curve}, 5, max_loss=metrics.JUDGE_MAX_LOSS)["tau"] == 0.5
+    # 이전성 분석(transfer_rows)도 같은 기본값을 쓴다
+    assert inspect.signature(evaluate.transfer_rows).parameters["max_loss"].default == metrics.SELECT_MAX_LOSS
+
+
+def test_judge_uses_ci_upper_not_point():
+    # (b) 판정은 구간 상한: 점추정 4% <= 5%여도 상한 5.5%면 불충족
+    row = {"split": "test", "lost_success": 0.04, "lost_success_lo": 0.025, "lost_success_hi": 0.055}
+    assert evaluate.loss_flags(row) == {"meets_select_point": None, "meets_judge_ci_hi": False}
+    assert evaluate.loss_flags({**row, "lost_success_hi": 0.05})["meets_judge_ci_hi"] is True
+    # 점추정이 5%를 넘어도 판정 값은 상한만 본다 (점추정은 판정 함수에 들어가지 않음)
+    assert evaluate.loss_flags({**row, "lost_success": 0.051, "lost_success_hi": 0.049})["meets_judge_ci_hi"] is True
+    assert metrics.meets_judge_loss(0.0501) is False
+    with pytest.raises(ValueError, match="구간 상한"):
+        metrics.meets_judge_loss(float("nan"))
+    # 구간이 없는 테스트 행(부트스트랩 생략)은 판정하지 않는다
+    assert evaluate.loss_flags({"split": "test", "lost_success": 0.01})["meets_judge_ci_hi"] is None
+    # train 행은 구간이 없어 점추정 <= 선택 기준(3.5%)으로만 표시한다
+    assert evaluate.loss_flags({"split": "train", "lost_success": 0.035}) == {"meets_select_point": True, "meets_judge_ci_hi": None}
+    assert evaluate.loss_flags({"split": "train", "lost_success": 0.04})["meets_select_point"] is False
 
 
 # ---- 곡선에서 고르기 ----
