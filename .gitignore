@@ -10,3 +10,6 @@ __pycache__/
 
 # pytest cache
 .pytest_cache/
+
+# Meeting files
+MEETING_*.md
