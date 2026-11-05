@@ -13,6 +13,9 @@
 
 예측 파일이 이미 있으면 다시 계산한 결과와 같은지 확인한다. 다르면 멈추고, --force면 덮어쓴다.
 끝에 완료 기준(PLAN_4.md 4.7)을 검사하고 다르면 assert로 멈춘다.
+
+손실 기준 (회의 2026-11-05 §4.1): 운영점·K*는 train 손실 <= metrics.SELECT_MAX_LOSS(3.5%)로 고르고, 테스트 충족은
+손실 95% 구간 상한 <= metrics.JUDGE_MAX_LOSS(5%)로 판정한다 (operating_points.csv의 meets_judge_ci_hi).
 """
 import argparse
 import json
@@ -45,7 +48,9 @@ EXPECTED = {
     "split_trajectories": {"train": 62_311, "test": 12_481},
     "issues_after_strip": 3_591,
     "issues_with_hint": 13,
-    "k_star": 35,  # train에서 손실 ≤5%인 최소 K (70B 무작위 분할 기준. 예전 분할에서는 34)
+    # train에서 손실 <= metrics.SELECT_MAX_LOSS(3.5%)인 최소 K (70B 무작위 분할, K=39는 train 손실 3.72%).
+    # 선택 기준이 5%이던 때는 35 (예전 분할에서는 34)
+    "k_star": 40,
     # 제안서 재현 (분할과 무관한 전체 80,036궤적, 8B·405B 포함): 하네스 검사용
     "oracle_full_loo_auroc": 0.945,
     "oracle_full_loo_n_traj": 80_026,
@@ -219,7 +224,7 @@ def operating_points(all_preds, sets, costs, k_star):
                         base = {"model": model, "policy": policy, "N": n, "objective": by, "max_loss": max_loss, "tau": op["tau"], "cap": op["cap"]}
                         sens.append({**base, "split": "train", **{c: op[c] for c in evaluate.POINT_COLUMNS}})
                         sens += [{**base, "split": name, **applied[(key, name)]} for name in evaluate.TEST_SPLITS]
-                        if by == "saved_steps" and max_loss == evaluate.MAX_LOSS:
+                        if by == "saved_steps" and max_loss == metrics.SELECT_MAX_LOSS:
                             chosen[(model, n, policy)] = (op["tau"], op["cap"])
                             spread = evaluate.fold_spread(train, sp["train"], n, op["tau"], op["cap"], costs["train"])
                             tr = {c: op[c] for c in evaluate.POINT_COLUMNS}
@@ -295,7 +300,7 @@ def attach_ci(main_rows, boots):
 
 OP_COLUMNS = [
     "model", "policy", "N", "tau", "cap", "split", "stop_rate", "lost_success", "lost_success_lo", "lost_success_hi",
-    "meets_max_loss", "saved_steps", "saved_steps_lo", "saved_steps_hi", "saved_tokens", "saved_tokens_lo", "saved_tokens_hi",
+    *evaluate.LOSS_FLAG_COLUMNS, "saved_steps", "saved_steps_lo", "saved_steps_hi", "saved_tokens", "saved_tokens_lo", "saved_tokens_hi",
     "d_lost_success", "d_lost_success_lo", "d_lost_success_hi", "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi",
     "d_saved_tokens", "d_saved_tokens_lo", "d_saved_tokens_hi",
     "fold_lost_success_min", "fold_lost_success_max", "fold_saved_steps_min", "fold_saved_steps_max",
@@ -319,6 +324,7 @@ def main():
     args = ap.parse_args()
     if args.n_boot <= 0:
         ap.error("--n-boot은 양수여야 한다")
+    assert metrics.SELECT_MAX_LOSS in evaluate.MAX_LOSS_GRID and metrics.JUDGE_MAX_LOSS in evaluate.MAX_LOSS_GRID
     for p, script in ((io.TRAJECTORIES_PATH, "01_parse.py"), (io.STEPS_PATH, "01_parse.py"), (io.SPLITS_PATH, "02_split.py")):
         if not p.exists():
             sys.exit(f"{p}가 없다. 먼저 uv run --no-sync python code/{script} 를 실행한다.")
@@ -372,7 +378,7 @@ def main():
     caps = fixed_cap_table(sets, costs)
     caps.write_csv(out_dir / "fixed_cap.csv", float_precision=FLOAT)
     cap_train = caps.filter(pl.col("split") == "train")
-    k_star = metrics.select_cap(cap_train, evaluate.MAX_LOSS)["K"]
+    k_star = metrics.select_cap(cap_train, metrics.SELECT_MAX_LOSS)["K"]
     proposal = proposal_reproduction(proposal_trajs, all_costs)
     lap("판별 지표·고정 상한")
 
@@ -432,8 +438,9 @@ def main():
 
     ops = attach_ci(cap_main + main_rows, boots)
     for r in ops:
-        r["meets_max_loss"] = bool(r["lost_success"] <= evaluate.MAX_LOSS + 1e-12)
-    ops_df = frame(ops, OP_COLUMNS, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64})
+        r.update(evaluate.loss_flags(r))
+    ops_df = frame(ops, OP_COLUMNS, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64,
+                                     **dict.fromkeys(evaluate.LOSS_FLAG_COLUMNS, pl.Boolean)})
     ops_df.write_csv(out_dir / "operating_points.csv", float_precision=FLOAT)
     sens_cols = ["model", "policy", "N", "objective", "max_loss", "tau", "cap", "split", *evaluate.POINT_COLUMNS]
     frame(cap_sens + sens_rows, sens_cols, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64}) \
@@ -441,6 +448,18 @@ def main():
 
     check(args, out_dir, split_stats, texts, n_hint, written, disc_out, caps, k_star, proposal, b1_info, oracle_info, ops_df,
           transfer, transfer_sum, boots, timings)
+
+
+def loss_ci_width(ops_df, k_star):
+    """테스트 손실 95% 구간 폭 (hi - lo)과 반폭. K* 행과 모델 운영점 전체의 범위."""
+    t = ops_df.filter(pl.col("split").is_in(evaluate.TEST_SPLITS)).with_columns(w=pl.col("lost_success_hi") - pl.col("lost_success_lo"))
+    k = t.filter((pl.col("policy") == "cap") & (pl.col("cap") == k_star)).row(0, named=True)
+    m = t.filter(pl.col("model") != "b0_cap")
+    return {"k_star": {"lost_success": k["lost_success"], "lo": k["lost_success_lo"], "hi": k["lost_success_hi"], "half_width": k["w"] / 2},
+            "models_half_width_min": float(m["w"].min()) / 2, "models_half_width_median": float(m["w"].median()) / 2,
+            "models_half_width_max": float(m["w"].max()) / 2,
+            "combined_half_width_median": float(m.filter(pl.col("policy") == "combined")["w"].median()) / 2,
+            "single_half_width_median": float(m.filter(pl.col("policy") == "single")["w"].median()) / 2}
 
 
 def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star, proposal, b1_info, oracle_info, ops_df,
@@ -465,9 +484,21 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
                              for k in (k_star, K_PROPOSAL)} for name in split.SPLITS},
         "proposal_reproduction_all_80036": {k: {c: round(v, 4) for c, v in r.items()} for k, r in proposal.items()},
         "discrimination_test_N0_N10": head.select("model", "split", "N", "auroc", "pr_auc", "within_pair").to_dicts(),
+        "loss_criteria": {
+            "select_max_loss": metrics.SELECT_MAX_LOSS, "select_rule": "train(OOF) 점추정 손실 <= select_max_loss로 τ·K·K*를 고른다",
+            "judge_max_loss": metrics.JUDGE_MAX_LOSS, "judge_rule": "test 손실의 이슈 단위 부트스트랩 95% 구간 상한(lost_success_hi) <= judge_max_loss",
+        },
         "operating_points_N10": ops_df.filter((pl.col("N") == 10) | (pl.col("model") == "b0_cap")).select(
-            "model", "policy", "N", "tau", "cap", "split", "lost_success", "saved_steps", "saved_tokens", "d_saved_steps",
+            "model", "policy", "N", "tau", "cap", "split", "lost_success", "lost_success_lo", "lost_success_hi",
+            *evaluate.LOSS_FLAG_COLUMNS, "saved_steps", "saved_tokens", "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi").to_dicts(),
+        # 판정 기준 충족 + K* 대비 절약 스텝 차이 구간 하한 > 0 (N=3~20, 모든 모델·정책)
+        "judged_and_saves_more_than_k_star": [] if args.skip_bootstrap else ops_df.filter(
+            pl.col("split").is_in(evaluate.TEST_SPLITS) & (pl.col("model") != "b0_cap")
+            & pl.col("meets_judge_ci_hi") & (pl.col("d_saved_steps_lo") > 0)).select(
+            "model", "policy", "N", "tau", "cap", "lost_success", "lost_success_hi", "saved_steps", "d_saved_steps",
             "d_saved_steps_lo", "d_saved_steps_hi").to_dicts(),
+        # 참고값: 테스트 손실 95% 구간 폭 (선택 기준 3.5%의 근거였던 예전 분할 ±1.4%p와 비교용, 기준을 바꾸지 않는다)
+        "test_loss_ci_width": None if args.skip_bootstrap else loss_ci_width(ops_df, k_star),
         "tau_transfer_N10": transfer_sum.filter((pl.col("N") == 10) | pl.col("N").is_null()).to_dicts(),
         "bootstrap": None if args.skip_bootstrap else {"n_boot": args.n_boot, "tasks": len(boots), "seed": io.SEED},
     }
@@ -507,6 +538,13 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
         and transfer.filter(pl.col("source") == "train").height == n_points
         and set(transfer.filter(pl.col("target") == "test_fold_model")["model"].unique()) == {"b1_static", "b1_n"}
         and transfer.select("dst_stop_rate", "dst_lost_success", "src_lost_success").null_count().sum_horizontal().item() == 0)
+    # 손실 기준 표시: train에서 고른 행(제안서 K 참고 행 제외)은 모두 선택 기준 안, 테스트 행은 모두 판정 값이 있다
+    train_ops = ops_df.filter(pl.col("split") == "train")
+    crit["C11_loss_criteria_flags"] = bool(
+        train_ops.filter(pl.col("policy") != "cap_proposal")["meets_select_point"].all()
+        and train_ops["meets_judge_ci_hi"].null_count() == train_ops.height
+        and test_ops["meets_select_point"].null_count() == test_ops.height
+        and (args.skip_bootstrap or test_ops["meets_judge_ci_hi"].null_count() == 0))
     s["criteria"] = crit
     s["criteria_note"] = "C9(pytest 전체 통과, 재실행 시 results/ 변화 없음)는 스크립트 밖에서 확인한다"
     (out_dir / "summary.json").write_text(json.dumps(s, ensure_ascii=False, indent=2, default=str) + "\n")
@@ -514,7 +552,8 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
     with pl.Config(tbl_rows=40, tbl_cols=12, tbl_width_chars=200, float_precision=4):
         print(disc.filter(pl.col("N").is_in([0, 10])).select("model", "split", "N", "n_running", "base_rate", "auroc", "pr_auc", "within_pair"))
         print(ops_df.filter((pl.col("N") == 10) | (pl.col("model") == "b0_cap")).select(
-            "model", "policy", "N", "tau", "cap", "split", "lost_success", "saved_steps", "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi"))
+            "model", "policy", "N", "tau", "cap", "split", "lost_success", "lost_success_hi", "meets_judge_ci_hi", "saved_steps",
+            "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi"))
     print(json.dumps({"k_star": k_star, "b1": b1_info["config"], "criteria": crit, "timings": timings}, ensure_ascii=False, indent=2))
 
     if args.skip_bootstrap:
