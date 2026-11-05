@@ -48,7 +48,7 @@ def processed(tmp_path, monkeypatch):
         "obs_len": [10, 20, 30, 40, 50, 60, 70],
     })
     splits = pl.DataFrame(
-        {"traj_id": ["a", "b", "c", "d", "e"], "split": ["train", "train", "train", "test_same", "test_cross"], "fold": [0, 1, 0, -1, -1]},
+        {"traj_id": ["a", "b", "c", "d", "e"], "split": ["train", "train", "train", "test", "test"], "fold": [0, 1, 0, -1, -1]},
         schema={"traj_id": pl.String, "split": pl.String, "fold": pl.Int8},
     )
     for name, df in [("TRAJECTORIES_PATH", traj), ("STEPS_PATH", steps), ("SPLITS_PATH", splits)]:
@@ -63,10 +63,11 @@ def test_eval_set_returns_one_split_with_harness_columns(processed):
     assert train.columns == [*metrics.TRAJ_COLUMNS, "fold"]
     assert train["traj_id"].to_list() == ["a", "b", "c"]  # 0스텝 궤적 c도 남는다 (비용 곡선 분모)
     assert train["fold"].to_list() == [0, 1, 0]
-    assert metrics.eval_set("test_same")["traj_id"].to_list() == ["d"]
+    assert metrics.eval_set("test")["traj_id"].to_list() == ["d", "e"]
 
-    with pytest.raises(ValueError, match="중 하나"):
-        metrics.eval_set("test")  # test_same·test_cross를 합친 집합은 없다
+    for old in ("test_same", "test_cross"):  # 예전 분할 이름 (8B·405B 테스트)은 더 없다
+        with pytest.raises(ValueError, match="중 하나"):
+            metrics.eval_set(old)
 
 
 def test_eval_set_stops_on_missing_files_or_trajectories(processed, monkeypatch, tmp_path):
@@ -445,14 +446,19 @@ def test_bootstrap_perfect_predictor_has_degenerate_interval():
     reason="data/processed에 trajectories·steps·splits가 없음 (01_parse.py, 02_split.py 실행 필요)",
 )
 def test_real_eval_sets_and_fixed_cap_baseline():
-    sizes = {"train": 62_460, "test_same": 12_332, "test_cross": 5_244}
-    # K=35 고정 상한 (성공 손실, 절약 스텝). PLAN.md Phase 3 결과의 분할별 기준값
-    k35 = {"train": (0.043, 0.242), "test_same": (0.045, 0.218), "test_cross": (0.124, 0.325)}
+    sizes = {"train": 62_311, "test": 12_481}
+    # K=35 고정 상한 (성공 손실, 절약 스텝). PLAN.md Phase 3 결과의 분할별 기준값 (70B 무작위 분할)
+    k35 = {"train": (0.0460, 0.2388), "test": (0.0307, 0.2346)}
     for name, size in sizes.items():
         trajs = metrics.eval_set(name)
         assert trajs.height == size
         alive = metrics.running(trajs, 35)
         preds = alive.select("traj_id", N=pl.lit(35), p_fail=pl.lit(1.0))
         row = metrics.cost_curve(trajs, preds, 35).row(-1, named=True)
-        assert (row["lost_success"], row["saved_steps"]) == pytest.approx(k35[name], abs=5e-4), name
-    assert set(metrics.eval_costs(metrics.eval_set("test_cross"))["traj_id"]) <= set(metrics.eval_set("test_cross")["traj_id"])
+        assert (row["lost_success"], row["saved_steps"]) == pytest.approx(k35[name], abs=5e-5), name
+    assert set(metrics.eval_costs(metrics.eval_set("test"))["traj_id"]) <= set(metrics.eval_set("test")["traj_id"])
+    # 평가 집합에는 70B 궤적만 있다
+    models = io.load_trajectories(["traj_id", "model_name"])
+    for name in sizes:
+        ids = metrics.eval_set(name).select("traj_id")
+        assert models.join(ids, on="traj_id")["model_name"].unique().to_list() == ["swe-agent-llama-70b"]

@@ -3,11 +3,13 @@
 실행: uv run python code/02_split.py [--force] [--leak-sample 4000] [--skip-leakage]
 
 입력: data/processed/trajectories.parquet, steps.parquet (01_parse.py), 원본 parquet (출처 확인·사후 누수 점검)
-- data/processed/splits.parquet  traj_id, split ∈ {train, test_same, test_cross}, fold (train 0..4, 테스트 -1)
+- data/processed/splits.parquet  70B 궤적만. traj_id, split ∈ {train, test}, fold (train 0..4, test -1)
+                                 테스트 이슈 = 70B 이슈를 층화 무작위로 6조각 낸 것 중 하나. 8B·405B 궤적은 넣지 않는다
 - results/phase2/                검증 수치, fold 균형, 학습/테스트 이슈 비교, 누수 점검 결과
 
 splits.parquet가 이미 있으면 다시 계산한 결과와 같은지 확인한다. 다르면 멈추고, --force면 덮어쓴다.
-끝에 제안서 수치와 대조하고 다르면 assert로 멈춘다.
+끝에 기대 수치(EXPECTED)와 대조하고 다르면 assert로 멈춘다. 분할 크기는 제안서의 "8B·405B 시도 이슈 = 테스트"
+규칙이 아니라 회의(2026-11-05 §4.3)에서 바꾼 70B 무작위 분할 값이다. 총 궤적 수 80,036과 모델별 수는 제안서와 같다.
 """
 import argparse
 import json
@@ -21,10 +23,11 @@ import sklearn
 from afp import io, leakage, split
 
 EXPECTED = {
-    "trajectories": 80_036,
-    "split_trajectories": {"train": 62_460, "test_same": 12_332, "test_cross": 5_244},
-    "train_issues": 3_013,
-    "test_issues": 578,
+    "trajectories": 74_792,  # 70B 궤적 전부 (제안서 모델별 수)
+    "excluded_trajectories": {"swe-agent-llama-8b": 4_053, "swe-agent-llama-405b": 1_191},
+    "split_trajectories": {"train": 62_311, "test": 12_481},
+    "train_issues": 2_989,
+    "test_issues": 602,
     "train_test_issue_overlap": 0,
     "train_issues_crossing_folds": 0,
 }
@@ -75,7 +78,9 @@ def build_splits(traj: pl.DataFrame, force: bool) -> tuple[pl.DataFrame, dict]:
     meta = {
         "method": "StratifiedGroupKFold", "n_folds": split.N_FOLDS, "shuffle": True, "seed": io.SEED,
         "group": "instance_id", "stratify": "target", "heldout_fold": split.HELDOUT_FOLD,
-        "train_model": split.TRAIN_MODEL, "heldout_models": list(split.HELDOUT_MODELS),
+        "test_selection": {"method": "StratifiedGroupKFold", "n_splits": split.TEST_PARTS, "part": split.TEST_PART,
+                           "shuffle": True, "seed": io.SEED, "group": "instance_id", "stratify": "target"},
+        "train_model": split.TRAIN_MODEL, "excluded_models": list(split.EXCLUDED_MODELS),
         "sklearn": sklearn.__version__,
     }
     table = splits.to_arrow()
@@ -281,6 +286,8 @@ def check(traj, splits, stats, det, prov, folds, static, markers, overlap, out_d
 
     for k, v in EXPECTED.items():
         assert stats[k] == v, (k, stats[k], v)
+    assert prov["trajectory_rows_matching_raw"] == 80_036, prov  # 제안서 전체 궤적 수 (8B·405B 포함, 분할 전)
+    assert stats["trajectories"] + sum(stats["excluded_trajectories"].values()) == prov["trajectory_rows_matching_raw"]
     assert hashes.height == 1, "시스템 프롬프트 해시가 여러 개"
     assert not static["references_outside_allowlist"], static["references_outside_allowlist"]
     assert not static["leaky_columns_in_processed"].get(io.SPLITS_PATH.name)

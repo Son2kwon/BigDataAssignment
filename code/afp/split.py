@@ -1,12 +1,18 @@
 """학습/테스트 분할과 학습 이슈 fold.
 
-- 테스트 이슈 = 8B 또는 405B가 한 번이라도 시도한 instance_id 전부
-- 테스트 이슈의 70B 궤적 → test_same, 8B·405B 궤적 → test_cross
-- 나머지 이슈의 70B 궤적 → train. 이슈(instance_id) 단위 5-fold StratifiedGroupKFold
-- fold: train은 0..4, test_same·test_cross는 HELDOUT_FOLD(-1). 테스트는 어떤 fold에도 속하지 않는다
+- 평가 대상은 70B 궤적뿐이다. 8B·405B 궤적(EXCLUDED_MODELS)은 splits.parquet에 넣지 않는다
+- 테스트 이슈 = 70B 이슈 전체를 이슈 단위 StratifiedGroupKFold(TEST_PARTS, shuffle, SEED)로 나눈 조각 중
+  TEST_PART번째 (약 1/6). 그룹 = instance_id, 층화 = target. 나머지 이슈의 궤적 → train
+- 학습 이슈는 다시 5-fold StratifiedGroupKFold로 나눈다. 테스트 이슈는 학습 fold와 같은 방식으로 뽑힌
+  "한 조각 더"라서, fold 사이의 운영점 이전과 train → test 이전을 같은 조건으로 비교할 수 있다
+- fold: train은 0..4, test는 HELDOUT_FOLD(-1). 테스트는 어떤 fold에도 속하지 않는다
+
+예전 분할(2026-10-29~11-05)은 "8B·405B가 시도한 578개 이슈"를 테스트로 고정했다. 이 이슈들은 무작위 표본이
+아니어서(성공률 18.7% vs train 16.3%, 저장소 구성 차이) train에서 고른 τ가 테스트로 옮겨지지 않는 원인
+후보였다 (회의 2026-11-05 §4.3). 그래서 70B만으로 테스트 이슈를 무작위로 다시 뽑는다.
 
 GroupKFold 대신 StratifiedGroupKFold를 쓰는 이유: 이슈 성공률 편차가 커서(76.7%가 성공 0)
-GroupKFold로는 fold 성공률이 14.4%~17.5%로 벌어진다. 비교 수치는 results/phase2/fold_balance.csv.
+GroupKFold로는 fold 성공률이 크게 벌어진다. 비교 수치는 results/phase2/fold_balance.csv.
 """
 import numpy as np
 import polars as pl
@@ -15,14 +21,16 @@ from sklearn.model_selection import GroupKFold, StratifiedGroupKFold
 from afp.io import SEED
 
 TRAIN_MODEL = "swe-agent-llama-70b"
-HELDOUT_MODELS = ("swe-agent-llama-8b", "swe-agent-llama-405b")
-KNOWN_MODELS = (TRAIN_MODEL, *HELDOUT_MODELS)
+EXCLUDED_MODELS = ("swe-agent-llama-8b", "swe-agent-llama-405b")  # 분할·평가에서 뺀다
+KNOWN_MODELS = (TRAIN_MODEL, *EXCLUDED_MODELS)
 
-SPLITS = ("train", "test_same", "test_cross")
+SPLITS = ("train", "test")
 N_FOLDS = 5
+TEST_PARTS = 6  # 70B 이슈를 6조각으로 나눠 한 조각(약 16.7%)을 테스트로
+TEST_PART = 0
 HELDOUT_FOLD = -1
 
-# 분할에 필요한 컬럼. target은 fold 층화에만 쓰고 splits.parquet에는 넣지 않는다.
+# 분할에 필요한 컬럼. target은 층화에만 쓰고 splits.parquet에는 넣지 않는다.
 INPUT_COLUMNS = ["traj_id", "instance_id", "model_name", "target"]
 SPLIT_SCHEMA = {"traj_id": pl.String, "split": pl.String, "fold": pl.Int8}
 
@@ -45,21 +53,33 @@ def validate_input(traj: pl.DataFrame) -> None:
         raise ValueError(f"모르는 model_name: {unknown}. 알려진 모델: {list(KNOWN_MODELS)}")
 
 
-def heldout_issues(traj: pl.DataFrame) -> list[str]:
-    """8B 또는 405B가 시도한 instance_id (정렬)."""
-    return sorted(traj.filter(pl.col("model_name").is_in(HELDOUT_MODELS))["instance_id"].unique())
+def in_scope(traj: pl.DataFrame) -> pl.DataFrame:
+    """분할 대상 궤적 (70B만), traj_id 순."""
+    return traj.filter(pl.col("model_name") == TRAIN_MODEL).sort("traj_id")
+
+
+def select_test_issues(traj: pl.DataFrame, seed: int = SEED) -> list[str]:
+    """테스트 이슈 (정렬). 70B 궤적을 이슈 단위로 층화해 TEST_PARTS조각으로 나눈 것 중 TEST_PART번째.
+
+    입력 행 순서와 무관하다 (traj_id 순으로 정렬한 뒤 나눈다).
+    """
+    t = in_scope(traj)
+    if t["instance_id"].n_unique() < TEST_PARTS:
+        raise ValueError(f"70B 이슈 {t['instance_id'].n_unique()}개로는 테스트 조각 {TEST_PARTS}개를 만들 수 없다")
+    y, groups = t["target"].to_numpy(), t["instance_id"].to_numpy()
+    splitter = StratifiedGroupKFold(n_splits=TEST_PARTS, shuffle=True, random_state=seed)
+    _, idx = list(splitter.split(np.zeros(len(y)), y, groups))[TEST_PART]
+    return sorted(set(groups[idx]))
 
 
 def assign_splits(traj: pl.DataFrame) -> pl.DataFrame:
-    """traj에 split 컬럼을 붙인다. 모든 행이 정확히 하나의 split을 받는다."""
+    """70B 궤적에 split 컬럼을 붙인다 (8B·405B 행은 빠진다). 모든 행이 정확히 하나의 split을 받는다.
+
+    테스트 이슈는 항상 고정 시드(io.SEED)로 뽑는다. make_splits의 seed는 train fold에만 쓴다.
+    """
     validate_input(traj)
-    is_test = pl.col("instance_id").is_in(heldout_issues(traj))
-    is_70b = pl.col("model_name") == TRAIN_MODEL
-    return traj.with_columns(
-        split=pl.when(is_test & is_70b).then(pl.lit("test_same"))
-        .when(is_test).then(pl.lit("test_cross"))
-        .otherwise(pl.lit("train"))
-    )
+    is_test = pl.col("instance_id").is_in(select_test_issues(traj))
+    return in_scope(traj).with_columns(split=pl.when(is_test).then(pl.lit("test")).otherwise(pl.lit("train")))
 
 
 def fold_splitter(n_folds: int = N_FOLDS, seed: int = SEED, stratified: bool = True):
@@ -82,7 +102,10 @@ def train_folds(train: pl.DataFrame, n_folds: int = N_FOLDS, seed: int = SEED, s
 
 
 def make_splits(traj: pl.DataFrame, n_folds: int = N_FOLDS, seed: int = SEED, stratified: bool = True) -> pl.DataFrame:
-    """궤적 표 → splits 표 (traj_id, split, fold). 입력 행 순서와 무관하게 같은 결과를 낸다."""
+    """궤적 표 → splits 표 (traj_id, split, fold). 70B 궤적만 들어간다. 입력 행 순서와 무관하게 같은 결과를 낸다.
+
+    seed는 train fold에만 쓴다 (테스트 이슈는 assign_splits가 고정 시드로 뽑는다).
+    """
     validate_input(traj)
     df = assign_splits(traj.select(INPUT_COLUMNS)).sort("traj_id")
     is_train = (df["split"] == "train").to_numpy()
@@ -92,7 +115,10 @@ def make_splits(traj: pl.DataFrame, n_folds: int = N_FOLDS, seed: int = SEED, st
 
 
 def validate_splits(traj: pl.DataFrame, splits: pl.DataFrame, n_folds: int = N_FOLDS) -> dict:
-    """splits가 분할 규칙을 지키는지 확인하고 크기를 돌려준다. 어기면 ValueError."""
+    """splits가 분할 규칙을 지키는지 확인하고 크기를 돌려준다. 어기면 ValueError.
+
+    traj는 전체 궤적 표 (8B·405B 포함). splits에는 70B 궤적이 정확히 한 번씩, 다른 모델 궤적은 하나도 없어야 한다.
+    """
     validate_input(traj)
     errors = []
     if dict(splits.schema) != SPLIT_SCHEMA:
@@ -101,9 +127,14 @@ def validate_splits(traj: pl.DataFrame, splits: pl.DataFrame, n_folds: int = N_F
         errors.append("splits에 null이 있다")
     if splits.height != splits["traj_id"].n_unique():
         errors.append("splits에 traj_id 중복")
-    df = traj.select(INPUT_COLUMNS).join(splits, on="traj_id", how="full", coalesce=True)
-    if df.height != traj.height or df.height != splits.height or df["split"].null_count() or df["instance_id"].null_count():
-        errors.append(f"traj_id가 일대일로 대응하지 않는다 (궤적 {traj.height}, 분할 {splits.height}, 합집합 {df.height})")
+    scope = in_scope(traj.select(INPUT_COLUMNS))
+    excluded = traj.filter(pl.col("model_name") != TRAIN_MODEL)
+    n_excluded_in_splits = splits.join(excluded.select("traj_id"), on="traj_id", how="semi").height
+    if n_excluded_in_splits:
+        errors.append(f"splits에 8B·405B 궤적 {n_excluded_in_splits}개")
+    df = scope.join(splits, on="traj_id", how="full", coalesce=True)
+    if df.height != scope.height or df.height != splits.height or df["split"].null_count() or df["instance_id"].null_count():
+        errors.append(f"70B traj_id가 일대일로 대응하지 않는다 (70B 궤적 {scope.height}, 분할 {splits.height}, 합집합 {df.height})")
         raise ValueError("; ".join(errors))
     bad_split = sorted(set(df["split"].unique()) - set(SPLITS))
     if bad_split:
@@ -122,17 +153,13 @@ def validate_splits(traj: pl.DataFrame, splits: pl.DataFrame, n_folds: int = N_F
         errors.append(f"train fold는 0..{n_folds - 1}이어야 한다")
     if train.height and train["fold"].n_unique() != n_folds:
         errors.append(f"train fold가 {n_folds}개가 아니다: {sorted(train['fold'].unique())}")
-    if (train["model_name"] != TRAIN_MODEL).any() or (df.filter(pl.col("split") == "test_same")["model_name"] != TRAIN_MODEL).any():
-        errors.append("train·test_same에 70B가 아닌 궤적이 있다")
-    if (df.filter(pl.col("split") == "test_cross")["model_name"] == TRAIN_MODEL).any():
-        errors.append("test_cross에 70B 궤적이 있다")
 
-    train_issues, test_issues = set(train["instance_id"]), set(test["instance_id"])
-    overlap = train_issues & test_issues
+    train_issues, test_issue_set = set(train["instance_id"]), set(test["instance_id"])
+    overlap = train_issues & test_issue_set
     if overlap:
         errors.append(f"train·test 이슈 교집합 {len(overlap)}개")
-    if test_issues != set(heldout_issues(traj)):
-        errors.append("테스트 이슈가 8B·405B 시도 이슈와 다르다")
+    if test_issue_set != set(select_test_issues(traj)):
+        errors.append("테스트 이슈가 무작위 추출 규칙(select_test_issues)과 다르다")
     fold_per_issue = train.group_by("instance_id").agg(pl.col("fold").n_unique())
     crossing = fold_per_issue.filter(pl.col("fold") > 1).height
     if crossing:
@@ -142,9 +169,10 @@ def validate_splits(traj: pl.DataFrame, splits: pl.DataFrame, n_folds: int = N_F
 
     return {
         "trajectories": df.height,
+        "excluded_trajectories": {m: excluded.filter(pl.col("model_name") == m).height for m in EXCLUDED_MODELS},
         "split_trajectories": {s: df.filter(pl.col("split") == s).height for s in SPLITS},
         "train_issues": len(train_issues),
-        "test_issues": len(test_issues),
+        "test_issues": len(test_issue_set),
         "train_test_issue_overlap": len(overlap),
         "train_issues_crossing_folds": crossing,
         "heldout_fold": HELDOUT_FOLD,
@@ -174,7 +202,7 @@ def repo_of(instance_id: pl.Expr) -> pl.Expr:
 def compare_issue_sets(traj: pl.DataFrame, splits: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
     """학습 이슈 vs 테스트 이슈의 구성 비교 (2.4).
 
-    공정한 비교를 위해 두 쪽 모두 70B 궤적만 쓴다 (train vs test_same).
+    두 쪽 모두 70B 궤적만 쓴다 (splits에 70B만 있음).
     traj에는 traj_id, instance_id, model_name, target, n_steps가 있어야 한다.
     돌려주는 것: (지표 표 metric/train/test, 저장소 구성 표)
     """

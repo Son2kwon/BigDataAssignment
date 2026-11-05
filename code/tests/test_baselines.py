@@ -142,13 +142,6 @@ def test_oracle_loo_within_issue_is_zero():
     assert dict(baselines.oracle_loo(t, 0, fill=0.9).select("traj_id", "p_fail").rows()) == {"a": 1.0, "b": 0.5, "c": 0.5, "d": 0.9}
 
 
-def test_oracle_xmodel_constant_within_issue_and_fills_missing():
-    t = pl.DataFrame({"traj_id": ["a", "b", "c"], "instance_id": ["i", "i", "j"], "target": [True, False, True], "n_steps": [5, 5, 5]})
-    other = pl.DataFrame({"instance_id": ["i", "i", "i", "i"], "target": [True, False, False, False]})
-    p = baselines.oracle_xmodel(t, other, 0, fill=0.8)
-    assert dict(p.select("traj_id", "p_fail").rows()) == {"a": 0.75, "b": 0.75, "c": 0.8}
-
-
 def test_oracle_full_loo_skips_single_trajectory_issues():
     t = pl.DataFrame({"traj_id": ["a", "b", "c", "d"], "instance_id": ["i", "i", "i", "j"],
                       "target": [True, False, False, True], "n_steps": [5, 0, 5, 5]})

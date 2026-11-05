@@ -3,13 +3,13 @@
 실행: uv run --no-sync python code/03_baselines.py [--force] [--n-boot 1000] [--skip-bootstrap] [--jobs 16]
 
 입력: data/processed/trajectories.parquet, steps.parquet (01_parse.py), splits.parquet (02_split.py)
-- data/processed/preds/<model>.parquet  traj_id, N, p_fail (train OOF + test_same + test_cross)
+평가 집합은 70B 궤적뿐이다 (train, test). 8B·405B 궤적은 제안서 수치 재현 검사(C4·C6)에만 읽는다.
+- data/processed/preds/<model>.parquet  traj_id, N, p_fail (train OOF + test)
     b0_err, b0_editfail       앞 N스텝 is_error / edit_failed 개수 (학습 없음)
     b1_static, b1_n           이슈 본문 TF-IDF + LR. static = N=0 모델 하나, n = N마다 진행 중 궤적으로 재학습
     ref_oracle_loo            같은 집합·같은 이슈 다른 궤적 성공률 (참고 천장, 피처 사용 금지)
-    ref_oracle_xmodel         테스트 전용: 같은 이슈의 다른 테스트 분할 성공률
 - data/processed/context_costs.parquet  스텝별 맥락 길이 캐시
-- results/phase4/                       판별 표, 고정 상한 표, 운영점 표, 비용 곡선, B1 그리드, 요약
+- results/phase4/                       판별 표, 고정 상한 표, 운영점 표, 운영점 이전성 표, 비용 곡선, B1 그리드, 요약
 
 예측 파일이 이미 있으면 다시 계산한 결과와 같은지 확인한다. 다르면 멈추고, --force면 덮어쓴다.
 끝에 완료 기준(PLAN_4.md 4.7)을 검사하고 다르면 assert로 멈춘다.
@@ -27,7 +27,7 @@ from joblib import Parallel, delayed
 
 from afp import baselines, evaluate, io, metrics, oof, preds, split
 
-MODELS = ("b0_err", "b0_editfail", "b1_static", "b1_n", "ref_oracle_loo", "ref_oracle_xmodel")
+MODELS = ("b0_err", "b0_editfail", "b1_static", "b1_n", "ref_oracle_loo")
 OP_MODELS = ("b0_err", "b0_editfail", "b1_static", "b1_n")  # 운영점 표에 넣는 모델 (오라클 제외)
 B0_COLUMNS = {"b0_err": "is_error", "b0_editfail": "edit_failed"}
 B1_GRID = tuple(
@@ -42,16 +42,16 @@ QUANTILES = (0.05, 0.25, 0.5, 0.75, 0.95)
 FLOAT = 6
 
 EXPECTED = {
-    "split_trajectories": {"train": 62_460, "test_same": 12_332, "test_cross": 5_244},
+    "split_trajectories": {"train": 62_311, "test": 12_481},
     "issues_after_strip": 3_591,
     "issues_with_hint": 13,
-    "k_star": 34,
+    "k_star": 35,  # train에서 손실 ≤5%인 최소 K (70B 무작위 분할 기준. 예전 분할에서는 34)
+    # 제안서 재현 (분할과 무관한 전체 80,036궤적, 8B·405B 포함): 하네스 검사용
     "oracle_full_loo_auroc": 0.945,
     "oracle_full_loo_n_traj": 80_026,
-    # Phase 3 결과 (전체 데이터·test_same 고정 상한): K → (손실, 절약 스텝). 반올림 자릿수까지 비교
+    # Phase 3 결과 (전체 데이터 고정 상한): K → (손실, 절약 스텝). 반올림 자릿수까지 비교
     "fixed_cap_all": {30: (0.070, 0.294), 35: (0.049, 0.246), 40: (0.037, 0.208), 50: (0.022, 0.158)},
     "fixed_cap_all_k35_tokens": 0.422,
-    "fixed_cap_test_same_k35": (0.0447, 0.2181),
 }
 
 
@@ -102,7 +102,8 @@ def b1_for_n(sets, texts, n, config):
     scores = pl.concat([res.train.select("instance_id", "p_fail"), res.test.select("instance_id", "p_fail")])
     in_fold = rows.select("instance_id", p_fail=pl.Series(predict(full, rows)))
     refit = test_rows.select("instance_id", p_fail=pl.Series(predict(full, test_rows)))
-    return {"n": n, "scores": scores, "in_fold": in_fold, "refit": refit,
+    fold_test = [test_rows.select("instance_id", p_fail=pl.Series(v)) for v in res.test_fold_scores]
+    return {"n": n, "scores": scores, "in_fold": in_fold, "refit": refit, "fold_test": fold_test,
             "seen_issue_scores": res.seen_issue_scores, "fold_issues": res.fold_issues}
 
 
@@ -147,30 +148,38 @@ def build_b1(sets, texts, jobs, out_dir):
                               "mean": float(p["p_fail"].mean()), **{f"q{int(x * 100):02d}": float(v) for x, v in zip(QUANTILES, q)}})
     pl.DataFrame(scale).write_csv(out_dir / "b1_scale.csv", float_precision=FLOAT)
     info = {"config": config.as_dict(), "grid_size": len(B1_GRID), "leakage": leak}
-    return p_static, p_n, config, info
+    # 테스트를 fold 모델 하나로만 채점한 예측 (운영점 이전성 분석용, 저장하지 않음): {model: {N: [fold k 예측]}}
+    test = sets["test"]
+    fold_test = {
+        "b1_static": {n: [baselines.to_trajectories(test, f, n) for f in per_n[0]["fold_test"]] for n in evaluate.N_GRID},
+        "b1_n": {n: [baselines.to_trajectories(test, f, n) for f in per_n[n]["fold_test"]] for n in evaluate.N_GRID},
+    }
+    return p_static, p_n, config, info, fold_test
 
 
-def build_oracles(sets):
+def build_oracles(sets, proposal_trajs):
     fill = 1 - float(sets["train"]["target"].mean())  # 점수를 못 주는 궤적: 학습 성공률
     loo = pl.concat([baselines.oracle_loo(t, n, fill) for t in sets.values() for n in evaluate.N_GRID_ISSUE])
-    other = {"test_same": "test_cross", "test_cross": "test_same"}
-    xm = pl.concat([baselines.oracle_xmodel(sets[s], sets[other[s]], n, fill) for s in evaluate.TEST_SPLITS for n in evaluate.N_GRID_ISSUE])
     singles = {name: int(t.group_by("instance_id").len().filter(pl.col("len") == 1)["len"].sum()) for name, t in sets.items()}
-    missing_x = {s: int(sets[s].join(sets[other[s]].select("instance_id").unique(), on="instance_id", how="anti").height)
-                 for s in evaluate.TEST_SPLITS}
-    full = baselines.oracle_full_loo_auroc(pl.concat([t.select(metrics.TRAJ_COLUMNS) for t in sets.values()]))
+    full = baselines.oracle_full_loo_auroc(proposal_trajs)  # 제안서 0.945 재현 (전체 80,036궤적)
     info = {"fill_p_fail": round(fill, 4), "loo_single_trajectory_issues_filled": singles,
-            "xmodel_trajectories_filled": missing_x, "full_data_loo": {**full, "auroc": round(full["auroc"], 4)}}
-    return loo, xm, info
+            "full_data_loo_proposal": {**full, "auroc": round(full["auroc"], 4)}}
+    return loo, info
 
 
 # ---- 평가 ----
 
-def fixed_cap_table(sets, costs, all_trajs, all_costs):
+def fixed_cap_table(sets, costs):
     ks = range(1, FIXED_CAP_MAX_K + 1)
     tables = [metrics.fixed_cap_curve(t, costs[name], ks).with_columns(split=pl.lit(name)) for name, t in sets.items()]
-    tables.append(metrics.fixed_cap_curve(all_trajs, all_costs, ks).with_columns(split=pl.lit("all")))
     return pl.concat(tables).select("split", "K", "n_stopped", "stop_rate", "lost_success", "saved_steps", "saved_tokens")
+
+
+def proposal_reproduction(proposal_trajs, all_costs):
+    """제안서 고정 상한 표(전체 80,036궤적) 재현. 하네스 검사용이고 평가 결과가 아니다."""
+    ks = [*EXPECTED["fixed_cap_all"], K_PROPOSAL]
+    curve = metrics.fixed_cap_curve(proposal_trajs, all_costs, sorted(set(ks)))
+    return {int(r["K"]): {c: r[c] for c in ("lost_success", "saved_steps", "saved_tokens")} for r in curve.iter_rows(named=True)}
 
 
 def boot_task(trajs, p, stat, n_boot):
@@ -241,6 +250,30 @@ def cap_rows(sets, costs, k_star, cap_curve_train):
     return rows, sens
 
 
+def transfer_task(model, n, policy, train, train_preds, test, test_preds, full_op, test_fold_preds):
+    rows = evaluate.transfer_rows(train, train_preds, test, test_preds, n, policy, full_op, test_fold_preds=test_fold_preds)
+    return [{"model": model, "policy": policy, "N": n, **r} for r in rows]
+
+
+def tau_transfer(all_preds, sets, main_rows, k_star, fold_test, jobs):
+    """회의 2026-11-05 §4.3: train 안 fold 사이 운영점 이전 vs train → test 이전 (evaluate.transfer_rows).
+
+    fold_test[model][N] = 테스트를 fold k 모델 하나로 채점한 예측 목록 (OOF로 학습하는 모델만, 예: B1).
+    """
+    train, test = sets["train"], sets["test"]
+    full = {(r["model"], r["N"], r["policy"]): r for r in main_rows if r["split"] == "train"}
+    cap_full = {"tau": None, "cap": k_star, **evaluate.cap_point(train, k_star, None)}
+    tasks = [("b0_cap", None, "cap", train, None, test, None, cap_full, None)]
+    for m in OP_MODELS:
+        for n in evaluate.N_GRID:
+            for policy in evaluate.POLICIES:
+                tasks.append((m, n, policy, train, evaluate.split_preds(all_preds[m], train, n), test,
+                              evaluate.split_preds(all_preds[m], test, n), full[(m, n, policy)], fold_test.get(m, {}).get(n)))
+    rows = [r for out in parallel(transfer_task, tasks, jobs) for r in out]
+    cols = ["model", "policy", "N", *evaluate.TRANSFER_COLUMNS]
+    return frame(rows, cols, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64})
+
+
 def attach_ci(main_rows, boots):
     """주 운영점 행에 테스트 부트스트랩 구간을 붙인다. boots[(model, split, N)] = bootstrap 출력."""
     out = []
@@ -300,9 +333,10 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
     split_stats = split.validate_splits(io.load_trajectories(split.INPUT_COLUMNS), io.load_splits())
     sets = evaluate.load_eval_sets()
-    costs = evaluate.load_costs(sets)
-    all_trajs = pl.concat([t.select(metrics.TRAJ_COLUMNS) for t in sets.values()])
-    all_costs = pl.concat(list(costs.values()))
+    all_costs = evaluate.load_all_costs()
+    costs = evaluate.load_costs(sets, all_costs)
+    # 제안서 수치 재현 검사(C4·C6) 전용: 분할과 무관한 전체 80,036궤적 (8B·405B 포함). 평가에는 쓰지 않는다
+    proposal_trajs = io.load_trajectories(metrics.TRAJ_COLUMNS)
     texts = baselines.issue_table()
     n_hint = io.load_trajectories(["instance_id", "issue_text"]).filter(
         pl.col("issue_text").str.contains(baselines.HINT, literal=True))["instance_id"].n_unique()
@@ -311,19 +345,18 @@ def main():
     # 1. 예측
     built = {m: build_b0(sets, c) for m, c in B0_COLUMNS.items()}
     lap("B0 에러 개수 점수")
-    built["b1_static"], built["b1_n"], b1_config, b1_info = build_b1(sets, texts, args.jobs, out_dir)
+    built["b1_static"], built["b1_n"], b1_config, b1_info, b1_fold_test = build_b1(sets, texts, args.jobs, out_dir)
     lap("B1 그리드·OOF")
-    built["ref_oracle_loo"], built["ref_oracle_xmodel"], oracle_info = build_oracles(sets)
+    built["ref_oracle_loo"], oracle_info = build_oracles(sets, proposal_trajs)
     lap("오라클")
     n_grid_of = {m: (evaluate.N_GRID if m.startswith("b0_") else evaluate.N_GRID_ISSUE) for m in MODELS}
-    sets_of = {m: ({s: sets[s] for s in evaluate.TEST_SPLITS} if m == "ref_oracle_xmodel" else sets) for m in MODELS}
+    sets_of = {m: sets for m in MODELS}
     configs = {
         "b0_err": ({"column": "is_error", "rule": "앞 N스텝 개수"}, "rule (학습 없음)"),
         "b0_editfail": ({"column": "edit_failed", "rule": "앞 N스텝 개수"}, "rule (학습 없음)"),
         "b1_static": ({**b1_config.as_dict(), "fit_n": 0}, "5fold-oof/test-fold-mean"),
         "b1_n": ({**b1_config.as_dict(), "fit_n": "each"}, "5fold-oof/test-fold-mean"),
         "ref_oracle_loo": ({"rule": "1 - 같은 집합·같은 이슈 다른 궤적 성공률", "fill": oracle_info["fill_p_fail"]}, "reference"),
-        "ref_oracle_xmodel": ({"rule": "1 - 같은 이슈 다른 테스트 분할 성공률", "fill": oracle_info["fill_p_fail"]}, "reference"),
     }
     written = {m: preds.write(m, built[m], sets_of[m], n_grid_of[m], *configs[m], force=args.force) for m in MODELS}
     all_preds = {m: preds.read(m) for m in MODELS}
@@ -336,16 +369,24 @@ def main():
     disc_out.write_csv(out_dir / "discrimination.csv", float_precision=FLOAT)
 
     # 3. 고정 상한 + K*
-    caps = fixed_cap_table(sets, costs, all_trajs, all_costs)
+    caps = fixed_cap_table(sets, costs)
     caps.write_csv(out_dir / "fixed_cap.csv", float_precision=FLOAT)
     cap_train = caps.filter(pl.col("split") == "train")
     k_star = metrics.select_cap(cap_train, evaluate.MAX_LOSS)["K"]
+    proposal = proposal_reproduction(proposal_trajs, all_costs)
     lap("판별 지표·고정 상한")
 
     # 4. 운영점
     main_rows, sens_rows, chosen = operating_points(all_preds, sets, costs, k_star)
     cap_main, cap_sens = cap_rows(sets, costs, k_star, cap_train)
     lap("운영점 선택·적용")
+
+    # 4b. 운영점 이전성 (회의 §4.3): fold 사이 vs train → test
+    transfer = tau_transfer(all_preds, sets, main_rows, k_star, b1_fold_test, args.jobs)
+    transfer.write_csv(out_dir / "tau_transfer.csv", float_precision=FLOAT)
+    transfer_sum = evaluate.transfer_summary(transfer)
+    transfer_sum.write_csv(out_dir / "tau_transfer_summary.csv", float_precision=FLOAT)
+    lap("운영점 이전성")
 
     # 5. 비용 곡선 (그림용, 상한 없는 단독 정책)
     curve_dir = out_dir / "cost_curves"
@@ -375,7 +416,8 @@ def main():
                     keys.append((m, name, n))
             c = evaluate.compressed_costs(costs[name], None, [K_PROPOSAL], k_star)
             empty = pl.DataFrame(schema=preds.SCHEMA)
-            tasks.append((t, empty, cap_stat([k_star, K_PROPOSAL], c), args.n_boot))
+            ks = list(dict.fromkeys([k_star, K_PROPOSAL]))  # K*가 제안서 K와 같으면 차이(0)를 따로 만들지 않는다
+            tasks.append((t, empty, cap_stat(ks, c), args.n_boot))
             keys.append(("b0_cap", name, None))
         boots = dict(zip(keys, parallel(boot_task, tasks, args.jobs)))
         ci_rows = []
@@ -397,17 +439,19 @@ def main():
     frame(cap_sens + sens_rows, sens_cols, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64}) \
         .write_csv(out_dir / "operating_points_sensitivity.csv", float_precision=FLOAT)
 
-    check(args, out_dir, split_stats, texts, n_hint, written, disc_out, caps, k_star, b1_info, oracle_info, ops_df, boots, timings)
+    check(args, out_dir, split_stats, texts, n_hint, written, disc_out, caps, k_star, proposal, b1_info, oracle_info, ops_df,
+          transfer, transfer_sum, boots, timings)
 
 
-def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star, b1_info, oracle_info, ops_df, boots, timings):
+def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star, proposal, b1_info, oracle_info, ops_df,
+          transfer, transfer_sum, boots, timings):
     def pick(split_name, k, col):
         return float(caps.filter((pl.col("split") == split_name) & (pl.col("K") == k))[col][0])
 
     b1 = disc.filter(pl.col("model").is_in(["b1_static", "b1_n"]))
     within_dev = float(max((b1["within_pair"] - 0.5).abs().max(), (b1["within_issue_mean"] - 0.5).abs().max()))
     head = disc.filter(pl.col("split") != "train_oof").filter(
-        (pl.col("N").is_in([0, 10])) & pl.col("model").is_in(["b0_err", "b1_static", "b1_n", "ref_oracle_loo", "ref_oracle_xmodel"]))
+        (pl.col("N").is_in([0, 10])) & pl.col("model").is_in(["b0_err", "b1_static", "b1_n", "ref_oracle_loo"]))
     s = {
         "splits": split_stats["split_trajectories"],
         "issues_after_strip": texts.height,
@@ -418,12 +462,13 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
         "oracle": oracle_info,
         "k_star": k_star,
         "fixed_cap": {name: {k: {c: round(pick(name, k, c), 4) for c in ("lost_success", "saved_steps", "saved_tokens")}
-                             for k in (k_star, K_PROPOSAL)} for name in ("train", "test_same", "test_cross", "all")},
-        "fixed_cap_all_phase3": {k: (round(pick("all", k, "lost_success"), 4), round(pick("all", k, "saved_steps"), 4)) for k in EXPECTED["fixed_cap_all"]},
+                             for k in (k_star, K_PROPOSAL)} for name in split.SPLITS},
+        "proposal_reproduction_all_80036": {k: {c: round(v, 4) for c, v in r.items()} for k, r in proposal.items()},
         "discrimination_test_N0_N10": head.select("model", "split", "N", "auroc", "pr_auc", "within_pair").to_dicts(),
         "operating_points_N10": ops_df.filter((pl.col("N") == 10) | (pl.col("model") == "b0_cap")).select(
             "model", "policy", "N", "tau", "cap", "split", "lost_success", "saved_steps", "saved_tokens", "d_saved_steps",
             "d_saved_steps_lo", "d_saved_steps_hi").to_dicts(),
+        "tau_transfer_N10": transfer_sum.filter((pl.col("N") == 10) | pl.col("N").is_null()).to_dicts(),
         "bootstrap": None if args.skip_bootstrap else {"n_boot": args.n_boot, "tasks": len(boots), "seed": io.SEED},
     }
 
@@ -434,14 +479,16 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
         all(v["seen_issue_scores"] == 0 for v in b1_info["leakage"].values()) and texts.height == EXPECTED["issues_after_strip"]
         and n_hint == EXPECTED["issues_with_hint"])
     crit["C3b_in_fold_much_higher_than_oof"] = all(v["in_fold_auroc"] > v["oof_auroc"] + 0.05 for v in b1_info["leakage"].values())
-    c4 = all(abs(pick("all", k, "lost_success") - lo) <= 5e-4 + 1e-9 and abs(pick("all", k, "saved_steps") - sv) <= 5e-4 + 1e-9
+    c4 = all(abs(proposal[k]["lost_success"] - lo) <= 5e-4 + 1e-9 and abs(proposal[k]["saved_steps"] - sv) <= 5e-4 + 1e-9
              for k, (lo, sv) in EXPECTED["fixed_cap_all"].items())
-    c4 &= abs(pick("all", K_PROPOSAL, "saved_tokens") - EXPECTED["fixed_cap_all_k35_tokens"]) <= 5e-4 + 1e-9
-    lo, sv = EXPECTED["fixed_cap_test_same_k35"]
-    c4 &= abs(pick("test_same", K_PROPOSAL, "lost_success") - lo) <= 5e-5 + 1e-9 and abs(pick("test_same", K_PROPOSAL, "saved_steps") - sv) <= 5e-5 + 1e-9
+    c4 &= abs(proposal[K_PROPOSAL]["saved_tokens"] - EXPECTED["fixed_cap_all_k35_tokens"]) <= 5e-4 + 1e-9
+    # 분할별 고정 상한 표 = 하네스 (N=K에서 진행 중 궤적 전부 p_fail=1) — K_PROPOSAL에서 test로 확인
+    t = evaluate.load_eval_sets()["test"]
+    h = metrics.cost_curve(t, metrics.running(t, K_PROPOSAL).select("traj_id", N=pl.lit(K_PROPOSAL), p_fail=pl.lit(1.0)), K_PROPOSAL).row(-1, named=True)
+    c4 &= all(abs(pick("test", K_PROPOSAL, c) - h[c]) <= 1e-12 for c in ("lost_success", "saved_steps"))
     crit["C4_fixed_cap_matches_phase3"] = bool(c4)
     crit["C5_k_star"] = k_star == EXPECTED["k_star"]
-    full = oracle_info["full_data_loo"]
+    full = oracle_info["full_data_loo_proposal"]
     crit["C6_oracle_full_loo"] = round(full["auroc"], 3) == EXPECTED["oracle_full_loo_auroc"] and full["n_traj"] == EXPECTED["oracle_full_loo_n_traj"]
     models_in_disc = set(disc["model"].unique())
     crit["C7_discrimination_table"] = models_in_disc == set(MODELS) and (out_dir / "discrimination_ci.csv").exists() and not args.skip_bootstrap
@@ -450,6 +497,16 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
         not args.skip_bootstrap and set(test_ops["model"].unique()) == {*OP_MODELS, "b0_cap"}
         and set(test_ops["policy"].unique()) == {"single", "combined", "cap", "cap_proposal"}
         and test_ops.filter(pl.col("model") != "b0_cap")["d_saved_steps_lo"].null_count() == 0)
+    n_folds = split.N_FOLDS
+    n_points = 1 + len(OP_MODELS) * len(evaluate.N_GRID) * len(evaluate.POLICIES)  # b0_cap + 모델 × N × 정책
+    n_fold_model = 2 * len(evaluate.N_GRID) * len(evaluate.POLICIES)  # B1 두 종류만 fold 모델별 테스트 점수가 있다
+    expected_rows = (2 * n_folds + 1) * n_points + n_folds * n_fold_model
+    crit["C10_tau_transfer_table"] = (
+        transfer.height == expected_rows
+        and set(transfer["target"].unique()) == {"test", "test_fold_model", *(f"fold{k}" for k in range(n_folds))}
+        and transfer.filter(pl.col("source") == "train").height == n_points
+        and set(transfer.filter(pl.col("target") == "test_fold_model")["model"].unique()) == {"b1_static", "b1_n"}
+        and transfer.select("dst_stop_rate", "dst_lost_success", "src_lost_success").null_count().sum_horizontal().item() == 0)
     s["criteria"] = crit
     s["criteria_note"] = "C9(pytest 전체 통과, 재실행 시 results/ 변화 없음)는 스크립트 밖에서 확인한다"
     (out_dir / "summary.json").write_text(json.dumps(s, ensure_ascii=False, indent=2, default=str) + "\n")

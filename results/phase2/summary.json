@@ -9,32 +9,35 @@
     "matches_existing_file": true
   },
   "splits": {
-    "trajectories": 80036,
-    "split_trajectories": {
-      "train": 62460,
-      "test_same": 12332,
-      "test_cross": 5244
+    "trajectories": 74792,
+    "excluded_trajectories": {
+      "swe-agent-llama-8b": 4053,
+      "swe-agent-llama-405b": 1191
     },
-    "train_issues": 3013,
-    "test_issues": 578,
+    "split_trajectories": {
+      "train": 62311,
+      "test": 12481
+    },
+    "train_issues": 2989,
+    "test_issues": 602,
     "train_test_issue_overlap": 0,
     "train_issues_crossing_folds": 0,
     "heldout_fold": -1
   },
   "folds": {
     "GroupKFold": {
-      "success_rate_min": 0.1439,
-      "success_rate_max": 0.1749,
-      "success_rate_range": 0.031,
-      "n_traj_range": 0,
+      "success_rate_min": 0.1587,
+      "success_rate_max": 0.1845,
+      "success_rate_range": 0.0258,
+      "n_traj_range": 1,
       "n_issues_range": 1
     },
     "StratifiedGroupKFold": {
-      "success_rate_min": 0.1623,
-      "success_rate_max": 0.1632,
-      "success_rate_range": 0.0009,
-      "n_traj_range": 32,
-      "n_issues_range": 18
+      "success_rate_min": 0.1665,
+      "success_rate_max": 0.1668,
+      "success_rate_range": 0.0003,
+      "n_traj_range": 19,
+      "n_issues_range": 13
     },
     "chosen": "StratifiedGroupKFold"
   },

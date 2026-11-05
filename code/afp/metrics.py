@@ -1,7 +1,7 @@
 """평가 하네스: 모든 모델의 예측을 같은 코드로 평가한다.
 
 입력 형식
-- trajs: 평가 대상 궤적 집합 (예: test_same 분할). 컬럼 traj_id, instance_id, target, n_steps.
+- trajs: 평가 대상 궤적 집합 (예: test 분할). 컬럼 traj_id, instance_id, target, n_steps.
   시점 N에서 끝난 궤적(n_steps <= N)도 포함해야 한다. 비용 곡선의 분모가 전체 궤적이다.
   선택 컬럼 weight: 궤적 가중치 (부트스트랩에서 이슈가 뽑힌 횟수). 없으면 모두 1.
 - preds: 모델 예측. 컬럼 traj_id, N, p_fail (실패 확률).
@@ -21,14 +21,13 @@ MAX_LOSS = 0.05  # 운영점 제약: 성공 손실률 상한 (proposal.md §5)
 
 
 def eval_set(name: str) -> pl.DataFrame:
-    """평가 집합 하나의 궤적 = 하네스의 trajs 입력. name은 train, test_same, test_cross 중 하나.
+    """평가 집합 하나의 궤적 = 하네스의 trajs 입력. name은 train 또는 test (split.SPLITS).
 
     모든 모델이 같은 집합으로 평가받도록 trajs는 이 함수로만 만든다.
+    - 두 집합 모두 70B 궤적뿐이다. 8B·405B 궤적은 splits.parquet에 없어서 어떤 평가 집합에도 들어가지 않는다
     - N 전에 끝난 궤적도 들어 있다 (비용 곡선의 분모가 전체 궤적이다). 미리 거르지 않는다
-    - test_same과 test_cross는 같은 테스트 이슈를 공유하므로 합쳐서 평가하지 않는다. 합치면
-      이슈 내 AUROC가 한 이슈 안의 70B 궤적과 8B·405B 궤적을 비교하게 된다
     - K 고정 상한 같은 기준값도 같은 집합에서 다시 계산한다 (전체 데이터 값을 가져오지 않는다)
-    출력: traj_id, instance_id, target, n_steps, fold (train은 0..4, 테스트는 split.HELDOUT_FOLD).
+    출력: traj_id, instance_id, target, n_steps, fold (train은 0..4, test는 split.HELDOUT_FOLD).
     """
     if name not in split.SPLITS:
         raise ValueError(f"평가 집합은 {split.SPLITS} 중 하나: {name!r}")
