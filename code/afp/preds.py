@@ -2,7 +2,7 @@
 
 모든 모델(B0·B1·M1·M2·M3, 참고용 오라클)의 예측을 같은 형식으로 저장한다. Phase 5~7이 그대로 쓴다.
 - 컬럼은 하네스 형식 그대로 traj_id, N, p_fail만. 분할·fold는 splits.parquet와 join해서 얻는다
-- 한 파일에 train(OOF) + test_same + test_cross 예측이 같이 있다. 시점 N마다 그 시점 진행 중
+- 한 파일에 train(OOF) + test 예측이 같이 있다. 시점 N마다 그 시점 진행 중
   궤적 전부에 정확히 1개 (metrics.align이 검사하는 조건을 저장 전에 validate가 분할마다 미리 검사)
 - parquet 메타데이터 afp.preds: model_id, config, oof_scheme, n_grid, splits, git 커밋, 버전, 생성 시각
 - model_id: 기준선 b0_*, b1_*, 모델 m1_*·m2_*·m3_*, 참고용 ref_*.

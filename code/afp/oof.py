@@ -26,6 +26,9 @@ class OOFResult:
     test: pl.DataFrame | None  # 입력 test 행 (같은 순서) + p_fail
     fold_issues: dict[int, int] = field(default_factory=dict)  # 검증 fold k → fold k 모델 학습에 쓴 이슈 수
     seen_issue_scores: int = 0  # 자기 이슈를 학습에 쓴 모델의 점수를 받은 train 행 수 (항상 0이어야 함)
+    # test_mode="fold_mean"일 때 fold k 모델 하나가 test 행에 준 점수 (n_folds × test 행 수). test 점수 = 행 평균.
+    # fold k의 OOF 점수와 같은 모델의 점수라, 평균 때문에 점수 분포가 달라지는지 확인하는 데 쓴다
+    test_fold_scores: np.ndarray | None = None
 
 
 def check_folds(train: pl.DataFrame, n_folds: int) -> None:
@@ -65,7 +68,7 @@ def oof_predict(train: pl.DataFrame, fit, predict, test: pl.DataFrame | None = N
 
     rows = train.with_row_index("_row")
     oof = np.full(train.height, np.nan)
-    test_sum = np.zeros(test.height) if test is not None else None
+    fold_scores = np.full((n_folds, test.height), np.nan) if test is not None and test_mode == "fold_mean" else None
     result = OOFResult(train=train, test=test)
     for k in range(n_folds):
         fit_rows = rows.filter(pl.col("fold") != k)
@@ -75,14 +78,15 @@ def oof_predict(train: pl.DataFrame, fit, predict, test: pl.DataFrame | None = N
         result.fold_issues[k] = fit_issues.len()
         model = fit(fit_rows.drop("_row"))
         oof[held["_row"].to_numpy()] = _scores(predict, model, held.drop("_row"))
-        if test is not None and test_mode == "fold_mean":
-            test_sum += _scores(predict, model, test)
+        if fold_scores is not None:
+            fold_scores[k] = _scores(predict, model, test)
     if result.seen_issue_scores:
         raise AssertionError(f"자기 이슈를 본 모델의 점수를 받은 train 행 {result.seen_issue_scores}개")
     if np.isnan(oof).any():
         raise AssertionError("OOF 점수를 받지 못한 train 행이 있음")
     result.train = train.with_columns(p_fail=pl.Series(oof))
     if test is not None:
-        p = test_sum / n_folds if test_mode == "fold_mean" else _scores(predict, fit(train), test)
+        p = fold_scores.mean(axis=0) if test_mode == "fold_mean" else _scores(predict, fit(train), test)
         result.test = test.with_columns(p_fail=pl.Series(p))
+        result.test_fold_scores = fold_scores
     return result

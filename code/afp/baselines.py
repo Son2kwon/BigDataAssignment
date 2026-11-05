@@ -187,18 +187,11 @@ def oracle_loo(trajs: pl.DataFrame, n: int, fill: float) -> pl.DataFrame:
     return metrics.running(t, n).select("traj_id", N=pl.lit(n, dtype=pl.Int16), p_fail="p_fail").sort("traj_id")
 
 
-def oracle_xmodel(trajs: pl.DataFrame, other: pl.DataFrame, n: int, fill: float) -> pl.DataFrame:
-    """p_fail = 1 - 다른 집합(other)에서 같은 이슈 궤적들의 성공률. 이슈 안에서 상수라 이슈 내 AUROC = 0.5.
-
-    test_cross는 test_same(70B), test_same은 test_cross(8B·405B)를 other로 쓴다. other에 없는 이슈는 fill.
-    """
-    rate = other.group_by("instance_id").agg(p=1 - pl.col("target").cast(pl.Float64).mean())
-    out = metrics.running(trajs, n).join(rate, on="instance_id", how="left")
-    return out.select("traj_id", N=pl.lit(n, dtype=pl.Int16), p_fail=pl.col("p").fill_null(fill)).sort("traj_id")
-
-
 def oracle_full_loo_auroc(trajs: pl.DataFrame) -> dict:
-    """제안서 0.945 재현: 전체 데이터에서 궤적이 2개 이상인 이슈의 궤적 전부 (스텝 수와 무관), LOO 성공률 AUROC."""
+    """제안서 0.945 재현: 전체 데이터에서 궤적이 2개 이상인 이슈의 궤적 전부 (스텝 수와 무관), LOO 성공률 AUROC.
+
+    제안서 값은 8B·405B를 포함한 전체 80,036궤적 기준이라, 재현 검사에는 분할과 무관한 전체 궤적을 넣는다.
+    """
     t = trajs.with_columns(m=pl.len().over("instance_id")).filter(pl.col("m") > 1)
     p = oracle_loo(t.with_columns(n_steps=pl.lit(1)), 0, fill=np.nan)  # 스텝 0개 궤적도 넣으려고 n_steps를 덮어씀
     a = t.select("traj_id", "target").join(p, on="traj_id")

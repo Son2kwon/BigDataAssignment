@@ -6,7 +6,7 @@ from afp import preds
 
 TRAIN = pl.DataFrame({"traj_id": ["a", "b", "c"], "instance_id": ["i", "i", "j"], "target": [True, False, False], "n_steps": [2, 5, 0]})
 TEST = pl.DataFrame({"traj_id": ["d"], "instance_id": ["k"], "target": [True], "n_steps": [4]})
-SETS = {"train": TRAIN, "test_same": TEST}
+SETS = {"train": TRAIN, "test": TEST}
 
 
 def good():
@@ -21,8 +21,8 @@ def tmp_preds(tmp_path, monkeypatch):
 
 
 def test_validate_counts_and_rejects_bad_coverage():
-    assert preds.validate(good(), SETS, [0, 3]) == {"train": {0: 2, 3: 1}, "test_same": {0: 1, 3: 1}}
-    with pytest.raises(ValueError, match="test_same: N=3: .*예측 없음 1개"):
+    assert preds.validate(good(), SETS, [0, 3]) == {"train": {0: 2, 3: 1}, "test": {0: 1, 3: 1}}
+    with pytest.raises(ValueError, match="test: N=3: .*예측 없음 1개"):
         preds.validate(good().filter(~((pl.col("traj_id") == "d") & (pl.col("N") == 3))), SETS, [0, 3])
     with pytest.raises(ValueError, match="대상 밖 예측 1개"):
         preds.validate(pl.concat([good(), pl.DataFrame({"traj_id": ["a"], "N": [3], "p_fail": [0.5]})]), SETS, [0, 3])
@@ -54,7 +54,7 @@ def test_write_is_idempotent_and_guards_changes(tmp_preds):
     assert got.columns == ["traj_id", "N", "p_fail"] and got["N"].dtype == pl.Int16
     assert got.select("N", "traj_id").rows() == [(0, "a"), (0, "b"), (0, "d"), (3, "b"), (3, "d")]
     meta = preds.metadata("b0_err")
-    assert meta["model_id"] == "b0_err" and meta["n_grid"] == [0, 3] and meta["splits"] == ["train", "test_same"]
+    assert meta["model_id"] == "b0_err" and meta["n_grid"] == [0, 3] and meta["splits"] == ["train", "test"]
     assert meta["config"] == {"rule": "is_error"} and meta["oof_scheme"] == "rule"
 
 

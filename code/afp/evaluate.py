@@ -1,6 +1,6 @@
 """모델 하나의 예측 → 분할 × N 지표 표, 비용 곡선, 운영점 표. Phase 4~7이 같은 코드로 평가한다.
 
-- 평가 집합은 metrics.eval_set의 train, test_same, test_cross. train 행은 OOF 점수 기준이라 표에 train_oof로 적는다
+- 평가 집합은 metrics.eval_set의 train, test (둘 다 70B). train 행은 OOF 점수 기준이라 표에 train_oof로 적는다
 - 운영점은 train(OOF) 곡선에서만 고르고 테스트에는 고른 (τ, K)를 그대로 적용한다 (PLAN 3.5)
   - single:   "시점 N에서 p_fail >= τ면 종료" (상한 없음)
   - combined: "스텝 > K면 종료 또는 시점 N에서 p_fail >= τ면 종료", K ∈ N+1..COMBINED_MAX_K
@@ -23,8 +23,8 @@ OBJECTIVES = ("saved_steps", "saved_tokens")
 POLICIES = ("single", "combined")
 CURVE_MAX_ROWS = 200
 COSTS_PATH = io.PROCESSED_DIR / "context_costs.parquet"
-SPLIT_LABEL = {"train": "train_oof", "test_same": "test_same", "test_cross": "test_cross"}
-TEST_SPLITS = ("test_same", "test_cross")
+SPLIT_LABEL = {"train": "train_oof", "test": "test"}
+TEST_SPLITS = ("test",)
 POINT_COLUMNS = ("stop_rate", "lost_success", "saved_steps", "saved_tokens")
 
 
@@ -32,16 +32,24 @@ def load_eval_sets() -> dict[str, pl.DataFrame]:
     return {name: metrics.eval_set(name) for name in split.SPLITS}
 
 
-def load_costs(sets: dict[str, pl.DataFrame]) -> dict[str, pl.DataFrame]:
-    """평가 집합별 스텝 맥락 길이. 전체 궤적에 대해 한 번 계산해 COSTS_PATH에 캐시한다 (steps 행 수로 검사)."""
+def load_all_costs() -> pl.DataFrame:
+    """모든 궤적(8B·405B 포함)의 스텝 맥락 길이. 한 번 계산해 COSTS_PATH에 캐시한다 (steps 행 수로 검사).
+
+    평가에는 load_costs로 평가 집합 궤적만 골라 쓴다. 전체는 제안서 수치 재현 검사에만 쓴다.
+    """
     n_steps_rows = pq.read_metadata(io.STEPS_PATH).num_rows
     if COSTS_PATH.exists() and pq.read_metadata(COSTS_PATH).num_rows == n_steps_rows:
-        costs = pl.read_parquet(COSTS_PATH)
-    else:
-        costs = metrics.eval_costs(io.load_trajectories(["traj_id"]))
-        if costs.height != n_steps_rows:
-            raise AssertionError(f"맥락 길이 {costs.height}행 != steps {n_steps_rows}행")
-        costs.write_parquet(COSTS_PATH)
+        return pl.read_parquet(COSTS_PATH)
+    costs = metrics.eval_costs(io.load_trajectories(["traj_id"]))
+    if costs.height != n_steps_rows:
+        raise AssertionError(f"맥락 길이 {costs.height}행 != steps {n_steps_rows}행")
+    costs.write_parquet(COSTS_PATH)
+    return costs
+
+
+def load_costs(sets: dict[str, pl.DataFrame], all_costs: pl.DataFrame | None = None) -> dict[str, pl.DataFrame]:
+    """평가 집합별 스텝 맥락 길이 (load_all_costs 캐시에서 그 집합 궤적만)."""
+    costs = load_all_costs() if all_costs is None else all_costs
     return {name: costs.join(t.select("traj_id"), on="traj_id", how="semi") for name, t in sets.items()}
 
 
@@ -169,3 +177,82 @@ def bootstrap_stat(n: int | None, points: dict, k_ref: int | None, costs: pl.Dat
 
 def compressed_costs(costs: pl.DataFrame, n: int | None, caps, k_ref: int | None) -> pl.DataFrame:
     return metrics.compress_costs(costs, [b for b in (n, *caps, k_ref) if b is not None])
+
+
+# ---- 운영점 이전성 (회의 2026-11-05 §4.3) ----
+
+TRANSFER_COLUMNS = (
+    "source", "target", "tau", "cap",
+    "src_stop_rate", "src_lost_success", "src_saved_steps",
+    "dst_stop_rate", "dst_lost_success", "dst_saved_steps",
+)
+
+
+def _transfer_row(source: str, target: str, op: dict, dst: dict) -> dict:
+    return {
+        "source": source, "target": target, "tau": op.get("tau"), "cap": op.get("cap"),
+        **{f"src_{c}": op[c] for c in ("stop_rate", "lost_success", "saved_steps")},
+        **{f"dst_{c}": dst[c] for c in ("stop_rate", "lost_success", "saved_steps")},
+    }
+
+
+def transfer_rows(train: pl.DataFrame, train_preds: pl.DataFrame | None, test: pl.DataFrame, test_preds: pl.DataFrame | None,
+                  n: int | None, policy: str, full_op: dict, max_loss: float = MAX_LOSS, by: str = "saved_steps",
+                  test_fold_preds: list[pl.DataFrame] | None = None) -> list[dict]:
+    """train에서 고른 운영점이 처음 보는 이슈로 옮겨지는지 (정지율·손실이 유지되는지).
+
+    - source=train-fold{k}: fold k를 뺀 학습 이슈 OOF 곡선에서 고른 운영점을 target=fold{k}(같은 방식으로
+      뽑힌 처음 보는 학습 이슈)와 target=test에 각각 적용한다. 같은 운영점이라 두 target을 짝지어 비교한다
+    - source=train: 학습 이슈 전체에서 고른 주 운영점(full_op)을 test에 적용 (operating_points.csv와 같은 값)
+    - test_fold_preds[k] (OOF로 학습하는 모델): 테스트를 fold k 모델 하나로만 채점한 예측. 있으면 같은 운영점을
+      target=test_fold_model에도 적용한다. fold{k}와 채점 모델이 같아서, test(5개 fold 모델 평균 점수)와의 차이가
+      "점수 평균" 때문인지 "이슈 차이" 때문인지 가른다
+    fold 사이에서는 잘 옮겨지는데 test로만 안 옮겨지면 테스트 이슈 선택(또는 테스트 점수 계산 방식)이 원인이다.
+    policy="cap"이면 예측 없이 고정 상한 K만 고른다 (select_cap, train_preds·n은 None). 비용은 스텝만 본다.
+    """
+    rows = []
+    for k in sorted(train["fold"].unique().to_list()):
+        src, held = train.filter(pl.col("fold") != k), train.filter(pl.col("fold") == k)
+        if policy == "cap":
+            op = metrics.select_cap(metrics.fixed_cap_curve(src), max_loss)
+            op = {**op, "tau": None, "cap": int(op["K"])}
+            targets = {f"fold{k}": cap_point(held, op["cap"], None), "test": cap_point(test, op["cap"], None)}
+        else:
+            curves = candidate_curves(src, split_preds(train_preds, src, n), n, policy, None)
+            op = metrics.select_from_curves(curves, n, max_loss=max_loss, by=by)
+            targets = {f"fold{k}": apply_point(held, split_preds(train_preds, held, n), n, op["tau"], op["cap"], None),
+                       "test": apply_point(test, split_preds(test_preds, test, n), n, op["tau"], op["cap"], None)}
+            if test_fold_preds is not None:
+                targets["test_fold_model"] = apply_point(test, split_preds(test_fold_preds[k], test, n), n, op["tau"], op["cap"], None)
+        rows += [_transfer_row(f"train-fold{k}", name, op, dst) for name, dst in targets.items()]
+    if policy == "cap":
+        dst = cap_point(test, full_op["cap"], None)
+    else:
+        dst = apply_point(test, split_preds(test_preds, test, n), n, full_op["tau"], full_op["cap"], None)
+    rows.append(_transfer_row("train", "test", full_op, dst))
+    return rows
+
+
+def transfer_summary(rows: pl.DataFrame) -> pl.DataFrame:
+    """transfer_rows 표 → (model, policy, N)마다 fold 이전과 test 이전의 정지율 비·손실 차이 요약.
+
+    stop_ratio = dst_stop_rate / src_stop_rate (src가 0이면 null), d_lost = dst_lost_success - src_lost_success.
+    - fold_*: source=train-fold{k} → target=fold{k} 5개의 최소·최대
+    - test_from_folds_*: 같은 5개 운영점 → target=test(fold 모델 평균 점수)의 최소·최대
+    - test_fold_model_*: 같은 5개 운영점 → target=test_fold_model(fold k 모델 하나의 점수). B1처럼 OOF로 학습하는 모델만
+    - test_from_train_*: 주 운영점 → test
+    """
+    r = rows.with_columns(
+        stop_ratio=pl.when(pl.col("src_stop_rate") > 0).then(pl.col("dst_stop_rate") / pl.col("src_stop_rate")),
+        d_lost=pl.col("dst_lost_success") - pl.col("src_lost_success"),
+        kind=pl.when(pl.col("source") == "train").then(pl.lit("test_from_train"))
+        .when(pl.col("target") == "test").then(pl.lit("test_from_folds"))
+        .when(pl.col("target") == "test_fold_model").then(pl.lit("test_fold_model"))
+        .otherwise(pl.lit("fold")),
+    )
+    aggs = []
+    for kind in ("fold", "test_from_folds", "test_fold_model", "test_from_train"):
+        sel = pl.col("kind") == kind
+        for c in ("stop_ratio", "d_lost"):
+            aggs += [pl.col(c).filter(sel).min().alias(f"{kind}_{c}_min"), pl.col(c).filter(sel).max().alias(f"{kind}_{c}_max")]
+    return r.group_by("model", "policy", "N", maintain_order=True).agg(aggs)

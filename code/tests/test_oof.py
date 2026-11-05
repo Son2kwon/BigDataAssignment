@@ -79,8 +79,12 @@ def test_test_scores_are_fold_mean():
     sizes = [data.filter(pl.col("fold") != k).height for k in range(5)]
     assert res.test["p_fail"].to_list() == pytest.approx([np.mean(sizes)] * 2)
     assert res.test.drop("p_fail").equals(test)
+    assert res.test_fold_scores.shape == (5, 2)
+    assert res.test_fold_scores[:, 0].tolist() == [float(n) for n in sizes]  # fold k 행 = fold k 모델 점수
+    assert np.allclose(res.test_fold_scores.mean(axis=0), res.test["p_fail"].to_numpy())
     refit = oof.oof_predict(data, fit, predict, test=test, test_mode="refit")
     assert refit.test["p_fail"].to_list() == [float(data.height)] * 2
+    assert refit.test_fold_scores is None
     with pytest.raises(ValueError, match="test_mode"):
         oof.oof_predict(data, fit, predict, test=test, test_mode="other")
 

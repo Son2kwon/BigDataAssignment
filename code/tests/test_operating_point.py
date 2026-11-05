@@ -3,7 +3,7 @@ import numpy as np
 import polars as pl
 import pytest
 
-from afp import metrics
+from afp import evaluate, metrics
 
 
 def trajs_frame(rows):
@@ -163,3 +163,78 @@ def test_compress_costs_preserves_cost_curve():
     # 0스텝·짧은 궤적에서도 압축 행의 step_idx는 궤적 길이를 넘지 않는다
     joined = metrics.compress_costs(costs, [50]).join(trajs, on="traj_id")
     assert (joined["step_idx"] <= joined["n_steps"]).all()
+
+
+# ---- 운영점 이전성 (회의 2026-11-05 §4.3) ----
+
+def transfer_setup(seed=4, n_traj=900, n=5):
+    """train(fold 0..4) + test. p_fail은 실패와 약하게 상관된 점수."""
+    rng = np.random.default_rng(seed)
+    issue = np.arange(n_traj) % 90
+    trajs = pl.DataFrame({
+        "traj_id": [f"t{i:04d}" for i in range(n_traj)],
+        "instance_id": [f"i{k}" for k in issue],
+        "target": rng.random(n_traj) < 0.3,
+        "n_steps": rng.integers(0, 40, n_traj),
+    })
+    fold = np.where(issue < 75, issue % 5, -1)  # 이슈 75..89 = test
+    trajs = trajs.with_columns(fold=pl.Series(fold, dtype=pl.Int8))
+    alive = metrics.running(trajs, n)
+    p = np.clip(0.5 + 0.3 * (~alive["target"].to_numpy()) + rng.normal(0, 0.3, alive.height), 0, 1)
+    preds = preds_frame(n, dict(zip(alive["traj_id"], p)))
+    return trajs.filter(pl.col("fold") >= 0), trajs.filter(pl.col("fold") < 0), preds
+
+
+def test_transfer_rows_match_selection_on_other_folds():
+    n = 5
+    train, test, preds = transfer_setup(n=n)
+    full = metrics.select_operating_point(train, evaluate.split_preds(preds, train, n), n, max_loss=0.05)
+    rows = evaluate.transfer_rows(train, evaluate.split_preds(preds, train, n), test, evaluate.split_preds(preds, test, n),
+                                  n, "single", full, max_loss=0.05)
+    assert len(rows) == 2 * 5 + 1
+    by = {(r["source"], r["target"]): r for r in rows}
+    for k in range(5):
+        src = train.filter(pl.col("fold") != k)
+        held = train.filter(pl.col("fold") == k)
+        op = metrics.select_operating_point(src, evaluate.split_preds(preds, src, n), n, max_loss=0.05)
+        r = by[(f"train-fold{k}", f"fold{k}")]
+        assert r["tau"] == op["tau"] and r["src_stop_rate"] == op["stop_rate"] and r["src_lost_success"] == op["lost_success"]
+        row = metrics.at_threshold(metrics.cost_curve(held, evaluate.split_preds(preds, held, n), n), op["tau"])
+        assert r["dst_stop_rate"] == row["stop_rate"] and r["dst_lost_success"] == row["lost_success"]
+        assert by[(f"train-fold{k}", "test")]["tau"] == op["tau"]  # 같은 운영점을 test에도
+    r = by[("train", "test")]
+    assert r["tau"] == full["tau"] and r["src_stop_rate"] == full["stop_rate"]
+    row = metrics.at_threshold(metrics.cost_curve(test, evaluate.split_preds(preds, test, n), n), full["tau"])
+    assert r["dst_stop_rate"] == row["stop_rate"]
+
+    # 같은 운영점을 fold k 모델 점수로 채점한 test에도 적용 (여기서는 점수를 0.1 내려 정지율이 줄어드는지)
+    shifted = [evaluate.split_preds(preds, test, n).with_columns(pl.col("p_fail") - 0.1)] * 5
+    rows2 = evaluate.transfer_rows(train, evaluate.split_preds(preds, train, n), test, evaluate.split_preds(preds, test, n),
+                                   n, "single", full, max_loss=0.05, test_fold_preds=shifted)
+    assert len(rows2) == 3 * 5 + 1
+    for k in range(5):
+        a = next(r for r in rows2 if r["source"] == f"train-fold{k}" and r["target"] == "test")
+        b = next(r for r in rows2 if r["source"] == f"train-fold{k}" and r["target"] == "test_fold_model")
+        assert b["dst_stop_rate"] <= a["dst_stop_rate"]
+
+    s = evaluate.transfer_summary(pl.DataFrame([{"model": "m", "policy": "single", "N": n, **r} for r in rows2]))
+    assert s.height == 1
+    fold_ratios = [by[(f"train-fold{k}", f"fold{k}")]["dst_stop_rate"] / by[(f"train-fold{k}", f"fold{k}")]["src_stop_rate"] for k in range(5)]
+    assert s["fold_stop_ratio_min"][0] == pytest.approx(min(fold_ratios))
+    assert s["fold_stop_ratio_max"][0] == pytest.approx(max(fold_ratios))
+    assert s["test_from_train_stop_ratio_min"][0] == pytest.approx(r["dst_stop_rate"] / r["src_stop_rate"])
+
+
+def test_transfer_rows_fixed_cap():
+    train, test, _ = transfer_setup()
+    k = metrics.select_cap(metrics.fixed_cap_curve(train), 0.05)
+    full = {"tau": None, "cap": int(k["K"]), **evaluate.cap_point(train, int(k["K"]), None)}
+    rows = evaluate.transfer_rows(train, None, test, None, None, "cap", full, max_loss=0.05)
+    assert len(rows) == 11
+    for r in rows:
+        assert r["tau"] is None and r["src_lost_success"] <= 0.05 + 1e-12
+    for kf in range(5):
+        r = next(x for x in rows if x["target"] == f"fold{kf}")
+        src = train.filter(pl.col("fold") != kf)
+        assert r["cap"] == metrics.select_cap(metrics.fixed_cap_curve(src), 0.05)["K"]
+        assert r["dst_lost_success"] == evaluate.cap_point(train.filter(pl.col("fold") == kf), r["cap"], None)["lost_success"]
