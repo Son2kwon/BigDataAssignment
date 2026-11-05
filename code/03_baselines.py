@@ -8,6 +8,8 @@
     b0_err, b0_editfail       앞 N스텝 is_error / edit_failed 개수 (학습 없음)
     b1_static, b1_n           이슈 본문 TF-IDF + LR. static = N=0 모델 하나, n = N마다 진행 중 궤적으로 재학습
     ref_oracle_loo            같은 집합·같은 이슈 다른 궤적 성공률 (참고 천장, 피처 사용 금지)
+- data/processed/preds/<model>.test_folds.parquet  B1의 fold 모델별 test 점수 (traj_id, N, fold, p_fail). 운영점 평가(P4-D6)와
+    M1 입력(P4-D7)용. 주 파일의 test 행은 5개 fold 평균 점수(판별 지표용, P4-D2)
 - data/processed/context_costs.parquet  스텝별 맥락 길이 캐시
 - results/phase4/                       판별 표, 고정 상한 표, 운영점 표, 운영점 이전성 표, 비용 곡선, B1 그리드, 요약
 
@@ -16,6 +18,7 @@
 
 손실 기준 (회의 2026-11-05 §4.1): 운영점·K*는 train 손실 <= metrics.SELECT_MAX_LOSS(3.5%)로 고르고, 테스트 충족은
 손실 95% 구간 상한 <= metrics.JUDGE_MAX_LOSS(5%)로 판정한다 (operating_points.csv의 meets_judge_ci_hi).
+OOF 모델(B1)의 test 운영점은 fold 모델별 점수에 같은 τ·K를 적용한 5개 결과의 평균이다 (P4-D6, *_fold_min/max 컬럼).
 """
 import argparse
 import json
@@ -32,6 +35,7 @@ from afp import baselines, evaluate, io, metrics, oof, preds, split
 
 MODELS = ("b0_err", "b0_editfail", "b1_static", "b1_n", "ref_oracle_loo")
 OP_MODELS = ("b0_err", "b0_editfail", "b1_static", "b1_n")  # 운영점 표에 넣는 모델 (오라클 제외)
+FOLD_MODELS = ("b1_static", "b1_n")  # OOF로 학습해 fold 모델별 test 점수가 있는 모델 (P4-D6·P4-D7)
 B0_COLUMNS = {"b0_err": "is_error", "b0_editfail": "edit_failed"}
 B1_GRID = tuple(
     baselines.B1Config(analyzer=a, C=c, weighting=w)
@@ -42,6 +46,7 @@ K_PROPOSAL = 35  # 제안서의 고정 상한 (전체 데이터에서 고른 값
 FIXED_CAP_MAX_K = 80
 CURVE_N = (0, 10)  # b1_scale 분위수 표의 N
 QUANTILES = (0.05, 0.25, 0.5, 0.75, 0.95)
+SCORE_DIST_N = (0, *evaluate.N_GRID)  # b1_score_dist 표의 N
 FLOAT = 6
 
 EXPECTED = {
@@ -153,13 +158,37 @@ def build_b1(sets, texts, jobs, out_dir):
                               "mean": float(p["p_fail"].mean()), **{f"q{int(x * 100):02d}": float(v) for x, v in zip(QUANTILES, q)}})
     pl.DataFrame(scale).write_csv(out_dir / "b1_scale.csv", float_precision=FLOAT)
     info = {"config": config.as_dict(), "grid_size": len(B1_GRID), "leakage": leak}
-    # 테스트를 fold 모델 하나로만 채점한 예측 (운영점 이전성 분석용, 저장하지 않음): {model: {N: [fold k 예측]}}
+    # 테스트를 fold 모델 하나로만 채점한 예측 (traj_id, N, fold, p_fail). 저장해서 운영점 평가(P4-D6)와 M1 입력(P4-D7)에 쓴다
     test = sets["test"]
+    source_n = {"b1_static": lambda n: 0, "b1_n": lambda n: n}
     fold_test = {
-        "b1_static": {n: [baselines.to_trajectories(test, f, n) for f in per_n[0]["fold_test"]] for n in evaluate.N_GRID},
-        "b1_n": {n: [baselines.to_trajectories(test, f, n) for f in per_n[n]["fold_test"]] for n in evaluate.N_GRID},
+        m: pl.concat([baselines.to_trajectories(test, f, n).with_columns(fold=pl.lit(k, dtype=pl.Int8))
+                      for n in evaluate.N_GRID_ISSUE for k, f in enumerate(per_n[src(n)]["fold_test"])])
+        for m, src in source_n.items()
     }
     return p_static, p_n, config, info, fold_test
+
+
+def fold_lists(fold_test: pl.DataFrame, n: int) -> list[pl.DataFrame]:
+    """fold별 점수 (traj_id, N, fold, p_fail) → 시점 N의 fold k 예측 목록 (운영점 이전성 분석 입력)."""
+    f = fold_test.filter(pl.col("N") == n)
+    return [f.filter(pl.col("fold") == k).select("traj_id", "N", "p_fail").sort("traj_id") for k in sorted(f["fold"].unique().to_list())]
+
+
+def score_dist(all_preds, fold_test, sets):
+    """5.0.6 B1 점수 분포: N별 train OOF, test fold 0..4, test 평균 점수의 평균·표준편차(ddof=0)·분위수. 궤적 단위."""
+    rows = []
+    for m in FOLD_MODELS:
+        for n in SCORE_DIST_N:
+            srcs = {"train_oof": evaluate.split_preds(all_preds[m], sets["train"], n),
+                    **{f"test_fold{k}": p for k, p in enumerate(fold_lists(fold_test[m], n))},
+                    "test_mean": evaluate.split_preds(all_preds[m], sets["test"], n)}
+            for src, p in srcs.items():
+                v = p["p_fail"].to_numpy()
+                q = np.quantile(v, QUANTILES)
+                rows.append({"model": m, "N": n, "source": src, "n": len(v), "mean": float(v.mean()), "std": float(v.std()),
+                             **{f"q{int(x * 100):02d}": float(y) for x, y in zip(QUANTILES, q)}})
+    return pl.DataFrame(rows)
 
 
 def build_oracles(sets, proposal_trajs):
@@ -202,7 +231,15 @@ def cap_stat(ks, costs):
     return stat
 
 
-def operating_points(all_preds, sets, costs, k_star):
+def test_preds_of(all_preds, fold_test, model, trajs, n=None):
+    """테스트 분할 예측. fold별 점수가 있는 모델은 p_fail_fold{k} 컬럼을 붙인다 (P4-D6)."""
+    p = evaluate.split_preds(all_preds[model], trajs, n)
+    if model in fold_test:
+        p = evaluate.attach_fold_scores(p, fold_test[model] if n is None else fold_test[model].filter(pl.col("N") == n))
+    return p
+
+
+def operating_points(all_preds, fold_test, sets, costs, k_star):
     """train(OOF)에서 고르고 테스트에 적용. 반환: 주 운영점 표 행(부트스트랩 구간은 나중에 붙임), 민감도 행, 주 운영점 {(model, N, policy): (τ, K)}."""
     train = sets["train"]
     main, sens, chosen = [], [], {}
@@ -210,7 +247,8 @@ def operating_points(all_preds, sets, costs, k_star):
     ref_train = evaluate.cap_point(train, k_star, costs["train"])
     for model in OP_MODELS:
         p_all = all_preds[model]
-        sp = {name: evaluate.split_preds(p_all, t) for name, t in sets.items()}
+        sp = {name: (test_preds_of(all_preds, fold_test, model, t) if name in evaluate.TEST_SPLITS else evaluate.split_preds(p_all, t))
+              for name, t in sets.items()}
         for n in evaluate.N_GRID:
             for policy in evaluate.POLICIES:
                 curves = evaluate.candidate_curves(train, sp["train"], n, policy, costs["train"])
@@ -220,10 +258,10 @@ def operating_points(all_preds, sets, costs, k_star):
                         key = (model, n, op["tau"], op["cap"])
                         for name in evaluate.TEST_SPLITS:
                             if (key, name) not in applied:
-                                applied[(key, name)] = evaluate.apply_point(sets[name], sp[name].filter(pl.col("N") == n), n, op["tau"], op["cap"], costs[name])
+                                applied[(key, name)] = evaluate.test_point(sets[name], sp[name].filter(pl.col("N") == n), n, op["tau"], op["cap"], costs[name])
                         base = {"model": model, "policy": policy, "N": n, "objective": by, "max_loss": max_loss, "tau": op["tau"], "cap": op["cap"]}
                         sens.append({**base, "split": "train", **{c: op[c] for c in evaluate.POINT_COLUMNS}})
-                        sens += [{**base, "split": name, **applied[(key, name)]} for name in evaluate.TEST_SPLITS]
+                        sens += [{**base, "split": name, **{c: applied[(key, name)][c] for c in evaluate.POINT_COLUMNS}} for name in evaluate.TEST_SPLITS]
                         if by == "saved_steps" and max_loss == metrics.SELECT_MAX_LOSS:
                             chosen[(model, n, policy)] = (op["tau"], op["cap"])
                             spread = evaluate.fold_spread(train, sp["train"], n, op["tau"], op["cap"], costs["train"])
@@ -263,7 +301,7 @@ def transfer_task(model, n, policy, train, train_preds, test, test_preds, full_o
 def tau_transfer(all_preds, sets, main_rows, k_star, fold_test, jobs):
     """회의 2026-11-05 §4.3: train 안 fold 사이 운영점 이전 vs train → test 이전 (evaluate.transfer_rows).
 
-    fold_test[model][N] = 테스트를 fold k 모델 하나로 채점한 예측 목록 (OOF로 학습하는 모델만, 예: B1).
+    fold_test[model] = 테스트를 fold k 모델 하나로 채점한 예측 (traj_id, N, fold, p_fail. OOF로 학습하는 모델만, 예: B1).
     """
     train, test = sets["train"], sets["test"]
     full = {(r["model"], r["N"], r["policy"]): r for r in main_rows if r["split"] == "train"}
@@ -273,7 +311,8 @@ def tau_transfer(all_preds, sets, main_rows, k_star, fold_test, jobs):
         for n in evaluate.N_GRID:
             for policy in evaluate.POLICIES:
                 tasks.append((m, n, policy, train, evaluate.split_preds(all_preds[m], train, n), test,
-                              evaluate.split_preds(all_preds[m], test, n), full[(m, n, policy)], fold_test.get(m, {}).get(n)))
+                              evaluate.split_preds(all_preds[m], test, n), full[(m, n, policy)],
+                              fold_lists(fold_test[m], n) if m in fold_test else None))
     rows = [r for out in parallel(transfer_task, tasks, jobs) for r in out]
     cols = ["model", "policy", "N", *evaluate.TRANSFER_COLUMNS]
     return frame(rows, cols, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64})
@@ -304,6 +343,8 @@ OP_COLUMNS = [
     "d_lost_success", "d_lost_success_lo", "d_lost_success_hi", "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi",
     "d_saved_tokens", "d_saved_tokens_lo", "d_saved_tokens_hi",
     "fold_lost_success_min", "fold_lost_success_max", "fold_saved_steps_min", "fold_saved_steps_max",
+    # test 행, OOF 모델만 (P4-D6): fold 모델별 점수 5개에 같은 τ·K를 적용한 결과의 최소·최대 (주 값은 평균)
+    *(f"{c}_fold_{e}" for c in evaluate.POINT_COLUMNS for e in ("min", "max")),
 ]
 
 
@@ -365,7 +406,10 @@ def main():
         "ref_oracle_loo": ({"rule": "1 - 같은 집합·같은 이슈 다른 궤적 성공률", "fill": oracle_info["fill_p_fail"]}, "reference"),
     }
     written = {m: preds.write(m, built[m], sets_of[m], n_grid_of[m], *configs[m], force=args.force) for m in MODELS}
+    written_folds = {m: preds.write_test_folds(m, b1_fold_test[m], sets["test"], n_grid_of[m], split.N_FOLDS, force=args.force)
+                     for m in FOLD_MODELS}
     all_preds = {m: preds.read(m) for m in MODELS}
+    fold_test = {m: preds.read_test_folds(m) for m in FOLD_MODELS}
     lap("예측 저장·검증")
 
     # 2. 판별 지표
@@ -383,12 +427,12 @@ def main():
     lap("판별 지표·고정 상한")
 
     # 4. 운영점
-    main_rows, sens_rows, chosen = operating_points(all_preds, sets, costs, k_star)
+    main_rows, sens_rows, chosen = operating_points(all_preds, fold_test, sets, costs, k_star)
     cap_main, cap_sens = cap_rows(sets, costs, k_star, cap_train)
     lap("운영점 선택·적용")
 
     # 4b. 운영점 이전성 (회의 §4.3): fold 사이 vs train → test
-    transfer = tau_transfer(all_preds, sets, main_rows, k_star, b1_fold_test, args.jobs)
+    transfer = tau_transfer(all_preds, sets, main_rows, k_star, fold_test, args.jobs)
     transfer.write_csv(out_dir / "tau_transfer.csv", float_precision=FLOAT)
     transfer_sum = evaluate.transfer_summary(transfer)
     transfer_sum.write_csv(out_dir / "tau_transfer_summary.csv", float_precision=FLOAT)
@@ -400,7 +444,7 @@ def main():
         shutil.rmtree(curve_dir)
     curve_dir.mkdir()
     for m in MODELS:
-        for (name, n), c in evaluate.model_curves(all_preds[m], sets_of[m], costs, n_grid_of[m]).items():
+        for (name, n), c in evaluate.model_curves(all_preds[m], sets_of[m], costs, n_grid_of[m], fold_test.get(m)).items():
             evaluate.thin_curve(c).write_csv(curve_dir / f"{m}_{name}_N{n}.csv", float_precision=FLOAT)
     lap("비용 곡선")
 
@@ -418,7 +462,7 @@ def main():
                     caps_used = [cap for _, cap in points.values()]
                     c = evaluate.compressed_costs(costs[name], n, caps_used, k_star) if points else None
                     stat = evaluate.bootstrap_stat(n, points, k_star if points else None, c, discrimination=True)
-                    tasks.append((t, evaluate.split_preds(all_preds[m], t, n), stat, args.n_boot))
+                    tasks.append((t, test_preds_of(all_preds, fold_test, m, t, n), stat, args.n_boot))
                     keys.append((m, name, n))
             c = evaluate.compressed_costs(costs[name], None, [K_PROPOSAL], k_star)
             empty = pl.DataFrame(schema=preds.SCHEMA)
@@ -442,12 +486,14 @@ def main():
     ops_df = frame(ops, OP_COLUMNS, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64,
                                      **dict.fromkeys(evaluate.LOSS_FLAG_COLUMNS, pl.Boolean)})
     ops_df.write_csv(out_dir / "operating_points.csv", float_precision=FLOAT)
+    dist = score_dist(all_preds, fold_test, sets)
+    dist.write_csv(out_dir / "b1_score_dist.csv", float_precision=FLOAT)
     sens_cols = ["model", "policy", "N", "objective", "max_loss", "tau", "cap", "split", *evaluate.POINT_COLUMNS]
     frame(cap_sens + sens_rows, sens_cols, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64}) \
         .write_csv(out_dir / "operating_points_sensitivity.csv", float_precision=FLOAT)
 
     check(args, out_dir, split_stats, texts, n_hint, written, disc_out, caps, k_star, proposal, b1_info, oracle_info, ops_df,
-          transfer, transfer_sum, boots, timings)
+          transfer, transfer_sum, boots, timings, written_folds, dist)
 
 
 def loss_ci_width(ops_df, k_star):
@@ -463,7 +509,7 @@ def loss_ci_width(ops_df, k_star):
 
 
 def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star, proposal, b1_info, oracle_info, ops_df,
-          transfer, transfer_sum, boots, timings):
+          transfer, transfer_sum, boots, timings, written_folds, dist):
     def pick(split_name, k, col):
         return float(caps.filter((pl.col("split") == split_name) & (pl.col("K") == k))[col][0])
 
@@ -476,6 +522,7 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
         "issues_after_strip": texts.height,
         "issues_with_hint": n_hint,
         "preds": {m: {"rows": w["rows"], "written": w["written"], "coverage": w["coverage"]} for m, w in written.items()},
+        "preds_test_folds": {m: {"rows": w["rows"], "folds": w["folds"], "max_abs_mean_diff": w["max_abs_mean_diff"]} for m, w in written_folds.items()},
         "b1": b1_info,
         "b1_within_issue_max_abs_dev_from_half": within_dev,
         "oracle": oracle_info,
@@ -490,7 +537,9 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
         },
         "operating_points_N10": ops_df.filter((pl.col("N") == 10) | (pl.col("model") == "b0_cap")).select(
             "model", "policy", "N", "tau", "cap", "split", "lost_success", "lost_success_lo", "lost_success_hi",
-            *evaluate.LOSS_FLAG_COLUMNS, "saved_steps", "saved_tokens", "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi").to_dicts(),
+            *evaluate.LOSS_FLAG_COLUMNS, "saved_steps", "saved_tokens", "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi",
+            "lost_success_fold_min", "lost_success_fold_max", "saved_steps_fold_min", "saved_steps_fold_max").to_dicts(),
+        "b1_score_dist_N10": dist.filter(pl.col("N") == 10).select("model", "source", "std", "q05", "q50", "q95").to_dicts(),
         # 판정 기준 충족 + K* 대비 절약 스텝 차이 구간 하한 > 0 (N=3~20, 모든 모델·정책)
         "judged_and_saves_more_than_k_star": [] if args.skip_bootstrap else ops_df.filter(
             pl.col("split").is_in(evaluate.TEST_SPLITS) & (pl.col("model") != "b0_cap")
@@ -545,6 +594,20 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
         and train_ops["meets_judge_ci_hi"].null_count() == train_ops.height
         and test_ops["meets_select_point"].null_count() == test_ops.height
         and (args.skip_bootstrap or test_ops["meets_judge_ci_hi"].null_count() == 0))
+    # P4-D6·P4-D7: fold별 test 점수 파일, fold 평균 = 주 파일 test 점수, OOF 모델 test 운영점에만 fold 범위가 있고 평균이 범위 안
+    crit["C12_test_fold_scores"] = all(
+        w["folds"] == list(range(split.N_FOLDS)) and w["max_abs_mean_diff"] is not None and w["max_abs_mean_diff"] <= preds.FOLD_MEAN_TOL
+        for w in written_folds.values()) and set(written_folds) == set(FOLD_MODELS)
+    fold_ops = test_ops.filter(pl.col("model").is_in(FOLD_MODELS))
+    other_ops = ops_df.filter(~(pl.col("model").is_in(FOLD_MODELS) & pl.col("split").is_in(evaluate.TEST_SPLITS)))
+    crit["C13_foldwise_operating_points"] = bool(
+        fold_ops.height == len(FOLD_MODELS) * len(evaluate.N_GRID) * len(evaluate.POLICIES)
+        and all(fold_ops[f"{c}_fold_min"].null_count() == 0
+                and ((fold_ops[f"{c}_fold_min"] <= fold_ops[c] + 1e-12) & (fold_ops[c] <= fold_ops[f"{c}_fold_max"] + 1e-12)).all()
+                for c in evaluate.POINT_COLUMNS)
+        and other_ops.select([f"{c}_fold_{e}" for c in evaluate.POINT_COLUMNS for e in ("min", "max")]).null_count().sum_horizontal().item()
+        == other_ops.height * 2 * len(evaluate.POINT_COLUMNS)
+        and dist.height == len(FOLD_MODELS) * len(SCORE_DIST_N) * (split.N_FOLDS + 2))
     s["criteria"] = crit
     s["criteria_note"] = "C9(pytest 전체 통과, 재실행 시 results/ 변화 없음)는 스크립트 밖에서 확인한다"
     (out_dir / "summary.json").write_text(json.dumps(s, ensure_ascii=False, indent=2, default=str) + "\n")

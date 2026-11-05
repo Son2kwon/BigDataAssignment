@@ -64,3 +64,81 @@ def test_model_id_rules(tmp_preds):
             preds.path(bad)
     with pytest.raises(FileNotFoundError, match="03_baselines.py"):
         preds.read("b1_missing")
+
+
+# ---- fold별 test 점수와 M1 입력 API (P4-D6·P4-D7) ----
+
+SPLITS = pl.DataFrame({"traj_id": ["a", "b", "c", "d"], "split": ["train", "train", "train", "test"]})
+FOLD_SCORES = {0: (0.1, 0.4), 1: (0.3, 0.6), 2: (0.2, 0.5)}  # fold k → (d의 N=0 점수, N=3 점수)
+
+
+def fold_frame():
+    return pl.DataFrame([("d", n, k, v[i]) for k, v in FOLD_SCORES.items() for i, n in enumerate((0, 3))],
+                        schema=["traj_id", "N", "fold", "p_fail"], orient="row")
+
+
+def write_with_folds():
+    mean = {n: sum(v[i] for v in FOLD_SCORES.values()) / 3 for i, n in enumerate((0, 3))}
+    main = good().with_columns(p_fail=pl.when(pl.col("traj_id") == "d").then(pl.col("N").replace_strict(mean, return_dtype=pl.Float64))
+                               .otherwise(pl.col("p_fail")))
+    preds.write("b1_n", main, SETS, [0, 3], {}, "5fold-oof/test-fold-mean")
+    return preds.write_test_folds("b1_n", fold_frame(), TEST, [0, 3], n_folds=3)
+
+
+def test_feature_test_requires_fold(tmp_preds):
+    write_with_folds()
+    # (a) fold k를 주면 fold k 모델 점수
+    for k, (v0, v3) in FOLD_SCORES.items():
+        got = preds.load_feature("b1_n", "test", fold=k, splits=SPLITS)
+        assert got.select("traj_id", "N", "p_fail").rows() == [("d", 0, v0), ("d", 3, v3)]
+    # (b) fold 없이 test를 요청하면 에러 (fold 평균 점수 = P4-D7 ③을 꺼낼 수 없다)
+    with pytest.raises(ValueError, match="fold를 지정"):
+        preds.load_feature("b1_n", "test", splits=SPLITS)
+    with pytest.raises(ValueError, match="fold 5가 없음"):
+        preds.load_feature("b1_n", "test", fold=5, splits=SPLITS)
+    # train은 OOF 점수 (fold를 주면 에러), test 궤적은 섞이지 않는다
+    tr = preds.load_feature("b1_n", "train", splits=SPLITS)
+    assert set(tr["traj_id"]) == {"a", "b"} and tr.filter(pl.col("traj_id") == "a")["p_fail"].to_list() == [0.2]
+    with pytest.raises(ValueError, match="train 피처"):
+        preds.load_feature("b1_n", "train", fold=0, splits=SPLITS)
+    with pytest.raises(ValueError, match="split은"):
+        preds.load_feature("b1_n", "valid", splits=SPLITS)
+
+
+def test_feature_other_folds_excludes_own(tmp_preds):
+    write_with_folds()
+    # (c) ② 민감도: fold k에 대해 j≠k만
+    for k in FOLD_SCORES:
+        got = preds.load_feature_other_folds("b1_n", k, splits=SPLITS)
+        assert sorted(set(got["src_fold"].to_list())) == [j for j in FOLD_SCORES if j != k]
+        assert got.height == 2 * (len(FOLD_SCORES) - 1)
+        for j in set(got["src_fold"].to_list()):
+            assert got.filter(pl.col("src_fold") == j).sort("N")["p_fail"].to_list() == list(FOLD_SCORES[j])
+    with pytest.raises(ValueError, match="fold 9가 없음"):
+        preds.load_feature_other_folds("b1_n", 9, splits=SPLITS)
+
+
+def test_test_folds_mean_matches_main_and_write_is_idempotent(tmp_preds):
+    st = write_with_folds()
+    # (d) fold 점수 평균 = 주 파일 test 점수 (저장 전에 검사, 차이 기록)
+    assert st["written"] and st["folds"] == [0, 1, 2] and st["max_abs_mean_diff"] <= preds.FOLD_MEAN_TOL
+    f = preds.read_test_folds("b1_n")
+    mean = f.group_by("N").agg(pl.col("p_fail").mean()).sort("N")["p_fail"].to_list()
+    main = preds.read("b1_n").filter(pl.col("traj_id") == "d").sort("N")["p_fail"].to_list()
+    assert mean == pytest.approx(main, abs=1e-15)
+    before = preds.fold_path("b1_n").read_bytes()
+    again = preds.write_test_folds("b1_n", fold_frame().reverse(), TEST, [0, 3], n_folds=3)
+    assert not again["written"] and preds.fold_path("b1_n").read_bytes() == before
+    with pytest.raises(SystemExit, match="--force"):
+        # fold 0·1 점수를 바꿔 넣음: 평균은 같아 검사는 통과하지만 내용이 달라 force 없이는 멈춘다
+        preds.write_test_folds("b1_n", fold_frame().with_columns(fold=pl.col("fold").replace_strict({0: 1, 1: 0, 2: 2})), TEST, [0, 3], n_folds=3)
+    # fold 평균이 주 파일과 다르면 저장하지 않는다
+    with pytest.raises(ValueError, match="fold 평균과 주 파일"):
+        preds.write_test_folds("b1_n", fold_frame().with_columns(p_fail=pl.col("p_fail") + 0.01), TEST, [0, 3], n_folds=3, force=True)
+    # fold마다 진행 중 test 궤적과 1:1
+    with pytest.raises(ValueError, match="fold 1: .*예측 없음"):
+        preds.validate_test_folds(fold_frame().filter(~((pl.col("fold") == 1) & (pl.col("N") == 3))), TEST, [0, 3], 3)
+    with pytest.raises(ValueError, match="fold는 0..3"):
+        preds.validate_test_folds(fold_frame(), TEST, [0, 3], 4)
+    # 모델 이름과 겹치지 않는 경로
+    assert preds.fold_path("b1_n").name == "b1_n.test_folds.parquet"

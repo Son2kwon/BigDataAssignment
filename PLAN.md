@@ -29,8 +29,8 @@
 | 데이터 다운로드 | `data/download.sh`. HF revision 고정 + SHA-256 검증, 이어받기 지원. 이 머신의 `data/`에 4개 데이터셋 모두 받아져 있다 (3.4GB) |
 | 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics, preds, oof, evaluate, baselines`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2), `code/03_baselines.py`(Phase 4). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
 | 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet, context_costs.parquet, preds/*.parquet` (git 밖). 검증 수치·결과 표 `results/phase1/`, `results/phase2/`, `results/phase4/` (git 안) |
-| 테스트·린트·CI | pytest(dev 그룹) 100개, `code/tests/`. 린트·CI 없음 |
-| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)은 확정, 구현은 다음 PR. 다음은 "Phase 5 선행: P4-D6·P4-D7 구현" → Phase 5 (M1) |
+| 테스트·린트·CI | pytest(dev 그룹) 108개, `code/tests/`. 린트·CI 없음 |
+| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). 다음은 Phase 5 (M1) |
 
 ### 데이터 구조 [확인, parquet 스키마와 샘플 행 조회]
 
@@ -380,7 +380,7 @@ metrics.point_metrics(trajs, test_preds, N, tau=op["tau"], cap=op["cap"], costs=
 산출물
 - `data/processed/preds/{b0_err, b0_editfail, b1_static, b1_n, ref_oracle_loo, ref_oracle_xmodel}.parquet` (git 밖). 메타데이터에 설정·N 목록·분할·git 커밋·생성 시각. 내용이 같으면 다시 쓰지 않는다
 - `results/phase4/`: `discrimination.csv`, `discrimination_ci.csv`, `fixed_cap.csv`(분할·전체 × K 1..80), `operating_points.csv`, `operating_points_sensitivity.csv`(max_loss 2~10% × 목적 함수 2), `cost_curves/`(113개, 행 ≤200), `b1_grid.csv`, `b1_scale.csv`, `summary.json`
-- Phase 5로 넘기는 것: `preds.load_feature("b1_n")`을 `(traj_id, N)`으로 join (`ref_*`는 거부됨. 2026-11-05 P4-D7: 이 파일의 test 행은 fold 평균이라 M1 테스트 입력으로는 train 행만 쓰고, 테스트는 B1 fold별 점수를 쓴다), `oof.oof_predict(train, fit, predict, test=)`, `evaluate.*`, `metrics.select_operating_point / select_from_curves / select_cap / fixed_cap_curve`, 앞 N스텝 누수 테스트 틀 `test_error_count_ignores_steps_after_n`
+- Phase 5로 넘기는 것: B1 피처는 `preds.load_feature("b1_n", "train")`(OOF)과 `preds.load_feature("b1_n", "test", fold=k)`(M1 fold k용, P4-D7 ①), 민감도 ②는 `preds.load_feature_other_folds("b1_n", k)`. `(traj_id, N)`으로 join한다 (`ref_*`는 거부, fold 없이 test를 요청하면 에러. 2026-11-05 "Phase 5 선행" 절에서 바뀜. 예전 `load_feature("b1_n")`은 test 행이 fold 평균이었다). M1의 fold별 test 점수는 `evaluate.attach_fold_scores`로 붙여 같은 운영점 평가를 받는다 (P4-D6), `oof.oof_predict(train, fit, predict, test=)`, `evaluate.*`, `metrics.select_operating_point / select_from_curves / select_cap / fixed_cap_curve`, 앞 N스텝 누수 테스트 틀 `test_error_count_ignores_steps_after_n`
 
 PLAN_4.md와 다르게 한 것
 - 3.5는 팀원이 먼저 `metrics.select_operating_point(..., caps=)`로 main에 넣어서(#4) 계획의 `select_combined`는 따로 만들지 않았다. 결합 정책 = `caps=range(N+1, 61)`. 같은 곡선에서 max_loss·목적 함수를 바꿔 고르려고 선택 단계만 `select_from_curves`로 떼어냈다 (시그니처 변경 없음)
@@ -497,7 +497,7 @@ PLAN_4.md와 다르게 한 것
 
 운영점 (N=10, train OOF에서 3.5%로 고른 τ·K 그대로 적용. 차이는 같은 부트스트랩 표본의 K\*=40 대비 절약 스텝. 판정 = test 손실 95% 상한 ≤5%)
 
-> 아래 B1 행의 test 값은 5개 fold 모델 **평균 점수**에 τ를 적용한 결과다. 2026-11-05 P4-D6로 운영점 평가 방식이 "fold 모델별 채점 후 평균"으로 바뀌었고, B1 운영점은 다음 PR에서 다시 계산한다 ("Phase 5 선행: P4-D6·P4-D7 구현"). B0 행과 K\*는 학습이 없어 바뀌지 않는다.
+> 아래 B1 행의 test 값은 5개 fold 모델 **평균 점수**에 τ를 적용한 당시 결과다. 2026-11-05 P4-D6로 운영점 평가 방식이 "fold 모델별 채점 후 평균"으로 바뀌었고, 다시 계산한 B1 운영점은 "Phase 5 선행: P4-D6·P4-D7 구현" 절의 "결과"에 있다 (`operating_points.csv`는 새 값). B0 행과 K\*는 학습이 없어 그대로다 (바이트 단위로 같음). 아래 구간 폭 참고값 중 "모델 운영점" 값도 당시 값이다.
 
 
 | 정책 | τ, K | train 손실 / 절약 | test 손실 [95%] / 절약 스텝 / 절약 토큰 | K\* 대비 절약 차이 [95%] | 판정 |
@@ -528,9 +528,9 @@ PLAN_4.md와 다르게 한 것
 - fold 사이 범위: B0 0.78~1.15, B1 0.80~1.32. B1을 fold 모델 하나로 채점하면 0.79~1.18로 fold 범위 안 → 앞 절 결론 2(남은 B1 차이는 fold 평균 점수 탓, P4-D6)가 그대로다. 같은 운영점을 적용한 B1 120쌍 중 89쌍에서 평균 점수 쪽 정지율이 fold 모델 하나 쪽보다 낮거나 같다 (5% 선택 당시 104쌍). 모든 N의 단독 정책 비: B0 0.84~1.08, B1 0.72~0.90
 - 고정 상한 K\*: fold 사이 0.94~1.09, test 0.99
 
-### Phase 5 선행: P4-D6·P4-D7 구현 — OOF 모델 운영점을 fold 모델별 채점으로 평가, B1 테스트 점수 fold별 저장 (다음 PR)
+### Phase 5 선행: P4-D6·P4-D7 구현 — OOF 모델 운영점을 fold 모델별 채점으로 평가, B1 테스트 점수 fold별 저장 (2026-11-05 완료)
 
-2026-11-05 확정한 P4-D6·P4-D7(11절)을 코드에 넣고 B1으로 먼저 확인한 뒤 Phase 5로 넘어간다. 이 PR(문서)에서는 코드·테스트·`results/`를 바꾸지 않았다.
+2026-11-05 확정한 P4-D6·P4-D7(11절)을 코드에 넣고 B1으로 먼저 확인한 뒤 Phase 5로 넘어간다. 결정은 문서 PR(#8), 구현은 브랜치 `phase/5.0-foldwise-scoring`.
 
 규칙 (적용 대상: OOF로 학습하는 모델 B1, M1~M3의 운영점 평가. 학습 없는 B0 규칙과 고정 상한 K\*는 해당 없음)
 - 테스트 궤적을 5개 fold 모델이 **각각** 채점한다 (`oof.OOFResult.test_fold_scores`, 행 = fold k, 새로 학습하지 않는다)
@@ -541,7 +541,7 @@ PLAN_4.md와 다르게 한 것
 - M1(과 B1을 입력으로 쓰는 M2·M3)의 테스트 B1 입력은 P4-D7: M1 fold k 모델에는 B1 fold k 모델의 테스트 점수를 넣는다. 평균 점수는 넣지 않는다
 
 작업
-| 작업 | 내용 |
+| 작업 (모두 완료 ✓) | 내용 |
 | --- | --- |
 | 5.0.1 | fold 모델별 테스트 예측을 운영점 평가 경로(비용 곡선, 운영점 적용, 부트스트랩 stat)에 넣는다. 지금 `03_baselines.py`는 `test_fold_scores`를 이전성 분석(`tau_transfer`)에만 쓰고 저장하지 않는다 |
 | 5.0.2 | 운영점 표에 평균과 fold 범위(min~max) 컬럼, 판정은 평균 손실의 구간 상한 |
@@ -549,6 +549,53 @@ PLAN_4.md와 다르게 한 것
 | 5.0.4 | B1으로 Phase 4 운영점 재실행 → B1 판정 결과 확인 (지금 N=10 B1은 4개 정책 모두 불충족, 평균 점수 기준). 판별 표·B0 행·K\*는 바이트 단위로 같아야 한다 |
 | 5.0.5 | B1 테스트 점수를 fold별로 저장하고 꺼낼 수 있게 한다 (P4-D7). 예측 파일에 넣을지 `OOFResult.test_fold_scores`를 쓸지는 구현 PR에서 정한다. 지금은 `03_baselines.py`가 fold별 점수를 이전성 분석에만 쓰고 저장하지 않는다 |
 | 5.0.6 | 분포 확인 표: N별로 B1 OOF 점수(train), B1 fold별 테스트 점수(fold 0~4 각각), B1 평균 테스트 점수의 표준편차와 5·25·50·75·95 분위수를 나란히 기록한다. 평균 점수가 얼마나 압축되는지 숫자로 남긴다 (기존 `b1_scale.csv`에는 OOF·평균의 분위수만 있고 표준편차와 fold별 점수가 없다) |
+
+#### 결과 (2026-11-05)
+
+실행: `uv run --no-sync python code/03_baselines.py --force` (12코어 M4 Pro 약 3분, 부트스트랩이 fold 5개를 적용해 87초) → 완료 기준 C1~C13 통과. 다시 실행하면 `results/phase4/`·`preds/`·`splits.parquet` 85개 파일이 바이트 단위로 같다 [확인]. `uv run --no-sync pytest` **108개 통과**, skip 0.
+- 바뀌지 않은 것 [확인]: `discrimination.csv`, `discrimination_ci.csv`, `fixed_cap.csv`, `tau_transfer*.csv`, B0 비용 곡선은 바이트 단위로 같다. `operating_points.csv`의 B0·K\* 행 52개, B1 train 행, 민감도 표의 B1 test 밖 행도 같다. K\* = 40. 주 예측 파일 `preds/*.parquet`도 그대로다 (같은 내용이라 다시 쓰지 않음)
+- 바뀐 것: `operating_points.csv`·`operating_points_sensitivity.csv`의 B1 test 행, `cost_curves/b1_*_test_N*.csv`(fold별 곡선을 τ마다 평균), `summary.json`. 새 파일 `b1_score_dist.csv`, `preds/b1_{static,n}.test_folds.parquet`
+- `tau_transfer*.csv`는 진단용이라 그대로 두었다. `source=train → test` 행은 계속 평균 점수 기준이고, B1의 주 운영점 test 값은 이제 `operating_points.csv`와 다르다 (`evaluate.transfer_rows` 문서에 적음)
+- `b1_grid.csv`는 PR #7과 같은 플랫폼 차이(고르지 않은 C ≥ 1 행의 소수 다섯째 자리)만 있어 커밋하지 않았다
+
+저장 형식 결정 (5.0.5): **별도 파일 `preds/<model_id>.test_folds.parquet`** (traj_id, N, fold, p_fail. test 궤적만)
+- 주 예측 파일에 넣지 않은 이유: 주 파일은 모든 모델이 같은 형식(traj_id, N, p_fail, 진행 중 궤적과 1:1)이고 하네스·판별 지표가 그 형식을 그대로 쓴다. fold 컬럼을 넣으면 test 궤적이 5행이 되어 그 불변식이 깨진다. B0처럼 fold가 없는 모델과 형식도 달라진다
+- `OOFResult`만 쓰지 않은 이유: 실행 중에만 있는 객체라 다음 스크립트(Phase 5)가 다시 학습하지 않고는 꺼낼 수 없다. M1은 B1을 다시 학습하지 않고 읽어야 한다
+- 저장 전에 `preds.write_test_folds`가 검사한다: fold 0..4가 각각 모든 N에서 진행 중 test 궤적과 1:1, fold 평균 = 주 파일 test 점수 (최대 차이 ≤1e-12, 실측 `summary.json`의 `preds_test_folds`). 같은 내용이면 다시 쓰지 않고 다르면 `--force` 없이는 멈춘다 (주 파일과 같은 방식). 이름에 `.`이 있어 model_id(소문자·숫자·밑줄)와 겹치지 않는다
+
+API
+- 운영점 평가 (P4-D6, 모델 종류와 무관): `evaluate.attach_fold_scores(test_preds, fold_preds)`가 test 예측에 `p_fail_fold0..4` 컬럼을 붙인다. 그 프레임을 넣으면 `evaluate.test_point`(운영점 적용, 평균 + `_fold_min/_fold_max`), `evaluate.bootstrap_stat`(반복마다 5개 평균), `evaluate.model_curves(..., fold_preds=)`(τ마다 평균한 곡선, `evaluate.fold_mean_curve`)가 fold별로 적용한다. 한 프레임에 같이 있어 부트스트랩에서 5개가 같은 재표본을 쓴다. 판별 지표는 그대로 `p_fail`(평균 점수). M1은 fold별 test 점수 5개만 넘기면 같은 평가를 받는다
+- M1 입력 (P4-D7): `preds.load_feature(model_id, split, fold=None)`. `split="train"` → OOF 점수, `split="test"` → `fold=k`를 줘야만 fold k 모델 점수(①), fold 없이 test를 요청하면 에러(③을 꺼낼 수 없음). ② 민감도는 `preds.load_feature_other_folds(model_id, k)` → `src_fold` j≠k 4개 (M1 fold k를 src_fold마다 채점해 결과를 평균한다)
+- `operating_points.csv` 새 컬럼: `stop_rate|lost_success|saved_steps|saved_tokens` × `_fold_min|_fold_max` (B1 test 행만, 주 값은 평균). 완료 기준 C12(fold 점수 파일), C13(fold 범위가 B1 test 행에만 있고 평균이 범위 안, 분포 표 행 수)
+- 테스트 8개 추가: fold 지정 시 fold k 점수(a), fold 없이 test → 에러(b), ② 경로가 j≠k 4개(c), fold 평균 = 주 파일 점수(d), fold 결과 평균·min·max, fold 점수가 같으면 기존과 같음, 부트스트랩 구간 = 반복마다 평균한 값의 구간(판별 구간은 그대로), τ마다 평균한 곡선. 실데이터 테스트에 fold 파일·API 검사 추가
+
+B1 운영점 (N=10, train OOF에서 3.5%로 고른 τ·K 그대로. 손실·절약은 fold 모델 5개 결과의 평균 (min~max), 차이는 같은 표본 K\*=40 대비 절약 스텝)
+
+| 정책 | τ, K | 새 test 손실 [95%] (fold 범위) | 새 절약 스텝 (fold 범위) / 토큰 | 새 K\* 대비 [95%] | 판정 | 이전(평균 점수) 손실 [95%] / 절약 / K\* 대비 | 이전 판정 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `b1_static` 단독 | 0.909, — | 4.45% [1.93, 7.44] (3.17~7.01) | 12.41% (11.36~13.25) / 16.47% | −7.42%p [−10.20, −4.37] | ✗ | 2.78% [0.48, 5.69] / 10.57% / −9.26%p [−12.41, −5.98] | ✗ |
+| `b1_static` 결합 | 0.920, 47 | 3.49% [1.54, 6.11] (2.97~4.22) | 20.83% (20.33~21.64) / 33.26% | +1.00%p [−0.44, +2.67] | ✗ | 2.64% [0.86, 5.18] / 20.13% / +0.30%p [−1.20, +1.88] | ✗ |
+| `b1_n` 단독 | 0.913, — | 3.89% [1.45, 6.76] (2.78~4.94) | 11.43% (11.05~12.39) / 15.08% | −8.39%p [−11.27, −5.37] | ✗ | 2.50% [0.29, 5.41] / 10.51% / −9.32%p [−12.15, −6.08] | ✗ |
+| `b1_n` 결합 | 0.921, 46 | 3.05% [1.14, 5.56] (2.64~3.69) | 20.95% (20.40~21.54) / 33.57% | +1.12%p [−0.24, +2.63] | ✗ | 2.97% [1.05, 5.46] / 20.80% / +0.98%p [−0.51, +2.62] | ✗ |
+
+- fold 모델별로 채점하면 τ가 더 많이 끊는다 (N=10 단독 정지율 `b1_static` 11.6% → 14.5%, `b1_n` 11.1% → 13.3%). 그만큼 절약도 손실도 늘었다. N=10에서는 네 정책 모두 여전히 판정 불충족이다 (손실 상한 5.6~7.4%)
+- **test/train 정지율 비** (단독 정책, 모든 N): fold별 채점 평균 `b1_static` 0.89~0.97, `b1_n` 0.88~0.95. 평균 점수일 때는 0.76~0.90, 0.72~0.89. fold 모델 하나하나의 비는 0.73~1.09로 fold 사이 범위(`tau_transfer_summary.csv` B1 0.76~1.40) 안이다. P4-D6이 고치려던 척도 차이는 대부분 사라졌다
+- **N=3~20에서 판정을 충족하면서 K\*보다 유의하게 더 아끼는 정책**: B0 9개는 그대로 (에러 수 결합 N=5·8·10·15·20, 편집 실패 수 결합 N=8·10·15·20). **B1은 `b1_static` 결합 N=20 하나가 새로 들어왔다** (τ=0.894, K=57, 손실 2.98% [상한 4.28%], 절약 21.26%, K\* 대비 +1.44%p [+0.14, +2.93]). 구간 하한이 0에 가깝다
+- B1 판정 통과 (24개 중): 8개 → 9개. 새로 통과 `b1_static` 단독 N=20(상한 5.01% → 4.89%), `b1_n` 결합 N=8(6.26% → 4.97%). 새로 불충족 `b1_static` 결합 N=15(4.98% → 5.30%). 셋 다 상한이 5% 근처라 경계 판정이다
+- 테스트 손실 구간 반폭 (모델 운영점 48개): 중앙값 ±1.26%p (최소 0.70, 최대 3.55). 결합 ±0.93%p, 단독 ±1.50%p
+
+B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표준편차는 ddof=0)
+
+| N=10 | train OOF | test fold 0~4 | test 평균 |
+| --- | --- | --- | --- |
+| `b1_n` 표준편차 | 0.0396 | 0.0334~0.0401 (평균 0.0366) | 0.0343 |
+| `b1_n` q05 / q95 | 0.799 / 0.928 | 0.795~0.816 / 0.924~0.928 | 0.811 / 0.927 |
+| `b1_static` 표준편차 | 0.0548 | 0.0478~0.0550 (평균 0.0506) | 0.0478 |
+| `b1_static` q05 / q95 | 0.753 / 0.928 | 0.749~0.777 / 0.924~0.928 | 0.776 / 0.924 |
+
+- 평균 점수는 fold 점수보다 표준편차가 5~8% 작다 (모든 N, fold 5개 표준편차의 평균 대비). OOF 대비로는 10~15% 작다. 압축은 주로 아래쪽 꼬리(q05)에서 나타나고 q95는 거의 같다
+- fold 점수 자체도 OOF보다 표준편차가 약 7% 작다 (N=10 `b1_n` 0.0366 vs 0.0396). 테스트 이슈 쪽 성질이고 평균과는 별개다. 남은 정지율 비(0.88~0.97)가 이것과 부합한다
+- 기존 `b1_scale.csv`는 그대로 둔다
 
 ### Phase 5. M1 피처 모델 + SHAP (9~10주차, 2~3일) — 최소 범위의 핵심
 
@@ -671,8 +718,8 @@ Phase 1과 Phase 3은 인터페이스(`steps.parquet` 스키마, 예측 파일 �
 | P4-D3 | B1 대표 행 | **`b1_n`을 주 결과로**, `b1_static` 보조. 두 값은 N≤8에서 거의 같다 |
 | P4-D4 | 운영점 목적 함수·주 지표 | **확정 (회의 2026-11-05): 절약 스텝이 주 지표**(운영점도 절약 스텝으로 고른다). 절약 토큰도 함께 계산·보고하고 스텝과의 관계를 같이 보여준다 (예: K\*=40 test 스텝 19.8% ↔ 토큰 34.4%. 맥락이 뒤로 갈수록 길어 토큰 절약이 크다). 토큰 기준 선택은 `operating_points_sensitivity.csv`(objective=saved_tokens) |
 | P4-D5 | B1 가중 방식 | 그리드 OOF로 선택됨: 70B 무작위 분할에서 `traj` 가중 (char_wb (3,5)-gram, C=0.1). 예전 분할에서는 `issue` 가중 |
-| P4-D6 | fold 평균 테스트 점수로 τ가 덜 끊는 문제 (Phase 2~4 재실행 결론 2) | **확정 (2026-11-05): (c) 테스트를 fold 모델별로 채점. 구현은 다음 PR** ("Phase 5 선행: P4-D6·P4-D7 구현"). M1 입력은 P4-D7. OOF로 학습하는 모델(B1, M1~M3)의 운영점 평가에 적용, B0 해당 없음. 5개 fold 모델 점수에 train에서 고른 τ·K를 각각 적용하고 정지율·손실·절약 스텝·절약 토큰의 평균(+ 범위)을 보고. 구간은 부트스트랩 반복마다 5개 평균, 판정은 그 평균 손실의 95% 상한 ≤5% (선택 3.5% 그대로). 근거: τ는 OOF(fold 모델 하나) 점수 척도에서 고르는데 평균 점수는 가운데로 모여 높은 τ를 덜 넘는다 / fold 모델 하나로 채점한 test의 정지율 비가 fold 사이 범위 안 (N=10 `b1_n` 단독 0.79~1.18 vs fold 0.80~1.32, 평균 점수 0.71~0.83, `tau_transfer_summary.csv`) / `test_fold_scores`가 이미 있어 새로 학습하지 않음. 기각: (a) 정지율 고정 — 손실을 직접 통제 못 함, (b) τ 선택 점수를 평균 방식에 맞춤 — train에서 fold 평균에 해당하는 점수를 정의하기 어렵고 따로 만들어야 함 |
-| P4-D7 | M1의 테스트 B1 입력 (M1 fold k 모델에 넣는 B1 점수) | **확정 (2026-11-05).** **① 주 방식(고정):** M1 fold k ← B1 fold k 모델의 테스트 점수. **② 민감도(보고만):** M1 fold k를 B1 fold j(j≠k) 4개 모델의 테스트 점수로 각각 채점해 평균. 결과를 보고 주 방식을 바꾸지 않는다 (테스트 정보가 선택에 들어가므로). ①과 차이가 크면 한계로 기록. **③ 금지:** B1 5개 fold 모델의 평균 테스트 점수. P4-D6과의 관계: 운영점은 M1 fold 모델 5개(각각 ① 입력) 결과의 평균, 판별 지표는 같은 5개 M1 점수의 평균. M2·M3가 B1을 입력으로 쓰면 같은 규칙. 근거: (1) M1 학습 피처는 B1 OOF 점수(모델 하나의 점수)인데 평균 점수는 가운데로 모여 성질이 다른 피처가 된다. 평균 점수로 채점한 test의 정지율 비는 하한이 fold 사이 범위 아래로 벗어나고 fold 범위의 아래쪽 끝에 몰렸다 (N=10 단독, `b1_n` 0.71~0.83 vs fold 0.80~1.32, `b1_static` 0.75~0.83 vs 0.80~1.17. fold 모델 하나로 채점하면 0.79~1.18, 0.89~1.06. `tau_transfer_summary.csv`) (2) ①이 맞추는 것은 척도("모델 하나가 낸 점수")뿐이다. M1 fold k의 학습 피처는 B1 fold j(j≠k) 모델들이 만들었고 B1 fold k 모델은 쓰이지 않았으므로 "k끼리 짝"에 통계적 이유는 없다. ①은 단순해서 골랐고, 학습 피처의 출처와 정확히 같은 방식은 ②다 (3) 테스트 이슈는 B1·M1 어떤 fold 모델의 학습에도 쓰이지 않아 누수가 없다. 한계(stacking): M1 fold k의 학습 피처를 만든 B1 fold j 모델은 fold k를 포함해 학습했으므로 M1 OOF 점수에 fold k 정보가 아주 간접적으로 섞인다. 일반적인 stacking에서 허용하는 수준이라 그대로 두고 기록만 한다 (중첩 교차검증은 하지 않음). proposal-changes.md 17번 |
+| P4-D6 | fold 평균 테스트 점수로 τ가 덜 끊는 문제 (Phase 2~4 재실행 결론 2) | **확정 (2026-11-05): (c) 테스트를 fold 모델별로 채점. 구현됨** ("Phase 5 선행: P4-D6·P4-D7 구현" 절, `evaluate.attach_fold_scores`·`test_point`). M1 입력은 P4-D7. OOF로 학습하는 모델(B1, M1~M3)의 운영점 평가에 적용, B0 해당 없음. 5개 fold 모델 점수에 train에서 고른 τ·K를 각각 적용하고 정지율·손실·절약 스텝·절약 토큰의 평균(+ 범위)을 보고. 구간은 부트스트랩 반복마다 5개 평균, 판정은 그 평균 손실의 95% 상한 ≤5% (선택 3.5% 그대로). 근거: τ는 OOF(fold 모델 하나) 점수 척도에서 고르는데 평균 점수는 가운데로 모여 높은 τ를 덜 넘는다 / fold 모델 하나로 채점한 test의 정지율 비가 fold 사이 범위 안 (N=10 `b1_n` 단독 0.79~1.18 vs fold 0.80~1.32, 평균 점수 0.71~0.83, `tau_transfer_summary.csv`) / `test_fold_scores`가 이미 있어 새로 학습하지 않음. 기각: (a) 정지율 고정 — 손실을 직접 통제 못 함, (b) τ 선택 점수를 평균 방식에 맞춤 — train에서 fold 평균에 해당하는 점수를 정의하기 어렵고 따로 만들어야 함 |
+| P4-D7 | M1의 테스트 B1 입력 (M1 fold k 모델에 넣는 B1 점수) | **확정 (2026-11-05). 입력 경로 구현됨** (`preds.load_feature(.., "test", fold=k)`, `load_feature_other_folds`, fold 없이 test 요청은 에러). **① 주 방식(고정):** M1 fold k ← B1 fold k 모델의 테스트 점수. **② 민감도(보고만):** M1 fold k를 B1 fold j(j≠k) 4개 모델의 테스트 점수로 각각 채점해 평균. 결과를 보고 주 방식을 바꾸지 않는다 (테스트 정보가 선택에 들어가므로). ①과 차이가 크면 한계로 기록. **③ 금지:** B1 5개 fold 모델의 평균 테스트 점수. P4-D6과의 관계: 운영점은 M1 fold 모델 5개(각각 ① 입력) 결과의 평균, 판별 지표는 같은 5개 M1 점수의 평균. M2·M3가 B1을 입력으로 쓰면 같은 규칙. 근거: (1) M1 학습 피처는 B1 OOF 점수(모델 하나의 점수)인데 평균 점수는 가운데로 모여 성질이 다른 피처가 된다. 평균 점수로 채점한 test의 정지율 비는 하한이 fold 사이 범위 아래로 벗어나고 fold 범위의 아래쪽 끝에 몰렸다 (N=10 단독, `b1_n` 0.71~0.83 vs fold 0.80~1.32, `b1_static` 0.75~0.83 vs 0.80~1.17. fold 모델 하나로 채점하면 0.79~1.18, 0.89~1.06. `tau_transfer_summary.csv`) (2) ①이 맞추는 것은 척도("모델 하나가 낸 점수")뿐이다. M1 fold k의 학습 피처는 B1 fold j(j≠k) 모델들이 만들었고 B1 fold k 모델은 쓰이지 않았으므로 "k끼리 짝"에 통계적 이유는 없다. ①은 단순해서 골랐고, 학습 피처의 출처와 정확히 같은 방식은 ②다 (3) 테스트 이슈는 B1·M1 어떤 fold 모델의 학습에도 쓰이지 않아 누수가 없다. 한계(stacking): M1 fold k의 학습 피처를 만든 B1 fold j 모델은 fold k를 포함해 학습했으므로 M1 OOF 점수에 fold k 정보가 아주 간접적으로 섞인다. 일반적인 stacking에서 허용하는 수준이라 그대로 두고 기록만 한다 (중첩 교차검증은 하지 않음). proposal-changes.md 17번 |
 | §4.1 | 성공 손실 기준 | **확정 (회의 2026-11-05): 선택 train 손실 ≤3.5%(`metrics.SELECT_MAX_LOSS`, 고정값) / 판정 test 손실 95% 구간 상한 ≤5%(`metrics.JUDGE_MAX_LOSS`).** 기준선·모델 같은 규칙. "손실 기준 변경" 절, proposal-changes.md 15번 |
 | N 선택 | "좋은 N"을 고르는 규칙 | **확정 (회의 2026-11-05): train OOF에서만 고른다. AUROC가 메인, 절약 스텝(선택 기준 3.5%로 고른 운영점)이 서브.** 정확도는 쓰지 않는다 (N이 클수록 진행 중 궤적의 성공 비율이 낮아 정확도가 저절로 오른다. 성공률 N=10 13.8%, N=20 6.4%). 테스트에는 고른 N만이 아니라 모든 N을 보고한다 |
 | §4.3 | 테스트 셋 구성 | **확정 (회의 2026-11-05): 70B만, 테스트 이슈 무작위(층화) 추출.** 8B·405B는 평가에서 뺀다 |
