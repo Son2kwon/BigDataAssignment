@@ -5,7 +5,9 @@
 - 리뷰 날짜: ____
 - 쓰는 법: 각 항목의 `[ ]`를 확인하면 `[x]`로 바꾸고, `메모:` 칸에 결과를 적는다. 문서·코드 위치는 PR #13 브랜치 기준이다
 
-**진행 순서**: ① 이 체크리스트로 리뷰 → ② 결정 반영 (5절의 결정을 PLAN.md 11절 P5-D3~D6에 확정으로 적는다) → ③ PR #13 머지 (머지는 사람이 한다) → ④ 최신 main에서 Phase 6 브랜치 시작
+**진행 순서**: ① 이 체크리스트로 리뷰 → ② 체크리스트를 채운 뒤 PR #13에 **GitHub Review**(Approve 또는 Request changes)로 요약을 남긴다 → ③ 결정 반영 (5절의 결정을 PLAN.md 11절 P5-D3~D7에 확정으로 적는다) → ④ PR #13 머지 (머지는 사람이 한다) → ⑤ 최신 main에서 Phase 6 브랜치 시작
+
+- ②를 하는 이유: PR #1~#12에는 GitHub 리뷰 기록이 없다. 두 사람의 협업(균등 기여) 기록을 PR에 남기려고 리뷰를 GitHub 리뷰 기능으로 한다. 예: `gh pr review 13 --approve --body "체크리스트 docs/reviews/phase5-review.md 완료. 지적 사항 …"` (수정 요청이면 `--request-changes`)
 
 준비:
 
@@ -40,7 +42,8 @@ brew install libomp            # macOS만. XGBoost가 OpenMP 런타임을 찾지
   - 머신 (CPU·코어 수·메모리·OS): ____
   - `03_baselines.py`: ____ (작성자 12코어 M4 Pro 2분 59초) / `04_m1.py`: ____ (4분 28초)
 - [ ] **설치 메모**: macOS에서 XGBoost에 `brew install libomp`가 필요하다는 내용이 README 설치 절(`README.md` "2. 패키지 설치")에 있는지 본다. 없으면 6절 지적 사항으로 남긴다
-  - 참고: 이 체크리스트를 쓴 시점(2026-11-06)에 PR #13의 README에는 없다 [확인]. `docs/phase5.md` 5.3 "결정과 근거"와 PLAN.md 8절 명령 모음에만 있다
+  - 정정 (2026-11-06): 처음 이 체크리스트에 "PR #13의 README에는 없다 [확인]"이라고 적었는데 틀렸다. README "OS별 차이" 절에는 `1f40612`(2026-10-23, 환경 설정 커밋)부터 "macOS에서 `import xgboost`가 libomp 오류를 내면 `brew install libomp`를 실행한다"가 있었다 (확인할 때 검색 결과를 앞부분만 보고 놓쳤다). PR #13 `4eb9ef5`에서 "2. 패키지 설치" 절에도 오류 증상과 함께 넣었다
+  - 볼 것: 설치 절의 안내와 오류 문구가 실제 증상과 맞는지 (`brew uninstall libomp` 상태에서 `uv run --no-sync python -c "import xgboost"`를 해 보면 확인할 수 있다. 확인 뒤 다시 설치)
   - 메모:
 
 ## 2. 피처와 누수
@@ -96,10 +99,20 @@ brew install libomp            # macOS만. XGBoost가 OpenMP 런타임을 찾지
   - 좋은 N이 탐색 범위 끝(N=20)이라는 점 → 5.6 "좋은 N"
   - 그 밖에: 같은 OOF로 하이퍼파라미터·운영점을 고르는 낙관 (5.3), SHAP을 인과로 읽지 않는다는 점 (5.4), 5.5가 근사라 83%/40%를 재현하지 못했다는 점 (5.5)
   - 메모:
+- [ ] **5.6 "절약 토큰" 표** (PR #13 `7f077fa`로 추가): `docs/phase5.md` 5.6 "절약 토큰 (N=10·15·20)" 표의 해석, 즉 "N=10은 토큰 기준 이득이 없다 (결합 정책은 K\*와 같거나 약간 적고 단독은 크게 적다), N=15 결합·N=20은 토큰 기준으로도 K\*보다 유의하게 더 아낀다"가 표 수치와 맞는지 본다. 원 수치는 `results/phase5/operating_points_compare.csv`의 `saved_tokens`, `d_saved_tokens`, `d_saved_tokens_lo`, `d_saved_tokens_hi` (test 행)
+  ```bash
+  uv run --no-sync python -c "import polars as pl; o=pl.read_csv('results/phase5/operating_points_compare.csv'); print(o.filter((pl.col('split')=='test') & pl.col('model').str.starts_with('m1') & pl.col('N').is_in([10,15,20])).select('model','policy','N','saved_tokens','d_saved_tokens','d_saved_tokens_lo','d_saved_tokens_hi','meets_judge_ci_hi').sort('model','policy','N'))"
+  ```
+  - 메모:
+- [ ] **5.6 "발표 시 주의"** (`7f077fa`): "가장 큰 절약은 N=15·20 시점의 선별이고(진행 중 궤적의 46~54%를 끊음), N=3·5에는 궤적 신호가 거의 없다(이슈 내 AUROC 0.50~0.54)"는 서술이 타당한지 본다. 근거 표: 5.6 "N별 판별 지표"(이슈 내 AUROC), 운영점 표(정지율), `results/phase5/discrimination_compare.csv`. 발표 문장 예시가 K\*=40 대비임을 밝히는지도 본다
+  - 메모:
+- [ ] **그림 `results/phase5/figures/auroc_by_n.png`** (`7f077fa`): `uv run --no-sync python code/04c_fig_auroc.py`로 다시 만들어지는지, 그림의 점이 5.6 "N별 판별 지표" 표(test AUROC, 이슈 내 AUROC 쌍 가중)와 같은지 본다. 다시 만든 뒤 `git checkout -- results/phase5/figures/auroc_by_n.png`로 되돌릴 수 있다
+  - 참고 [확인, 2026-11-06]: 이 체크리스트 작성자의 머신(같은 `.venv`)에서 다시 만들면 **내용은 같지만 바이트가 다르다** (커밋된 파일 97,127바이트, 다시 만든 파일 91,521바이트. 글자·선의 렌더링만 다르고, 같은 머신에서 두 번 만들면 서로 같다). 커밋된 그림을 만든 환경(matplotlib·글꼴)이 다른 것으로 보인다 [가정]. 리뷰어 머신에서도 바이트 diff가 나면 그림 내용만 비교하고, 어느 환경의 그림을 커밋할지 정해서 지적 사항에 적는다
+  - 메모:
 - [ ] **결과 해석 규칙** (CLAUDE.md "판단이 필요할 때"): 기준선 비교가 K\* 대비라고 적혀 있는지, 하나만 통과한 결과를 강조하지 않고 N 전체의 경향으로 쓰는지 (5.6 "판정을 통과하면서 K\*보다 유의하게 더 아끼는 정책"의 "N 전체의 경향")
   - 메모:
 
-## 5. 결정 필요 (PLAN.md 11절 P5-D3~D6)
+## 5. 결정 필요 (PLAN.md 11절 P5-D3~D7)
 
 PR #13 브랜치의 PLAN.md 11절에서 옮겨 적었다. 리뷰어가 결정과 근거를 채운다. 확정한 내용은 2단계(결정 반영)에서 PLAN.md 11절에 적는다.
 
@@ -126,6 +139,12 @@ PR #13 브랜치의 PLAN.md 11절에서 옮겨 적었다. 리뷰어가 결정과
 - Claude Code 권장: (a)
 - 결정: ____ / 근거: ____
 
+### P5-D7 M1 단독 정책의 train → test 손실 상승
+- 내용: 단독 정책의 손실이 train에서 test로 갈 때 올라간다 (N=10: train 3.50% → test 3.67~4.40%). fold 사이 변동 범위 안인지는 아직 모른다. 출처: PR #13 `docs/phase5.md` 5.6 "미결 (Phase 5 전체)", PLAN.md 11절 P5-D7 (PR #13 `7f077fa`)
+- 선택지: (a) M1에도 운영점 이전성 진단을 돌린다 (`evaluate.transfer_rows`: fold k를 뺀 학습 이슈에서 고른 운영점을 fold k·test에 적용. 새 학습 없음) / (b) 하지 않고 한계로만 기록
+- Claude Code 권장: (a). 진단 결과로 선택 기준이나 운영점을 바꾸지 않는다 (판정은 이미 test 손실 구간 상한으로 했으므로 판정 결과에도 영향이 없다)
+- 결정: ____ / 근거: ____
+
 ### 참고 의견
 - **그리드 확장과 N>20**: 하더라도 **보조 실험으로만** 한다. train OOF로만 판단하고 주 결과(현재 표)는 바꾸지 않는다. 테스트 결과를 이미 봤다는 사실(5.3 "개발 실행 순서")을 보조 실험 기록에 함께 적는다. 새 CLAUDE.md 규칙(개발 중 테스트 지표 출력 금지, `--final` 분리)을 보조 실험 스크립트에 적용한다
 - **5.5 정답 패치**: SWE-bench 원본 데이터셋의 `patch` 필드(정답 패치)를 `instance_id`로 연결하면 데이터 카드 83% / 40%와 직접 비교할 수 있다. HF Hub 직접 로드는 금지이므로 `data/download.sh`에 revision과 체크섬을 고정해 받는다 [가정: 이 데이터의 이슈가 어느 원본 데이터셋에 있는지는 확인하지 않았다. 저장소 이름(`iterative__dvc` 등)으로 보아 SWE-bench 본 데이터셋 밖의 이슈가 섞여 있을 수 있다]. 어려우면 지금의 대리 지표와 한계 보고로 충분하다 (피처가 아니라 발표의 동기 설명용)
@@ -139,8 +158,9 @@ PR #13 브랜치의 PLAN.md 11절에서 옮겨 적었다. 리뷰어가 결정과
 
 | # | 위치 | 내용 | 심각도 |
 | --- | --- | --- | --- |
-| 1 | `README.md` 설치 절 | (후보, 1절 설치 메모 확인 후 확정) macOS XGBoost용 `brew install libomp` 안내가 없다 | ____ |
-| 2 | | | |
+| 1 | `README.md` 설치 절 | macOS XGBoost용 `brew install libomp` 안내. **상태: PR #13 `4eb9ef5`에서 README "2. 패키지 설치" 절에 반영함 (오류 증상 포함), 리뷰어 확인 필요.** 참고: "OS별 차이" 절에는 원래 한 줄 있었다 (1절 정정) | ____ |
+| 2 | `results/phase5/figures/auroc_by_n.png` | (후보, 4절 그림 항목 확인 후 확정) `04c_fig_auroc.py`로 다시 만들면 내용은 같고 바이트가 다르다 | ____ |
 | 3 | | | |
+| 4 | | | |
 
 Phase 6에 넘길 메모 (스텝 단위 API, 평가 함수 사용 등):
