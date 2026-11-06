@@ -1,0 +1,13 @@
+scope,N,target,n_traj,n_issues,opened_rate
+70b_eval_sets_first_n_steps,3,success,12350,762,0.418785
+70b_eval_sets_first_n_steps,3,failure,20305,799,0.312632
+70b_eval_sets_first_n_steps,5,success,11724,761,0.697458
+70b_eval_sets_first_n_steps,5,failure,19428,797,0.541950
+70b_eval_sets_first_n_steps,8,success,9755,757,0.874936
+70b_eval_sets_first_n_steps,8,failure,17006,789,0.708926
+70b_eval_sets_first_n_steps,10,success,7607,742,0.910872
+70b_eval_sets_first_n_steps,10,failure,14958,778,0.753644
+70b_eval_sets_first_n_steps,15,success,3681,674,0.937245
+70b_eval_sets_first_n_steps,15,failure,10443,762,0.790673
+70b_eval_sets_first_n_steps,20,success,1938,556,0.959752
+70b_eval_sets_first_n_steps,20,failure,7683,736,0.793440

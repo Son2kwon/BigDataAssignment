@@ -361,3 +361,74 @@ def scan_code(code_dir: Path = io.ROOT / "code") -> dict[str, list[tuple[int, st
         if hits:
             out[rel] = hits
     return out
+
+
+# ---- 5.5 사후 분석: 정답 파일 열람 (피처 아님) ----
+# 정답 파일 = 정답 패치(gold patch)가 고친 파일. 이 저장소의 데이터에는 정답 패치가 없다 [확인: 원본 컬럼은
+# instance_id, model_name, target, trajectory, exit_status, generated_patch, eval_logs. eval_logs에는 예측 패치와
+# 테스트 패치 적용 기록만 있다]. 그래서 근사를 쓴다 [가정]:
+#   정답 파일 근사 = 같은 이슈의 **다른** 성공 궤적(target=True)들이 낸 generated_patch가 고친 기존 비테스트 파일의 합집합
+# 성공한 패치는 정답 패치와 같은 파일을 고치는 경우가 많다는 가정이다. 자기 패치는 빼서(leave-one-out) 성공 궤적이
+# "자기가 고친 파일을 열었다"로 자동으로 맞는 것을 막는다. 성공 궤적이 다른 데 없는 이슈의 궤적은 근사를 만들 수 없어 뺀다.
+# 이슈 13개는 본문 끝에 데이터셋이 붙인 "고칠 파일 목록"(baselines.HINT, 정답 패치 정보)이 있어 근사를 대조하는 데 쓴다.
+
+PATCH_HEADER = re.compile(r"^diff --git a/(\S+) b/(\S+)$", re.M)
+TEST_PATH = re.compile(r"(?:^|/)(?:tests?|testing)/|(?:^|/)test_[^/]*$|_tests?\.py$|(?:^|/)conftest\.py$")
+HINT_FILES = re.compile(r"^- (\S+)\s*$", re.M)
+
+
+def patch_files(patch: str | None) -> list[str]:
+    """패치가 고친 기존 비테스트 파일 (새로 만든 파일·지운 파일·테스트 경로 제외, 중복 없이 정렬)."""
+    if not patch:
+        return []
+    out = set()
+    heads = list(PATCH_HEADER.finditer(patch))
+    for i, m in enumerate(heads):
+        body = patch[m.end(): heads[i + 1].start() if i + 1 < len(heads) else len(patch)]
+        head = body[:300]
+        if "new file mode" in head or "deleted file mode" in head:
+            continue
+        path = m.group(2)
+        if not TEST_PATH.search(path):
+            out.add(path)
+    return sorted(out)
+
+
+def load_patch_files(traj: pl.DataFrame) -> pl.DataFrame:
+    """traj(traj_id, file_idx, row_idx) 궤적마다 generated_patch가 고친 파일 목록 (traj_id, files). 원본에서 읽는다 (사후 분석 전용)."""
+    out = []
+    for f in sorted(traj["file_idx"].unique().to_list()):
+        t = traj.filter(pl.col("file_idx") == f)
+        col = io.read_raw(int(f), ["generated_patch"], allow_leaky=True).column(0).to_pylist()
+        rows = t["row_idx"].to_list()
+        out.append(t.select("traj_id").with_columns(files=pl.Series([patch_files(col[r]) for r in rows], dtype=pl.List(pl.String))))
+    return pl.concat(out).sort("traj_id")
+
+
+def hint_files(issue_text: str | None) -> list[str]:
+    """본문 끝 "고칠 파일 목록"(baselines.HINT 뒤 "- 경로" 줄들). 없으면 []."""
+    from afp import baselines
+    if not issue_text or baselines.HINT not in issue_text:
+        return []
+    return sorted(set(HINT_FILES.findall(issue_text[issue_text.find(baselines.HINT):])))
+
+
+def solution_proxy(trajs: pl.DataFrame, files: pl.DataFrame) -> pl.DataFrame:
+    """궤적마다 정답 파일 근사 (traj_id, proxy): 같은 이슈의 다른 성공 궤적 패치 파일의 합집합. 빈 근사는 행이 없다.
+
+    trajs: traj_id, instance_id, target. files: load_patch_files 출력.
+    """
+    t = trajs.select("traj_id", "instance_id", "target").join(files, on="traj_id", how="left")
+    succ = t.filter(pl.col("target")).select("instance_id", src="traj_id", f="files").explode("f").drop_nulls("f")
+    pairs = (t.select("traj_id", "instance_id").join(succ, on="instance_id", how="inner")
+             .filter(pl.col("src") != pl.col("traj_id")).select("traj_id", "f").unique())
+    return pairs.group_by("traj_id").agg(proxy=pl.col("f").sort()).sort("traj_id")
+
+
+def opened_files(open_steps: pl.DataFrame, targets: pl.DataFrame, target_col: str) -> pl.DataFrame:
+    """스텝의 열린 파일(open_steps: traj_id, step_idx, open_file)이 궤적의 대상 파일 목록(targets: traj_id, <target_col>)과
+    맞는 첫 스텝 (traj_id, first_step). 맞춤 = 열린 경로가 '/대상'으로 끝남 (대상은 저장소 기준 상대 경로)."""
+    pairs = (open_steps.filter(pl.col("open_file").is_not_null()).select("traj_id", "step_idx", "open_file")
+             .join(targets.select("traj_id", pl.col(target_col).alias("_t")).explode("_t"), on="traj_id", how="inner")
+             .filter(pl.col("open_file").str.ends_with(pl.lit("/") + pl.col("_t")) | (pl.col("open_file") == pl.col("_t"))))
+    return pairs.group_by("traj_id").agg(first_step=pl.col("step_idx").min()).sort("traj_id")

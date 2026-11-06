@@ -200,3 +200,52 @@ values = features.load_step_values(max_n, trajs)   # traj_id, step_idx + 아래 
 
 ### 미결
 - 없음
+
+---
+
+## 5.5 사후 분석: 정답 파일 열람 (피처 아님, 2026-11-06)
+
+### 한 일
+- `afp/leakage.py`에 5.5 절을 추가했다 (`patch_files`, `load_patch_files`, `solution_proxy`, `opened_files`, `hint_files`). 원본 패치 컬럼은 이 모듈만 읽는다 (`io.read_raw(..., allow_leaky=True)`)
+- 실행 스크립트 `code/04b_solution_files.py` (4초). 출력 `results/phase5/solution_file_open.csv`, `solution_file_open_by_n.csv`, `solution_file_hint_check.csv`, `solution_files_summary.json`. M1 학습(04_m1.py)과 독립이고, 출력은 결과 표뿐이다 (피처·예측 입력에 들어가지 않는다)
+- 테스트 `code/tests/test_solution_files.py` 4개 (패치 파일 추출 규칙, 고칠 파일 목록 파싱, 근사의 leave-one-out, 열람 매칭과 첫 스텝)
+
+### 결정과 근거
+- **정답 패치가 데이터에 없다** [확인]: 원본 컬럼은 `instance_id, model_name, target, trajectory, exit_status, generated_patch, eval_logs`이고, `eval_logs`에는 예측 패치·테스트 패치 적용 기록과 pytest 출력만 있다. 이 머신의 `data/`에는 swe-agent 궤적만 있다 (SWE-bench 이슈 데이터 없음)
+- 그래서 **근사**를 썼다 [가정]: 궤적 t의 정답 파일 근사 = 같은 이슈의 **다른** 성공 궤적들이 낸 `generated_patch`가 고친 기존 비테스트 파일의 합집합. 새로 만든 파일·지운 파일·테스트 경로(`tests/`, `test_*.py`, `*_test.py`, `conftest.py`)는 뺀다. 자기 패치를 빼서(leave-one-out) 성공 궤적이 "자기가 고친 파일을 열었다"로 자동으로 맞는 것을 막는다
+- 열람 = 관측 끝 상태 줄의 열린 파일(`open_file`)이 `/근사 경로`로 끝나는 스텝이 있다 (`open`·`edit`·`goto`·`scroll`·`create` 뒤에 열린 파일이 바뀐다). N별 표는 첫 열람 스텝이 N 이하인지
+- 기각: 정답 패치를 HF Hub에서 바로 받기 (CLAUDE.md: 로컬 parquet만, revision 고정). 받으려면 `data/download.sh`에 데이터셋과 revision·체크섬을 추가해야 한다 → 미결
+
+### 검증 / 결과 [확인, `results/phase5/solution_file_open*.csv`]
+
+| 범위 | 성공 궤적: 열람 비율 (궤적 수) | 실패 궤적: 열람 비율 (궤적 수) |
+| --- | --- | --- |
+| 데이터 카드 (제안서 §5 인용) | 83% | 40% |
+| 근사, 전체 모델 | 99.7% (13,313) | 84.3% (22,018) |
+| 근사, 70B 평가 집합 (train + test) | 99.7% (12,393) | 84.3% (20,478) |
+
+시점 N별 (70B, 시점 N 진행 중 궤적, 앞 N스텝 안에서 처음 열었는지):
+
+| N | 3 | 5 | 8 | 10 | 15 | 20 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 성공 | 41.9% | 69.7% | 87.5% | 91.1% | 93.7% | 96.0% |
+| 실패 | 31.3% | 54.2% | 70.9% | 75.4% | 79.1% | 79.3% |
+| 차이 (%p) | 10.6 | 15.5 | 16.6 | 15.7 | 14.6 | 16.7 |
+
+- **데이터 카드 값(83% / 40%)은 재현되지 않았다.** 방향(성공이 더 자주 연다)은 같고, 앞 N스텝에서도 N=5부터 15%p 안팎의 차이가 계속된다
+- 재현되지 않은 이유 [가정]:
+  1. 근사가 정답 파일이 아니다. 성공한 패치들은 서로 같은 파일을 고치는 경향이 강하고, 성공 궤적은 그 파일을 고치려고 반드시 열었으므로 성공 쪽 비율이 거의 100%가 된다
+  2. **근사를 만들 수 있는 궤적은 "다른 성공 궤적이 있는 이슈"뿐이다.** 성공이 없는 이슈의 궤적 44,705개(이슈 2,829개, 대부분 실패)가 빠진다. 이 이슈들의 실패 궤적은 정답 파일을 찾지 못했을 가능성이 높아서, 실패 쪽 비율이 크게 올라간다. 데이터 카드는 정답 패치로 모든 궤적을 셌을 것이다
+  3. "열람" 정의가 다를 수 있다 (데이터 카드의 정의는 확인하지 못했다)
+- 근사 대조: 본문에 "고칠 파일 목록"(정답 파일)이 있는 이슈 13개 중 성공 궤적이 있는 이슈는 1개(`pylint-dev__astroid-1196`)뿐이고, 그 이슈의 근사 파일 1개가 목록 파일과 같다 (1/1). 대조 표본이 너무 작아 근사의 정확도는 알 수 없다
+- 이 값은 **피처로 쓰지 않는다** (정답 패치 정보, CLAUDE.md 누수 규칙). M1의 `issue_file_opened`는 이슈 본문 언급 파일 기준이라 다른 값이다 (N=10 train: 성공 11.4% / 실패 7.6%, 5.1)
+
+### 산출물
+- `code/afp/leakage.py` (5.5 절), `code/04b_solution_files.py`, `code/tests/test_solution_files.py`
+- `results/phase5/solution_file_open.csv`, `solution_file_open_by_n.csv`, `solution_file_hint_check.csv`, `solution_files_summary.json`
+
+### 계획과 다른 점
+- PLAN 5.5는 "성공 83% / 실패 40% 재현"이었다. 정답 패치가 없어 근사로 바꿨고 재현되지 않았다
+
+### 미결
+- `[결정 필요]` 정답 패치 출처. 선택지: (a) 근사 결과를 한계와 함께 그대로 보고 (권장: 이 분석은 피처가 아니라 발표의 동기 설명용이고, 방향과 N별 차이는 보인다), (b) SWE-agent 궤적 데이터셋의 이슈 원본(정답 패치 포함) 데이터셋을 `data/download.sh`에 revision·SHA-256 고정으로 추가하고 다시 계산. (b)는 다운로드 경로 변경이라 팀 결정이 필요하다

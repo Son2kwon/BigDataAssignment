@@ -1,0 +1,14 @@
+instance_id,hint,proxy,has_proxy,hint_in_proxy,n_hint,n_proxy
+marshmallow-code__marshmallow-1359,src/marshmallow/fields.py,,false,0,1,0
+pvlib__pvlib-python-1707,pvlib/iam.py,,false,0,1,0
+pydicom__pydicom-1139,pydicom/valuerep.py,,false,0,1,0
+pydicom__pydicom-1256,pydicom/jsonrep.py,,false,0,1,0
+pydicom__pydicom-1413,pydicom/dataelem.py,,false,0,1,0
+pydicom__pydicom-901,pydicom/config.py,,false,0,1,0
+pylint-dev__astroid-1196,astroid/nodes/node_classes.py,astroid/nodes/node_classes.py,true,1,1,1
+pylint-dev__astroid-1333,astroid/modutils.py,,false,0,1,0
+pylint-dev__astroid-1866,astroid/brain/brain_builtin_inference.py,,false,0,1,0
+pylint-dev__astroid-1978,astroid/raw_building.py,,false,0,1,0
+sqlfluff__sqlfluff-1517,src/sqlfluff/core/parser/helpers.py,,false,0,1,0
+sqlfluff__sqlfluff-1625,src/sqlfluff/rules/L031.py,,false,0,1,0
+sqlfluff__sqlfluff-1763,src/sqlfluff/core/linter/linted_file.py,,false,0,1,0
