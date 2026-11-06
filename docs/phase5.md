@@ -249,3 +249,66 @@ values = features.load_step_values(max_n, trajs)   # traj_id, step_idx + 아래 
 
 ### 미결
 - `[결정 필요]` 정답 패치 출처. 선택지: (a) 근사 결과를 한계와 함께 그대로 보고 (권장: 이 분석은 피처가 아니라 발표의 동기 설명용이고, 방향과 N별 차이는 보인다), (b) SWE-agent 궤적 데이터셋의 이슈 원본(정답 패치 포함) 데이터셋을 `data/download.sh`에 revision·SHA-256 고정으로 추가하고 다시 계산. (b)는 다운로드 경로 변경이라 팀 결정이 필요하다
+
+---
+
+## 5.3 학습과 평가 (2026-11-06)
+
+### 한 일
+- `code/04_m1.py`: 모델 4종 × N 6개 = **24개 설정**을 N마다 따로 학습한다 (D2). `m1_lr`(로지스틱 회귀), `m1_xgb`(XGBoost), 각각 B1 포함(`_b1`)·제외
+- 학습: `oof.oof_predict`로 train 5-fold OOF 점수와 test fold 모델별 점수. `oof_predict`에 두 옵션을 더했다
+  - `test_for_fold(k, test)`: fold k 모델에 넣을 test 행을 따로 준다. B1 포함 모델의 fold k 모델은 B1 fold k test 점수로 채점한다 (P4-D7 ①). 테스트 `test_test_for_fold_gives_fold_specific_input`
+  - `keep_models`: fold 모델을 남긴다 (② 민감도와 SHAP에 쓴다)
+- B1 입력 (P4-D7): train = `preds.load_feature("b1_n", "train")` (OOF), test fold k 모델 = `load_feature("b1_n", "test", fold=k)` (①). ② 민감도 = `load_feature_other_folds("b1_n", k)`의 j≠k 4개로 M1 fold k를 각각 채점. 평균 test 점수(③)는 쓰지 않는다 (fold별 입력이 실제로 다른지 완료 기준 C5로 확인)
+- 예측 저장: `preds.write`(train OOF + test 5개 fold 평균, 판별 지표용) + `preds.write_test_folds`(fold별, 운영점용 P4-D6). `preds/m1_{lr,lr_b1,xgb,xgb_b1}.parquet` + `.test_folds.parquet`
+- 평가: 5.0의 공용 함수 그대로 (`evaluate.discrimination_table`, `operating_points`, `bootstrap_tasks`, `operating_table`). K\*=40과 K=35 참고 행도 같은 함수로 다시 계산하고, Phase 4 결과와 같은지 확인한다 (완료 기준 C8)
+- 비교 표는 Phase 4 결과 파일(`results/phase4/discrimination*.csv`, `operating_points.csv`)을 읽어 M1 행과 합친다
+
+### 결정과 근거
+- **학습기 설정**
+  - LR: 피처를 `log1p` 한 뒤 표준화(fold 안에서 학습), L2, lbfgs (`tol=1e-6`, `max_iter=5000`). 피처가 모두 0 이상의 횟수·길이·확률이고 관측 길이 꼬리가 길어서 log 변환 후 표준화했다. BLAS 스레드 1개 (B1과 같은 이유)
+  - XGBoost: `hist`, 학습률 0.05, subsample 0.8, colsample_bytree 0.8, min_child_weight 1, λ=1, `n_jobs=1`, `random_state=io.SEED`. 작업 단위로 병렬화하고 모델 안에서는 스레드 1개라 결과가 결정적이다 (다시 학습한 점수가 그리드 점수와 비트 단위로 같은지 완료 기준 C3)
+- **그리드** (각 8개, 순서 = 단순한 것부터. `results/phase5/m1_grid.csv`):
+  - LR: C ∈ {0.01, 0.1, 1, 10} × class_weight ∈ {없음, balanced}
+  - XGBoost: max_depth ∈ {3, 6} × n_estimators ∈ {200, 600} × 불균형 처리 ∈ {없음, balanced(`scale_pos_weight` = 성공 수 / 실패 수)}
+  - 선택: (모델, N)마다 **train OOF AUROC** 최대. 최고값에서 0.002 안이면 그리드 앞쪽(단순한) 설정 (B1과 같은 규칙)
+  - 클래스 불균형 처리는 그리드에 넣었다. 실패가 다수(N=10 진행 중 train의 86%)라 balanced는 실패 쪽 무게를 줄인다. 점수 척도가 바뀌어도 τ는 같은 OOF 척도에서 고르므로 운영점 규칙과 충돌하지 않는다
+- **한계 (그리드 선택의 낙관)**: 같은 5-fold OOF로 하이퍼파라미터를 고르고 그 OOF 점수로 운영점·좋은 N도 고른다. 그리드가 작아서(8개) 낙관은 작을 것으로 보지만 [가정] 크기를 따로 재지 않았다 (중첩 교차검증 안 함). test 지표에는 영향이 없다 (test는 고른 뒤 한 번 채점)
+- **한계 (그리드 경계)**: XGBoost는 24개 중 23개가 그리드에서 가장 작은 모델(깊이 3, 트리 200개, 불균형 처리 없음)을 골랐고(N=20 B1 제외만 balanced), 모델이 커질수록 OOF AUROC가 내려간다 (N=10 `m1_xgb_b1` 0.717 → 깊이 6·트리 600개 0.693). 최적점이 그리드 경계에 있으므로 더 작은 모델(깊이 2, 트리 100개 등)이 더 나을 수 있다. LR은 C에 거의 둔감하다 (N=10 OOF AUROC 차이 < 0.001)
+  - **그리드는 넓히지 않았다.** 이 경계 결과를 확인한 개발 실행(`--skip-bootstrap --skip-shap`)이 test 판별 지표도 출력했고 그것을 읽었다 (N=10 test AUROC 약 0.70). 그 뒤에 그리드를 바꾸면 "테스트 결과를 본 뒤 규칙을 바꾸지 않는다"(CLAUDE.md)를 지켰다고 말할 수 없다. 그래서 그리드는 처음 코드에 쓴 그대로 두고 경계 문제는 미결로 넘긴다
+- **N별 개별 모델** (D2). 피처 정의가 N과 무관하게 같고 N마다 하이퍼파라미터를 고른다
+- **libomp**: XGBoost macOS 휠은 OpenMP 런타임(`libomp.dylib`)이 시스템에 있어야 로드된다. 이 머신에 없어서 `brew install libomp`로 설치했다 (저장소 변경 없음). Linux에서는 보통 `libgomp`가 이미 있다
+
+### 검증
+- `uv run --no-sync python code/04_m1.py` (12코어 M4 Pro **4분 28초**: 피처 1.4초, 그리드 OOF 192개 70초, 고른 설정 다시 학습 15개 5초, 운영점 선택·적용 40초, 부트스트랩 25개 × 1,000회 127초, ② 민감도 6초, SHAP 17초) → 완료 기준 C1~C10 통과 [확인] (`results/phase5/summary.json`의 `criteria`)
+  - C3 고른 설정을 다시 학습한 OOF·fold 점수가 그리드 점수와 비트 단위로 같다
+  - C5 B1 포함 모델의 test 입력이 fold마다 다르다 (③ 평균 점수가 아님)
+  - C8 이 스크립트가 다시 계산한 K\*=40·K=35 행(부트스트랩 구간 포함)이 `results/phase4/operating_points.csv`와 같다 (같은 평가 집합·시드 → 같은 재표본)
+- 재실행 바이트 비교: 5.6 절
+- 개발 실행 순서 (투명성): 부트스트랩·SHAP을 뺀 개발 실행 1회 → 그리드 경계 확인 (위 한계) → 그리드를 바꾸지 않고 전체 실행. 개발 실행과 전체 실행의 예측·판별 값은 같다 (같은 코드, `preds.write`가 다시 쓰지 않음)
+
+### 결과: 고른 하이퍼파라미터 (`results/phase5/m1_grid.csv`)
+
+| 모델 | N=3 | 5 | 8 | 10 | 15 | 20 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `m1_lr` | C=0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 |
+| `m1_lr_b1` | C=0.01 | 0.01 | 0.01 | 0.01 | 0.01 | 0.01 |
+| `m1_xgb` | d3·200 | d3·200 | d3·200 | d3·200 | d3·200 | d3·200·balanced |
+| `m1_xgb_b1` | d3·200 | d3·200 | d3·200 | d3·200 | d3·200 | d3·200 |
+
+LR은 모두 class_weight 없음 (balanced와 OOF AUROC 차이 ≤0.001이라 동률 규칙으로 앞쪽). LR C=0.01도 동률 규칙 (C에 따른 차이 < 0.001)
+
+### 결과: 판별 지표 (5.6에 정리)
+
+### 산출물
+- `code/04_m1.py`, `code/afp/oof.py` (`test_for_fold`, `keep_models`), `code/tests/test_oof.py`
+- `data/processed/features/m1_n.parquet`, `data/processed/preds/m1_*.parquet`·`.test_folds.parquet` (git 밖)
+- `results/phase5/`: `m1_grid.csv`, `discrimination.csv`, `discrimination_ci.csv`, `operating_points.csv`, `operating_points_sensitivity.csv`, `cost_curves/`(48개), `b1_input_sensitivity.csv`, `discrimination_compare.csv`, `operating_points_compare.csv`, `loss_ci_width_compare.csv`, `loss_ci_width_summary.csv`, `good_n.csv`, `summary.json`
+
+### 계획과 다른 점
+- 없음 (PLAN 5.3 그대로). 하이퍼파라미터 그리드는 작업 지시의 "작은 그리드"로 각 8개
+
+### 미결
+- `[결정 필요]` XGBoost 그리드 경계 (위 한계). 선택지: (a) 지금 그리드 결과를 주 결과로 두고 경계 문제를 한계로 보고 (권장: test를 본 뒤 그리드를 바꾸지 않는다는 규칙을 지킨다), (b) 더 작은 모델(깊이 2, 트리 50~100개)까지 넓힌 그리드를 **보조 실험**으로 돌려 train OOF AUROC만 비교하고 test 결과는 주 결과를 바꾸지 않는다. (b)를 하더라도 주 표는 (a)
+- `[결정 필요]` 좋은 N 규칙의 동률 폭 `GOOD_N_TIE = 0.005` (아래 5.6). OOF AUROC가 N에 따라 단조 증가해서 이번에는 동률 폭이 결과를 바꾸지 않았다
+

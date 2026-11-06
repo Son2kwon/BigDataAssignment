@@ -29,6 +29,7 @@ class OOFResult:
     # test_mode="fold_mean"일 때 fold k 모델 하나가 test 행에 준 점수 (n_folds × test 행 수). test 점수 = 행 평균.
     # fold k의 OOF 점수와 같은 모델의 점수라, 평균 때문에 점수 분포가 달라지는지 확인하는 데 쓴다
     test_fold_scores: np.ndarray | None = None
+    models: list | None = None  # keep_models=True일 때 fold k 모델 (SHAP·다른 입력으로 다시 채점할 때)
 
 
 def check_folds(train: pl.DataFrame, n_folds: int) -> None:
@@ -53,14 +54,20 @@ def _scores(predict, model, rows: pl.DataFrame) -> np.ndarray:
 
 
 def oof_predict(train: pl.DataFrame, fit, predict, test: pl.DataFrame | None = None,
-                test_mode: str = "fold_mean", n_folds: int = split.N_FOLDS) -> OOFResult:
+                test_mode: str = "fold_mean", n_folds: int = split.N_FOLDS, test_for_fold=None,
+                keep_models: bool = False) -> OOFResult:
     """fit(rows) -> model, predict(model, rows) -> p_fail 배열 (행 순서대로).
 
     train: 학습 행 (instance_id, fold 0..n_folds-1). test: 채점만 할 행 (instance_id 필요, train과 이슈가 겹치면 멈춤).
+    test_for_fold(k, test) -> fold k 모델에 넣을 test 행 (같은 행·순서, 입력 컬럼만 다를 수 있음). 다른 모델 점수를
+    입력으로 쓰는 모델이 fold k 모델에 그 모델의 fold k test 점수를 넣을 때 쓴다 (P4-D7 ①, test_mode="fold_mean"만).
+    keep_models면 fold 모델들을 result.models에 남긴다.
     """
     if test_mode not in TEST_MODES:
         raise ValueError(f"test_mode는 {TEST_MODES} 중 하나: {test_mode!r}")
     check_folds(train, n_folds)
+    if test_for_fold is not None and (test is None or test_mode != "fold_mean"):
+        raise ValueError("test_for_fold는 test가 있고 test_mode='fold_mean'일 때만 쓴다")
     if test is not None:
         overlap = test.join(train.select("instance_id").unique(), on="instance_id", how="semi").height
         if overlap:
@@ -69,7 +76,7 @@ def oof_predict(train: pl.DataFrame, fit, predict, test: pl.DataFrame | None = N
     rows = train.with_row_index("_row")
     oof = np.full(train.height, np.nan)
     fold_scores = np.full((n_folds, test.height), np.nan) if test is not None and test_mode == "fold_mean" else None
-    result = OOFResult(train=train, test=test)
+    result = OOFResult(train=train, test=test, models=[] if keep_models else None)
     for k in range(n_folds):
         fit_rows = rows.filter(pl.col("fold") != k)
         held = rows.filter(pl.col("fold") == k)
@@ -78,8 +85,13 @@ def oof_predict(train: pl.DataFrame, fit, predict, test: pl.DataFrame | None = N
         result.fold_issues[k] = fit_issues.len()
         model = fit(fit_rows.drop("_row"))
         oof[held["_row"].to_numpy()] = _scores(predict, model, held.drop("_row"))
+        if keep_models:
+            result.models.append(model)
         if fold_scores is not None:
-            fold_scores[k] = _scores(predict, model, test)
+            rows_k = test if test_for_fold is None else test_for_fold(k, test)
+            if rows_k.height != test.height:
+                raise ValueError(f"test_for_fold({k}) 행 수 {rows_k.height} != test {test.height}")
+            fold_scores[k] = _scores(predict, model, rows_k)
     if result.seen_issue_scores:
         raise AssertionError(f"자기 이슈를 본 모델의 점수를 받은 train 행 {result.seen_issue_scores}개")
     if np.isnan(oof).any():
