@@ -395,7 +395,7 @@ N=10 (진행 중 test 궤적 9,351개, 성공률 13.7%, 이슈 내 AUROC 계산 
 
 ![N별 test AUROC와 이슈 내 AUROC](../results/phase5/figures/auroc_by_n.png)
 
-`code/04c_fig_auroc.py`가 `discrimination_compare.csv`만 읽어 그린다 (학습·선택 없음, 이미 보고한 test 수치를 옮긴 그림). 띠는 이슈 단위 부트스트랩 95% 구간 (B1, M1 XGB, M1 XGB + B1만). 왼쪽: M1은 N=8부터 B1보다 높고 N이 커질수록 벌어진다. 오른쪽: 이슈 내 AUROC는 N=3·5에서 0.5 근처, N≥8에서 B0 규칙보다 높다. B1은 정의상 0.5다
+`code/04c_fig_auroc.py`가 `discrimination_compare.csv`만 읽어 그린다 (학습·선택 없음, 이미 보고한 test 수치를 옮긴 그림). 그림 파일은 이 머신(Apple M4 Pro, macOS)의 `.venv`로 생성했고(`8f8a7d0`), 두 번 실행하면 바이트 단위로 같다 [확인]. 다른 OS에서는 PNG 바이트가 다를 수 있다 (플랫폼 차이, 커밋하지 않음). 띠는 이슈 단위 부트스트랩 95% 구간 (B1, M1 XGB, M1 XGB + B1만). 왼쪽: M1은 N=8부터 B1보다 높고 N이 커질수록 벌어진다. 오른쪽: 이슈 내 AUROC는 N=3·5에서 0.5 근처, N≥8에서 B0 규칙보다 높다. B1은 정의상 0.5다
 
 ### 운영점 (N=10, train OOF에서 3.5%로 고른 τ·K를 test fold 모델 5개에 각각 적용해 평균, P4-D6)
 
