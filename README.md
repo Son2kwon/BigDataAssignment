@@ -45,6 +45,7 @@ uv sync --group dl    # 기본 + PyTorch, transformers (Windows/Linux 약 6GB)
 - Python 3.13이 없으면 uv가 받아서 `.venv/`에 환경을 만든다. 시스템 Python은 건드리지 않는다.
 - `dl` 그룹은 M2(LSTM)와 M3(Transformer)에만 필요하다. 그 전까지는 `uv sync`만 해도 된다.
 - `dl`을 받은 뒤 `--group dl` 없이 `uv sync`를 실행하면 torch가 지워진다. 한 번 받았으면 계속 `--group dl`을 붙인다.
+- **macOS**: XGBoost(M1, `code/04_m1.py`)는 OpenMP 런타임이 있어야 로드된다. 먼저 `brew install libomp`를 실행한다. 없으면 `import xgboost`에서 `XGBoostError: XGBoost Library (libxgboost.dylib) could not be loaded ... Library not loaded: @rpath/libomp.dylib`로 멈춘다. Windows/Linux는 따로 설치할 것이 없다.
 
 ### 3. 실행
 
@@ -58,8 +59,13 @@ uv run python "code/test for K/fixed_cap_k.py"
 uv run python code/01_parse.py    # Phase 1: 궤적·스텝 테이블 → data/processed/ (약 1.5분)
 uv run python code/02_split.py    # Phase 2: 분할·fold·누수 점검 → data/processed/splits.parquet, results/phase2/ (약 10초). 평가는 70B만 (train / test, 테스트 이슈 = 70B 이슈 층화 무작위 1/6)
 uv run python code/03_baselines.py  # Phase 4: 기준선 B0·B1·오라클 예측 → data/processed/preds/, 지표·운영점·운영점 이전성 → results/phase4/ (16코어 약 2.5분)
+uv run python code/04_m1.py       # Phase 5: M1 피처 → data/processed/features/m1_n.parquet, M1 예측 4종 → data/processed/preds/m1_*, 그리드·판별·운영점·B0·B1 비교·SHAP → results/phase5/ (12코어 약 4.5분, 03 결과 필요)
+uv run python code/04b_solution_files.py  # Phase 5.5: 정답 파일 열람 사후 분석 (피처 아님) → results/phase5/solution_file*.csv, solution_files_summary.json (약 4초)
+uv run python code/04c_fig_auroc.py       # Phase 5: N별 AUROC 그림 → results/phase5/figures/auroc_by_n.png (1초 미만, 04_m1 결과 필요)
 uv run pytest                     # 단위 테스트 (data/processed/가 있으면 실제 데이터 통합 테스트도 돈다)
 ```
+
+옵션 (03·04 공통): 저장된 예측·피처 파일이 다시 계산한 값과 다르면 멈추고, `--force`를 주면 덮어쓴다. `--n-boot 100`(부트스트랩 반복 수), `--skip-bootstrap`은 개발용이다. `04_m1.py`는 `--skip-shap`(개발용)도 있다. 실행 시간과 산출물 목록은 [docs/phase5.md](docs/phase5.md) 5.3~5.5.
 
 환경을 전혀 바꾸지 않고 실행하려면 `uv run --no-sync ...`를 쓴다 (`dl` 그룹을 받은 뒤 `--group dl` 없는 `uv sync`는 torch를 지운다, 위 참고).
 
