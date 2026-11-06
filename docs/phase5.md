@@ -34,3 +34,35 @@
 
 ### 미결
 - 반올림 경계에 걸린 값은 드물게 머신 사이에서 마지막 자리가 갈릴 수 있다 (PLAN 5절에 기록). 그런 diff도 플랫폼 차이로 보고 커밋하지 않는다
+
+---
+
+## 5.0 운영점 루프 이동 (P5-D2, 2026-11-06)
+
+### 한 일
+- `03_baselines.py`에 있던 운영점 선택·적용 루프를 `afp/evaluate.py`의 모델 무관 함수로 옮겼다. 입력은 모델마다 `(preds, fold_preds)` 한 쌍이다: `preds` = train OOF + test 예측 (traj_id, N, p_fail), `fold_preds` = test fold 모델별 예측 (traj_id, N, fold, p_fail, OOF 모델만. 없으면 None)
+  - `evaluate.operating_points(models, sets, costs, k_star)`: 단독·결합 정책 선택(train OOF, 3.5%), test 적용(P4-D6 fold별 적용 평균), 민감도(`MAX_LOSS_GRID` × 목적 함수 2), fold별 train 범위
+  - `evaluate.cap_rows`: K\*·제안서 K=35 참고 행(`cap_proposal`)과 K 민감도
+  - `evaluate.bootstrap_tasks`, `cap_bootstrap_tasks`, `boot_task`, `cap_stat`: 부트스트랩 작업 (판별 + 운영점 + K\* 대비 짝지은 차이)
+  - `evaluate.attach_ci`, `operating_table`, `sensitivity_table`, `discrimination_ci`, `judged_and_saves_more`, `loss_ci_width`, `frame`, `parallel`, `test_preds`
+  - 상수 `OP_COLUMNS`, `SENS_COLUMNS`, `OP_SCHEMA`, `K_PROPOSAL`(=35)도 `evaluate`로 옮겼다
+- `03_baselines.py`는 이 함수들을 부르기만 한다 (B1 학습·오라클·이전성 분석·완료 기준 검사는 그대로)
+- 테스트 1개 추가 (`test_operating_points_loop_matches_direct_selection`): 합성 데이터에서 루프가 고른 (τ, K)가 `select_from_curves`를 직접 부른 값과 같고, test 행이 `test_point`와 같고, fold 점수가 있는 모델에만 fold 범위가 붙고, 부트스트랩 → 운영점 표가 `OP_COLUMNS` 형식으로 구간·판정을 채우는지
+
+### 결정과 근거
+- 모델 입력 형식을 "예측 파일 두 개"로 정했다. M1~M3 스크립트가 B0·B1과 같은 함수를 그대로 부르고, 학습 방식(OOF인지 규칙인지)은 `fold_preds`가 있는지로만 갈린다
+- 부트스트랩 재표본은 평가 집합의 이슈와 `io.SEED`로만 정해진다. 그래서 다른 스크립트(04_m1.py)에서 돌려도 K\* 행의 구간이 Phase 4와 같다 (5.3에서 확인)
+- 기각: B0·B1 비교 행까지 M1 스크립트에서 다시 계산. Phase 4 결과 파일을 읽어 붙이는 쪽이 계산을 반복하지 않고, K\* 행이 같은지로 두 스크립트가 같은 재표본을 썼는지도 확인할 수 있다
+
+### 검증
+- `uv run --no-sync python code/03_baselines.py --force` (2분 59초, 12코어 M4 Pro): 완료 기준 C1~C13 통과, **`results/`·`preds/`·`splits.parquet` 96개 파일이 리팩터 전(5.0a 두 번째 실행)과 바이트 단위로 같다** [확인]. `b1_grid.csv`의 플랫폼 차이는 리팩터 전과 같은 값이라 되돌렸다
+- `uv run --no-sync pytest`: 112개 통과
+
+### 산출물
+- `code/afp/evaluate.py` (운영점 루프 절), `code/03_baselines.py` (얇아짐), `code/tests/test_operating_point.py`
+
+### 계획과 다른 점
+- 없음 (PLAN 5.0 그대로)
+
+### 미결
+- 없음

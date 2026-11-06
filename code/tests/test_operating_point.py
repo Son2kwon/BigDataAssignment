@@ -375,3 +375,51 @@ def test_fold_mean_curve_matches_at_threshold():
                                          for k in range(5)])
     assert mc[("test", n)].equals(ref_test)
     assert mc[("train", n)].equals(metrics.cost_curve(sets["train"], evaluate.split_preds(allp, sets["train"]), n, costs=cs["train"]))
+
+
+# ---- 모델 무관 운영점 루프 (P5-D2, Phase 5.0) ----
+
+def loop_setup(seed=7, n=5):
+    trajs, costs, rng = random_population(seed=seed, n_traj=600)
+    trajs = trajs.with_columns(fold=pl.Series([int(i[1:]) % 5 for i in trajs["instance_id"]], dtype=pl.Int8))
+    test_issue = pl.col("instance_id").is_in([f"i{k}" for k in range(0, 37, 6)])
+    sets = {"train": trajs.filter(~test_issue), "test": trajs.filter(test_issue).with_columns(fold=pl.lit(-1, dtype=pl.Int8))}
+    cs = {k: costs.join(v.select("traj_id"), on="traj_id", how="semi") for k, v in sets.items()}
+    alive = pl.concat([metrics.running(t, n) for t in sets.values()])
+    p = alive.select("traj_id", N=pl.lit(n, dtype=pl.Int16),
+                     p_fail=pl.Series((~alive["target"].to_numpy()) * 0.3 + rng.random(alive.height) * 0.7))
+    test_alive = metrics.running(sets["test"], n)
+    folds = pl.concat([test_alive.select("traj_id", N=pl.lit(n, dtype=pl.Int16), fold=pl.lit(k, dtype=pl.Int8),
+                                         p_fail=pl.Series(rng.random(test_alive.height))) for k in range(5)])
+    mean = folds.group_by("traj_id", "N").agg(pl.col("p_fail").mean())
+    p = pl.concat([evaluate.split_preds(p, sets["train"]), mean.select(p.columns)]).sort("N", "traj_id")
+    return sets, cs, n, p, folds
+
+
+def test_operating_points_loop_matches_direct_selection():
+    sets, cs, n, p, folds = loop_setup()
+    k_star = metrics.select_cap(metrics.fixed_cap_curve(sets["train"], cs["train"]))["K"]
+    main, sens, chosen = evaluate.operating_points({"m1_x": (p, folds), "b0_x": (p, None)}, sets, cs, k_star, n_grid=[n])
+    for model, fp in (("m1_x", folds), ("b0_x", None)):
+        for policy in evaluate.POLICIES:
+            curves = evaluate.candidate_curves(sets["train"], evaluate.split_preds(p, sets["train"]), n, policy, cs["train"])
+            op = metrics.select_from_curves(curves, n)
+            assert chosen[(model, n, policy)] == (op["tau"], op["cap"])
+            test_row = next(r for r in main if (r["model"], r["policy"], r["split"]) == (model, policy, "test"))
+            want = evaluate.test_point(sets["test"], evaluate.test_preds(p, fp, sets["test"], n), n, op["tau"], op["cap"], cs["test"])
+            assert {c: test_row[c] for c in want} == want
+            assert ("lost_success_fold_min" in test_row) == (fp is not None)
+    assert len(sens) == 2 * len(evaluate.POLICIES) * len(evaluate.OBJECTIVES) * len(evaluate.MAX_LOSS_GRID) * 2
+    cap_main, _ = evaluate.cap_rows(sets, cs, k_star, metrics.fixed_cap_curve(sets["train"], cs["train"]), evaluate.K_PROPOSAL)
+    tasks, keys = evaluate.bootstrap_tasks({"m1_x": (p, folds)}, sets, cs, chosen, k_star, {"m1_x": [n]}, n_boot=20)
+    ctasks, ckeys = evaluate.cap_bootstrap_tasks(sets, cs, k_star, 20)
+    assert keys == [("m1_x", "test", n)] and ckeys == [("b0_cap", "test", None)]
+    boots = dict(zip(keys + ckeys, [evaluate.boot_task(*t) for t in tasks + ctasks]))
+    rows = cap_main + [r for r in main if r["model"] == "m1_x"]
+    table = evaluate.operating_table(rows, boots)
+    assert table.columns == evaluate.OP_COLUMNS
+    t = table.filter(pl.col("split") == "test")
+    assert t["lost_success_hi"].null_count() == 0 and t["meets_judge_ci_hi"].null_count() == 0
+    assert t.filter(pl.col("model") == "m1_x")["d_saved_steps_lo"].null_count() == 0
+    ci = evaluate.discrimination_ci(boots)
+    assert set(ci["stat"]) == {"auroc", "pr_auc", "within_pair", "within_issue_mean"}

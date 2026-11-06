@@ -29,7 +29,6 @@ import time
 
 import numpy as np
 import polars as pl
-from joblib import Parallel, delayed
 
 from afp import baselines, evaluate, io, metrics, oof, preds, split
 
@@ -42,7 +41,7 @@ B1_GRID = tuple(
     for a in ("word", "char_wb") for c in (0.03, 0.1, 0.3, 1.0, 3.0) for w in ("traj", "issue")
 )
 B1_TIE = 0.002  # OOF AUROC 차이가 이보다 작으면 더 단순한 설정 (word, 작은 C, traj 가중)
-K_PROPOSAL = 35  # 제안서의 고정 상한 (전체 데이터에서 고른 값, 참고 행)
+K_PROPOSAL = evaluate.K_PROPOSAL  # 제안서의 고정 상한 (전체 데이터에서 고른 값, 참고 행)
 FIXED_CAP_MAX_K = 80
 CURVE_N = (0, 10)  # b1_scale 분위수 표의 N
 QUANTILES = (0.05, 0.25, 0.5, 0.75, 0.95)
@@ -65,12 +64,7 @@ EXPECTED = {
 }
 
 
-def parallel(fn, tasks, jobs):
-    """작업마다 결과가 정해져 있어(고정 시드) 실행 순서와 무관하게 같은 값이 나온다."""
-    if jobs <= 1:
-        return [fn(*t) for t in tasks]
-    os.environ["POLARS_MAX_THREADS"] = "1"  # 이제 뜨는 작업 프로세스에만 적용 (이 프로세스는 이미 스레드 풀이 있음)
-    return Parallel(n_jobs=jobs, backend="loky", inner_max_num_threads=1)(delayed(fn)(*t) for t in tasks)
+parallel = evaluate.parallel  # 운영점 루프와 같이 afp/evaluate.py로 옮김 (Phase 5.0)
 
 
 # ---- 예측 만들기 ----
@@ -216,83 +210,6 @@ def proposal_reproduction(proposal_trajs, all_costs):
     return {int(r["K"]): {c: r[c] for c in ("lost_success", "saved_steps", "saved_tokens")} for r in curve.iter_rows(named=True)}
 
 
-def boot_task(trajs, p, stat, n_boot):
-    return metrics.bootstrap(trajs, p, stat, n_boot=n_boot)
-
-
-def cap_stat(ks, costs):
-    def stat(trajs, _preds):
-        out = {}
-        for k in ks:
-            out.update({f"K{k}.{c}": v for c, v in evaluate.cap_point(trajs, k, costs).items()})
-        for k in ks[1:]:
-            out.update({f"K{k}.d_{c}": out[f"K{k}.{c}"] - out[f"K{ks[0]}.{c}"] for c in ("lost_success", "saved_steps", "saved_tokens")})
-        return out
-    return stat
-
-
-def test_preds_of(all_preds, fold_test, model, trajs, n=None):
-    """테스트 분할 예측. fold별 점수가 있는 모델은 p_fail_fold{k} 컬럼을 붙인다 (P4-D6)."""
-    p = evaluate.split_preds(all_preds[model], trajs, n)
-    if model in fold_test:
-        p = evaluate.attach_fold_scores(p, fold_test[model] if n is None else fold_test[model].filter(pl.col("N") == n))
-    return p
-
-
-def operating_points(all_preds, fold_test, sets, costs, k_star):
-    """train(OOF)에서 고르고 테스트에 적용. 반환: 주 운영점 표 행(부트스트랩 구간은 나중에 붙임), 민감도 행, 주 운영점 {(model, N, policy): (τ, K)}."""
-    train = sets["train"]
-    main, sens, chosen = [], [], {}
-    applied = {}
-    ref_train = evaluate.cap_point(train, k_star, costs["train"])
-    for model in OP_MODELS:
-        p_all = all_preds[model]
-        sp = {name: (test_preds_of(all_preds, fold_test, model, t) if name in evaluate.TEST_SPLITS else evaluate.split_preds(p_all, t))
-              for name, t in sets.items()}
-        for n in evaluate.N_GRID:
-            for policy in evaluate.POLICIES:
-                curves = evaluate.candidate_curves(train, sp["train"], n, policy, costs["train"])
-                for by in evaluate.OBJECTIVES:
-                    for max_loss in evaluate.MAX_LOSS_GRID:
-                        op = metrics.select_from_curves(curves, n, max_loss=max_loss, by=by)
-                        key = (model, n, op["tau"], op["cap"])
-                        for name in evaluate.TEST_SPLITS:
-                            if (key, name) not in applied:
-                                applied[(key, name)] = evaluate.test_point(sets[name], sp[name].filter(pl.col("N") == n), n, op["tau"], op["cap"], costs[name])
-                        base = {"model": model, "policy": policy, "N": n, "objective": by, "max_loss": max_loss, "tau": op["tau"], "cap": op["cap"]}
-                        sens.append({**base, "split": "train", **{c: op[c] for c in evaluate.POINT_COLUMNS}})
-                        sens += [{**base, "split": name, **{c: applied[(key, name)][c] for c in evaluate.POINT_COLUMNS}} for name in evaluate.TEST_SPLITS]
-                        if by == "saved_steps" and max_loss == metrics.SELECT_MAX_LOSS:
-                            chosen[(model, n, policy)] = (op["tau"], op["cap"])
-                            spread = evaluate.fold_spread(train, sp["train"], n, op["tau"], op["cap"], costs["train"])
-                            tr = {c: op[c] for c in evaluate.POINT_COLUMNS}
-                            main.append({"model": model, "policy": policy, "N": n, "tau": op["tau"], "cap": op["cap"], "split": "train",
-                                         **tr, **{f"d_{c}": tr[c] - ref_train[c] for c in ("lost_success", "saved_steps", "saved_tokens")}, **spread})
-                            main += [{"model": model, "policy": policy, "N": n, "tau": op["tau"], "cap": op["cap"], "split": name,
-                                      **applied[(key, name)]} for name in evaluate.TEST_SPLITS]
-    return main, sens, chosen
-
-
-def cap_rows(sets, costs, k_star, cap_curve_train):
-    rows, sens = [], []
-    ref = {name: evaluate.cap_point(t, k_star, costs[name]) for name, t in sets.items()}
-    for policy, k in (("cap", k_star), ("cap_proposal", K_PROPOSAL)):
-        for name, t in sets.items():
-            pt = evaluate.cap_point(t, k, costs[name])
-            row = {"model": "b0_cap", "policy": policy, "N": None, "tau": None, "cap": k, "split": name, **pt}
-            if name == "train":  # K* 행은 차이의 기준이라 d_*가 없다
-                if k != k_star:
-                    row.update({f"d_{c}": pt[c] - ref[name][c] for c in ("lost_success", "saved_steps", "saved_tokens")})
-                row.update(evaluate.fold_spread(sets["train"], None, None, None, k, costs["train"]))
-            rows.append(row)
-    for max_loss in evaluate.MAX_LOSS_GRID:
-        k = metrics.select_cap(cap_curve_train, max_loss)["K"]
-        for name, t in sets.items():
-            sens.append({"model": "b0_cap", "policy": "cap", "N": None, "objective": "saved_steps", "max_loss": max_loss,
-                         "tau": None, "cap": k, "split": name, **evaluate.cap_point(t, k, costs[name])})
-    return rows, sens
-
-
 def transfer_task(model, n, policy, train, train_preds, test, test_preds, full_op, test_fold_preds):
     rows = evaluate.transfer_rows(train, train_preds, test, test_preds, n, policy, full_op, test_fold_preds=test_fold_preds)
     return [{"model": model, "policy": policy, "N": n, **r} for r in rows]
@@ -315,45 +232,7 @@ def tau_transfer(all_preds, sets, main_rows, k_star, fold_test, jobs):
                               fold_lists(fold_test[m], n) if m in fold_test else None))
     rows = [r for out in parallel(transfer_task, tasks, jobs) for r in out]
     cols = ["model", "policy", "N", *evaluate.TRANSFER_COLUMNS]
-    return frame(rows, cols, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64})
-
-
-def attach_ci(main_rows, boots):
-    """주 운영점 행에 테스트 부트스트랩 구간을 붙인다. boots[(model, split, N)] = bootstrap 출력."""
-    out = []
-    for r in main_rows:
-        r = dict(r)
-        if r["split"] in evaluate.TEST_SPLITS and boots:
-            if r["model"] == "b0_cap":
-                b, prefix = boots[("b0_cap", r["split"], None)], f"K{r['cap']}."
-            else:
-                b, prefix = boots[(r["model"], r["split"], r["N"])], f"{r['policy']}."
-            ci = {s[len(prefix):]: (e, lo, hi) for s, e, lo, hi in b.select("stat", "estimate", "lo", "hi").iter_rows() if s.startswith(prefix)}
-            for c, (e, lo, hi) in ci.items():
-                if c.startswith("d_") or c not in r:
-                    r[c] = e
-                r[f"{c}_lo"], r[f"{c}_hi"] = lo, hi
-        out.append(r)
-    return out
-
-
-OP_COLUMNS = [
-    "model", "policy", "N", "tau", "cap", "split", "stop_rate", "lost_success", "lost_success_lo", "lost_success_hi",
-    *evaluate.LOSS_FLAG_COLUMNS, "saved_steps", "saved_steps_lo", "saved_steps_hi", "saved_tokens", "saved_tokens_lo", "saved_tokens_hi",
-    "d_lost_success", "d_lost_success_lo", "d_lost_success_hi", "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi",
-    "d_saved_tokens", "d_saved_tokens_lo", "d_saved_tokens_hi",
-    "fold_lost_success_min", "fold_lost_success_max", "fold_saved_steps_min", "fold_saved_steps_max",
-    # test 행, OOF 모델만 (P4-D6): fold 모델별 점수 5개에 같은 τ·K를 적용한 결과의 최소·최대 (주 값은 평균)
-    *(f"{c}_fold_{e}" for c in evaluate.POINT_COLUMNS for e in ("min", "max")),
-]
-
-
-def frame(rows, columns, schema_overrides=None):
-    df = pl.DataFrame(rows, infer_schema_length=None, schema_overrides=schema_overrides)
-    for c in columns:
-        if c not in df.columns:
-            df = df.with_columns(pl.lit(None, dtype=pl.Float64).alias(c))
-    return df.select(columns)
+    return evaluate.frame(rows, cols, evaluate.OP_SCHEMA)
 
 
 def main():
@@ -427,8 +306,9 @@ def main():
     lap("판별 지표·고정 상한")
 
     # 4. 운영점
-    main_rows, sens_rows, chosen = operating_points(all_preds, fold_test, sets, costs, k_star)
-    cap_main, cap_sens = cap_rows(sets, costs, k_star, cap_train)
+    model_preds = {m: (all_preds[m], fold_test.get(m)) for m in MODELS}
+    main_rows, sens_rows, chosen = evaluate.operating_points({m: model_preds[m] for m in OP_MODELS}, sets, costs, k_star)
+    cap_main, cap_sens = evaluate.cap_rows(sets, costs, k_star, cap_train, K_PROPOSAL)
     lap("운영점 선택·적용")
 
     # 4b. 운영점 이전성 (회의 §4.3): fold 사이 vs train → test
@@ -451,61 +331,20 @@ def main():
     # 6. 부트스트랩 (테스트 분할, 이슈 단위). 분할마다 같은 시드라 모델 사이에서도 같은 재표본을 쓴다
     boots = {}
     if not args.skip_bootstrap:
-        tasks, keys = [], []
-        for name in evaluate.TEST_SPLITS:
-            t = sets[name]
-            for m in MODELS:
-                if name not in sets_of[m]:
-                    continue
-                for n in n_grid_of[m]:
-                    points = {pol: chosen[(m, n, pol)] for pol in evaluate.POLICIES if (m, n, pol) in chosen}
-                    caps_used = [cap for _, cap in points.values()]
-                    c = evaluate.compressed_costs(costs[name], n, caps_used, k_star) if points else None
-                    stat = evaluate.bootstrap_stat(n, points, k_star if points else None, c, discrimination=True)
-                    tasks.append((t, test_preds_of(all_preds, fold_test, m, t, n), stat, args.n_boot))
-                    keys.append((m, name, n))
-            c = evaluate.compressed_costs(costs[name], None, [K_PROPOSAL], k_star)
-            empty = pl.DataFrame(schema=preds.SCHEMA)
-            ks = list(dict.fromkeys([k_star, K_PROPOSAL]))  # K*가 제안서 K와 같으면 차이(0)를 따로 만들지 않는다
-            tasks.append((t, empty, cap_stat(ks, c), args.n_boot))
-            keys.append(("b0_cap", name, None))
-        boots = dict(zip(keys, parallel(boot_task, tasks, args.jobs)))
-        ci_rows = []
-        for (m, name, n), b in boots.items():
-            if m == "b0_cap":
-                continue
-            keep = ["auroc", "pr_auc"] + ([] if m == "ref_oracle_loo" else ["within_pair", "within_issue_mean"])
-            ci_rows.append(b.filter(pl.col("stat").is_in(keep)).with_columns(model=pl.lit(m), split=pl.lit(name), N=pl.lit(n)))
-        pl.concat(ci_rows).select("model", "split", "N", "stat", "estimate", "lo", "hi", "n_boot") \
-            .write_csv(out_dir / "discrimination_ci.csv", float_precision=FLOAT)
-        lap(f"부트스트랩 ({len(tasks)}개 × {args.n_boot}회)")
+        tasks, keys = evaluate.bootstrap_tasks(model_preds, sets, costs, chosen, k_star, n_grid_of, args.n_boot)
+        cap_tasks, cap_keys = evaluate.cap_bootstrap_tasks(sets, costs, k_star, args.n_boot, K_PROPOSAL)
+        boots = dict(zip(keys + cap_keys, parallel(evaluate.boot_task, tasks + cap_tasks, args.jobs)))
+        evaluate.discrimination_ci(boots, no_within=("ref_oracle_loo",)).write_csv(out_dir / "discrimination_ci.csv", float_precision=FLOAT)
+        lap(f"부트스트랩 ({len(tasks) + len(cap_tasks)}개 × {args.n_boot}회)")
 
-    ops = attach_ci(cap_main + main_rows, boots)
-    for r in ops:
-        r.update(evaluate.loss_flags(r))
-    ops_df = frame(ops, OP_COLUMNS, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64,
-                                     **dict.fromkeys(evaluate.LOSS_FLAG_COLUMNS, pl.Boolean)})
+    ops_df = evaluate.operating_table(cap_main + main_rows, boots)
     ops_df.write_csv(out_dir / "operating_points.csv", float_precision=FLOAT)
     dist = score_dist(all_preds, fold_test, sets)
     dist.write_csv(out_dir / "b1_score_dist.csv", float_precision=FLOAT)
-    sens_cols = ["model", "policy", "N", "objective", "max_loss", "tau", "cap", "split", *evaluate.POINT_COLUMNS]
-    frame(cap_sens + sens_rows, sens_cols, {"N": pl.Int64, "cap": pl.Int64, "tau": pl.Float64}) \
-        .write_csv(out_dir / "operating_points_sensitivity.csv", float_precision=FLOAT)
+    evaluate.sensitivity_table(cap_sens + sens_rows).write_csv(out_dir / "operating_points_sensitivity.csv", float_precision=FLOAT)
 
     check(args, out_dir, split_stats, texts, n_hint, written, disc_out, caps, k_star, proposal, b1_info, oracle_info, ops_df,
           transfer, transfer_sum, boots, timings, written_folds, dist)
-
-
-def loss_ci_width(ops_df, k_star):
-    """테스트 손실 95% 구간 폭 (hi - lo)과 반폭. K* 행과 모델 운영점 전체의 범위."""
-    t = ops_df.filter(pl.col("split").is_in(evaluate.TEST_SPLITS)).with_columns(w=pl.col("lost_success_hi") - pl.col("lost_success_lo"))
-    k = t.filter((pl.col("policy") == "cap") & (pl.col("cap") == k_star)).row(0, named=True)
-    m = t.filter(pl.col("model") != "b0_cap")
-    return {"k_star": {"lost_success": k["lost_success"], "lo": k["lost_success_lo"], "hi": k["lost_success_hi"], "half_width": k["w"] / 2},
-            "models_half_width_min": float(m["w"].min()) / 2, "models_half_width_median": float(m["w"].median()) / 2,
-            "models_half_width_max": float(m["w"].max()) / 2,
-            "combined_half_width_median": float(m.filter(pl.col("policy") == "combined")["w"].median()) / 2,
-            "single_half_width_median": float(m.filter(pl.col("policy") == "single")["w"].median()) / 2}
 
 
 def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star, proposal, b1_info, oracle_info, ops_df,
@@ -541,13 +380,9 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
             "lost_success_fold_min", "lost_success_fold_max", "saved_steps_fold_min", "saved_steps_fold_max").to_dicts(),
         "b1_score_dist_N10": dist.filter(pl.col("N") == 10).select("model", "source", "std", "q05", "q50", "q95").to_dicts(),
         # 판정 기준 충족 + K* 대비 절약 스텝 차이 구간 하한 > 0 (N=3~20, 모든 모델·정책)
-        "judged_and_saves_more_than_k_star": [] if args.skip_bootstrap else ops_df.filter(
-            pl.col("split").is_in(evaluate.TEST_SPLITS) & (pl.col("model") != "b0_cap")
-            & pl.col("meets_judge_ci_hi") & (pl.col("d_saved_steps_lo") > 0)).select(
-            "model", "policy", "N", "tau", "cap", "lost_success", "lost_success_hi", "saved_steps", "d_saved_steps",
-            "d_saved_steps_lo", "d_saved_steps_hi").to_dicts(),
+        "judged_and_saves_more_than_k_star": [] if args.skip_bootstrap else evaluate.judged_and_saves_more(ops_df).to_dicts(),
         # 참고값: 테스트 손실 95% 구간 폭 (선택 기준 3.5%의 근거였던 예전 분할 ±1.4%p와 비교용, 기준을 바꾸지 않는다)
-        "test_loss_ci_width": None if args.skip_bootstrap else loss_ci_width(ops_df, k_star),
+        "test_loss_ci_width": None if args.skip_bootstrap else evaluate.loss_ci_width(ops_df, k_star),
         "tau_transfer_N10": transfer_sum.filter((pl.col("N") == 10) | pl.col("N").is_null()).to_dicts(),
         "bootstrap": None if args.skip_bootstrap else {"n_boot": args.n_boot, "tasks": len(boots), "seed": io.SEED},
     }
