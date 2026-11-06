@@ -62,6 +62,7 @@ uv run python code/03_baselines.py  # Phase 4: 기준선 B0·B1·오라클 예�
 uv run python code/04_m1.py       # Phase 5: M1 피처 → data/processed/features/m1_n.parquet, M1 예측 4종 → data/processed/preds/m1_*, 그리드·판별·운영점·B0·B1 비교·SHAP → results/phase5/ (12코어 약 4.5분, 03 결과 필요)
 uv run python code/04b_solution_files.py  # Phase 5.5: 정답 파일 열람 사후 분석 (피처 아님) → results/phase5/solution_file*.csv, solution_files_summary.json (약 4초)
 uv run python code/04c_fig_auroc.py       # Phase 5: N별 AUROC 그림 → results/phase5/figures/auroc_by_n.png (1초 미만, 04_m1 결과 필요)
+uv run python code/04d_m1_supplementary.py --final  # Phase 5.7 보조 실험 (넓힌 그리드, N=25·30, 이전성 진단) → results/phase5/supplementary/, data/processed/supplementary/ (12코어 약 6분. --final 없이 실행하면 train OOF만 출력하고 파일을 쓰지 않는다)
 uv run pytest                     # 단위 테스트 (data/processed/가 있으면 실제 데이터 통합 테스트도 돈다)
 ```
 
