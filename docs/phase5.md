@@ -112,6 +112,8 @@
 - 손으로 센 예제 2개(스텝 단위 값, 궤적 피처), 이슈 언급 매칭 규칙, B0 규칙 재사용, `check_features`가 1:1이 아니거나 무한값이 있으면 멈추는지 (`code/tests/test_features.py`)
 - 누수 테스트는 5.2
 
+> 메모 (5.2): 이 절을 쓴 뒤 `issue_file_mentions`가 이슈 13개의 "고칠 파일 목록" 꼬리를 지우도록 고쳤다. `issue_mentions_file`·`issue_file_opened`·`n_issue_file_steps` 세 피처가 궤적 11개에서 바뀌었고, 아래 표의 반올림 값은 그대로다 (5.2 검증).
+
 ### 피처별 train 분포 요약 (N=10 진행 중 train 궤적 46,167개, `results/phase5/feature_dist.csv`)
 
 성공·실패 평균 차이가 큰 피처 (실패 쪽이 크면 ↑):
@@ -169,3 +171,32 @@ values = features.load_step_values(max_n, trajs)   # traj_id, step_idx + 아래 
 
 ### 미결
 - `[결정 필요]` 이슈 언급 파일 매칭 규칙 (휴리스틱). 선택지: (a) 지금 규칙 유지 (권장: 운영 중 계산 가능하고 단순), (b) 이름만 있는 언급은 흔한 이름(`__init__.py`, `setup.py` 등)을 빼고 맞춤. (b)는 SHAP 결과를 보고 정하면 테스트 정보가 들어가므로, 바꾼다면 train 분포만 보고 정한다
+
+---
+
+## 5.2 누수 테스트 (2026-11-06)
+
+### 한 일
+`code/tests/test_features_leakage.py` (7개, 합성 3개 시드 포함):
+- **N 뒤 스텝** (`test_features_ignore_steps_after_n`, 시드 3개 × N 4개): N 뒤 스텝의 명령·관측 길이·에러·편집 실패·열린 파일을 모두 바꾸거나, 지우거나, 엉뚱한 스텝(999번)을 덧붙이거나, 행 순서를 섞어도 시점 N 피처가 바이트 단위로 같다. 기존 `test_error_count_ignores_steps_after_n`(B0)의 틀을 모든 피처로 넓혔다
+- **궤적 길이**: `n_steps`는 "N에 진행 중인가"만 정하고 값에는 들어가지 않는다 (N 뒤 길이를 100 늘려도 같다)
+- **금지 컬럼**: `features.STEP_INPUT_COLUMNS`에 `io.LEAKY_COLUMNS`가 없고 `io.check_safe_columns`를 통과한다. 입력에 `exit_status`·`generated_patch`·`eval_logs`·`target`을 넣어도 결과가 같다 (읽지 않는다). 실제 로드(`features.load_step_values`)는 `io.scan_steps`·`io.load_trajectories`로 컬럼을 명시해 누수 컬럼을 요청하면 멈춘다. 정적 점검(`test_leakage.py`의 `scan_code`)도 `features.py`·`04_m1.py`를 검사한다 (허용 목록 밖 파일에 누수 컬럼 이름이 있으면 실패)
+- **정답 파일 목록 꼬리**: 합성 본문에 `baselines.HINT` 꼬리를 붙여도 언급이 같다. 실데이터 13개 이슈 모두 꼬리를 지운 본문과 언급이 같다
+- **실데이터** (데이터가 있을 때만): 모든 N에서 피처 행이 진행 중 궤적과 1:1, 결측·무한값 0 (`features.check_features`). 스텝 21개 이상인 궤적 300개 표본은 앞 N스텝만 읽어 계산해도(N=3, 10) 전체 스텝으로 계산한 값과 같다
+
+### 결정과 근거
+- 스텝 단위 값이 "스텝 1..t만 본다"는 조건을 집계 뒤 결과로 검사한다. 스텝 단위(`run_len` 등 누적 값)와 집계(`last_*`, 정렬) 둘 다 깨지면 이 테스트가 잡는다
+- 이슈 본문은 운영 중에도 보이므로 입력으로 허용한다. 단 **이슈 13개 본문 끝의 "고칠 파일 목록"(정답 패치 정보, Phase 4 B1 입력 정리와 같은 꼬리)은 언급 추출 전에 지운다** (`features.issue_file_mentions`가 `baselines.strip_hint`를 먼저 적용). 이 테스트를 쓰면서 처음 만든 5.1 코드가 이 꼬리를 지우지 않아 13개 이슈(모두 train)에서 정답 파일이 "언급 파일"로 들어갈 수 있었음을 찾아 고쳤다. 5.3 학습은 고친 뒤 피처로만 했다
+
+### 검증
+- `uv run --no-sync pytest code/tests/test_features_leakage.py`: 8개 통과. `test_leakage.py`(정적 점검 포함) 통과
+- 꼬리 제거 전후 피처 차이 (실데이터, 다시 만든 `m1_n.parquet` 비교) [확인]: 세 피처만 바뀐다. `issue_mentions_file` 52행(궤적 9개), `issue_file_opened`·`n_issue_file_steps` 46행(궤적 11개). 나머지 70개 피처는 모든 행이 같다. `feature_dist.csv`는 이 세 피처의 행만 바뀌었다 (N=10 `issue_file_opened` 평균 0.08153 → 0.08134)
+
+### 산출물
+- `code/tests/test_features_leakage.py`
+
+### 계획과 다른 점
+- 5.1 코드의 누수 하나(정답 파일 목록 꼬리)를 5.2에서 고쳤다 (위)
+
+### 미결
+- 없음

@@ -23,7 +23,7 @@ import re
 
 import polars as pl
 
-from afp import io, metrics, parse
+from afp import baselines, io, metrics, parse
 
 STEP_INPUT_COLUMNS = ["traj_id", "step_idx", "command", "command_name", "obs_len", "is_error", "edit_failed", "open_file"]
 COMMAND_NAMES = (*parse.COMMANDS, "other", "none")
@@ -60,10 +60,13 @@ B1_FEATURE = "b1_score"
 # ---- 스텝 단위 ----
 
 def issue_file_mentions(text: str | None) -> list[str]:
-    """이슈 본문에 나온 파일 경로 토큰 (중복 없이 정렬). 경로가 있으면 경로 그대로, 없으면 파일 이름만."""
+    """이슈 본문에 나온 파일 경로 토큰 (중복 없이 정렬). 경로가 있으면 경로 그대로, 없으면 파일 이름만.
+
+    이슈 13개의 본문 끝에 붙은 "고칠 파일 목록"(baselines.HINT, 정답 패치 정보)은 먼저 지운다 (B1 입력과 같은 정리).
+    """
     if not text:
         return []
-    return sorted(set(FILE_MENTION.findall(text)))
+    return sorted(set(FILE_MENTION.findall(baselines.strip_hint(text))))
 
 
 def mentions_table(trajs: pl.DataFrame) -> pl.DataFrame:
