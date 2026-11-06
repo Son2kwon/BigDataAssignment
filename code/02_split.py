@@ -279,7 +279,7 @@ def check(traj, splits, stats, det, prov, folds, static, markers, overlap, out_d
         "harness_marker_scan_first20": markers,
         "leakage_eval_overlap_first20": overlap,
     }
-    (out_dir / "summary.json").write_text(json.dumps(s, ensure_ascii=False, indent=2, default=str))
+    io.write_summary(out_dir / "summary.json", s, trailing_newline=False)
     print(json.dumps({k: v for k, v in s.items() if k != "leakage_eval_overlap_first20"}, ensure_ascii=False, indent=2, default=str))
     if overlap:
         print(pl.read_csv(out_dir / "leakage_overlap.csv"))

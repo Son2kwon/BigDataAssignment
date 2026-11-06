@@ -610,7 +610,7 @@ def check(args, out_dir, split_stats, texts, n_hint, written, disc, caps, k_star
         and dist.height == len(FOLD_MODELS) * len(SCORE_DIST_N) * (split.N_FOLDS + 2))
     s["criteria"] = crit
     s["criteria_note"] = "C9(pytest 전체 통과, 재실행 시 results/ 변화 없음)는 스크립트 밖에서 확인한다"
-    (out_dir / "summary.json").write_text(json.dumps(s, ensure_ascii=False, indent=2, default=str) + "\n")
+    io.write_summary(out_dir / "summary.json", s)
 
     with pl.Config(tbl_rows=40, tbl_cols=12, tbl_width_chars=200, float_precision=4):
         print(disc.filter(pl.col("N").is_in([0, 10])).select("model", "split", "N", "n_running", "base_rate", "auroc", "pr_auc", "within_pair"))

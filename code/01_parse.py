@@ -141,7 +141,7 @@ def check(out_dir):
         saved = float((n_steps - K).clip(0).sum() / n_steps.sum())
         s["fixed_cap"][K] = {"lost_success": round(lost, 4), "saved_steps": round(saved, 4)}
 
-    (out_dir / "summary.json").write_text(json.dumps(s, ensure_ascii=False, indent=2))
+    io.write_summary(out_dir / "summary.json", s, trailing_newline=False)
     print(json.dumps(s, ensure_ascii=False, indent=2))
 
     # 제안서 수치와 대조
