@@ -312,3 +312,44 @@ LR은 모두 class_weight 없음 (balanced와 OOF AUROC 차이 ≤0.001이라 �
 - `[결정 필요]` XGBoost 그리드 경계 (위 한계). 선택지: (a) 지금 그리드 결과를 주 결과로 두고 경계 문제를 한계로 보고 (권장: test를 본 뒤 그리드를 바꾸지 않는다는 규칙을 지킨다), (b) 더 작은 모델(깊이 2, 트리 50~100개)까지 넓힌 그리드를 **보조 실험**으로 돌려 train OOF AUROC만 비교하고 test 결과는 주 결과를 바꾸지 않는다. (b)를 하더라도 주 표는 (a)
 - `[결정 필요]` 좋은 N 규칙의 동률 폭 `GOOD_N_TIE = 0.005` (아래 5.6). OOF AUROC가 N에 따라 단조 증가해서 이번에는 동률 폭이 결과를 바꾸지 않았다
 
+---
+
+## 5.4 SHAP (2026-11-06)
+
+### 한 일
+- `m1_xgb`, `m1_xgb_b1`의 N=5, 10, 20 (6개 설정)에서 fold 모델 5개 각각에 `shap.TreeExplainer`를 적용했다. 대상은 test 궤적이고, fold k 모델에는 그 모델이 채점에 쓴 입력(B1 포함이면 B1 fold k 점수)을 넣었다. 값의 단위는 실패의 log-odds
+- 표: `results/phase5/shap_importance.csv` (피처별 평균 |SHAP| = fold 5개 평균, fold 사이 최소·최대, fold별 순위 범위, 피처 값이 0이 아닐 때의 평균 SHAP), `shap_stability.csv` (상위 10개의 fold 사이 안정성)
+- 그림: `results/phase5/figures/` PNG 24개. 설정마다 요약 그림 1개(상위 15개, beeswarm)와 상위 3개 피처의 의존 그림. 그림의 SHAP 값은 표본마다 fold 5개 값의 평균이다 (= 5개 모델 출력 평균의 분해). 점의 색은 피처 값이고, `b1_score`는 fold 평균 값으로 칠했다
+
+### 결과: 상위 피처 (평균 |SHAP|, test. 괄호는 fold 5개 사이 순위 범위)
+
+| 순위 | `m1_xgb` N=5 | N=10 | N=20 | `m1_xgb_b1` N=5 | N=10 | N=20 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `n_edit_ok` 0.181 (1~3) | `n_edit_ok` 0.313 (1) | `n_edit_ok` 0.369 (1) | `b1_score` 0.451 (1) | `b1_score` 0.411 (1) | `n_edit_ok` 0.332 (1~2) |
+| 2 | `cmd_find_file` 0.174 (1~3) | `cmd_find_file` 0.149 (2~4) | `n_unique_files` 0.180 (2~7) | `n_edit_ok` 0.135 (2) | `n_edit_ok` 0.292 (2) | `b1_score` 0.313 (1~2) |
+| 3 | `obs_len_min` 0.156 (2~4) | `obs_len_min` 0.143 (2~3) | `cmd_python` 0.175 (2~7) | `cmd_find_file` 0.102 (3~6) | `obs_len_mean` 0.108 (3~5) | `n_unique_files` 0.164 (3~6) |
+| 4 | `cmd_open` 0.131 (2~5) | `obs_len_mean` 0.124 (2~5) | `n_steps_no_file` 0.167 (2~6) | `obs_len_min` 0.101 (3~5) | `n_edit_failed` 0.101 (3~7) | `cmd_python` 0.143 (3~10) |
+| 5 | `obs_len_mean` 0.090 (5~6) | `n_edit_failed` 0.102 (4~8) | `obs_len_min` 0.152 (4~6) | `cmd_open` 0.094 (3~8) | `obs_len_min` 0.098 (3~5) | `obs_len_mean` 0.132 (4~7) |
+| 6 | `n_edit_failed` 0.079 (5~7) | `cmd_python` 0.093 (4~9) | `obs_len_mean` 0.149 (3~7) | `obs_len_max` 0.089 (4~7) | `cmd_find_file` 0.086 (3~7) | `n_steps_no_file` 0.132 (4~8) |
+
+**fold 사이 안정성** (`shap_stability.csv`): 6개 설정 모두 fold 모델 5개의 피처 순위 Spearman 상관이 최소 0.91, 평균 0.94. 전체 상위 10개 중 각 fold의 상위 10개에 들어가는 수는 8~10개, 5개 fold 모두의 상위 10개에 공통인 피처는 7~9개다. 1위 피처는 6개 설정 중 4개에서 모든 fold가 같다 (N=5 `m1_xgb`는 1~3위 셋이 fold마다 자리를 바꾸고, N=20 `m1_xgb_b1`은 `n_edit_ok`와 `b1_score`가 1·2위를 바꾼다)
+
+### 해석: "초반 실패 신호" (인과가 아니다)
+SHAP은 **이 모델이 점수를 낼 때 어떤 피처에 기댔는지**를 보여 줄 뿐이다. 피처를 바꾸면 성공 확률이 바뀐다는 뜻이 아니고, 피처끼리 서로 얽혀 있다 (예: 편집 성공 수는 "파일을 찾았는가"와 같이 움직인다). 아래는 모델이 쓰는 패턴의 기술이다 [가정: 해석].
+
+- **편집이 받아들여졌는가(`n_edit_ok`)가 모든 N에서 가장 강한 궤적 신호다.** 값이 작으면 실패 쪽(N=10 그림에서 약 +0.1~+0.8 log-odds), 값이 크면 성공 쪽이다. 반대로 편집 거부(`n_edit_failed`)·마지막 스텝 에러(`last_is_error`)가 많으면 실패 쪽이다. "초반에 고치려는 시도가 문법 검사를 통과하지 못한다"가 실패 신호다
+- **탐색 단계에서 머무는가**: N=5·10에서 `find_file`·`open`을 아직 하지 않은 궤적(값 0)은 실패 쪽이다 (모델이 탐색의 시작 자체를 성공 신호로 쓴다). N=20에서는 `n_steps_no_file`(파일 없이 보낸 스텝)이 많고 `n_unique_files`가 많은(여러 파일을 헤맨) 궤적이 실패 쪽이다
+- **재현 스크립트 흐름**: `cmd_python`(재현·확인 실행)·`last_cmd_rm`(재현 스크립트 정리)이 크면 성공 쪽이다 (5.1 분포와 부합)
+- **관측 길이**: `obs_len_mean`이 길면 실패 쪽이다 (긴 에러 출력·긴 파일 목록) [가정]
+- **B1 포함 모델**: 이슈 난이도 점수 `b1_score`가 N=5·10에서 1위이고, N=20에서는 `n_edit_ok`와 같은 크기로 내려온다. 궤적이 길어질수록 궤적 자체의 신호가 이슈 난이도만큼 중요해진다. 궤적 피처의 순위는 B1을 넣어도 거의 같다
+- 반복(`n_repeat_consec`, `max_run_len`)은 분포상 실패 쪽 차이가 있었지만(5.1) 상위권이 아니다. N=20에서 `n_repeat_any`가 7위 정도로 들어온다. 이슈 파일 언급(`issue_file_opened`)은 상위 10위 밖이다
+
+### 산출물
+- `results/phase5/shap_importance.csv`, `shap_stability.csv`, `figures/*.png` (24개)
+
+### 계획과 다른 점
+- 없음
+
+### 미결
+- 의존 그림은 피처마다 상위 3개만 저장했다. 다른 피처가 필요하면 `shap_analysis`의 `DEPENDENCE_TOP`을 바꿔 다시 그린다 (SHAP은 test 해석용이라 다시 그려도 선택 규칙에 영향이 없다)
+
