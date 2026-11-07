@@ -30,7 +30,7 @@ from afp import io, metrics
 
 PREDS_DIR = io.PROCESSED_DIR / "preds"
 SCHEMA = {"traj_id": pl.String, "N": pl.Int16, "p_fail": pl.Float64}
-PREFIXES = ("b0_", "b1_", "m1_", "m2_", "m3_", "ref_")
+PREFIXES = ("b0_", "b1_", "m1_", "m2_", "m2x_", "m3_", "ref_")  # m2x_ = M2 보조 실험 (Phase 6.5)
 REFERENCE_PREFIX = "ref_"
 META_KEY = b"afp.preds"
 MODEL_ID = re.compile(r"^[a-z0-9_]+$")

@@ -63,6 +63,10 @@ uv run python code/04_m1.py       # Phase 5: M1 피처 → data/processed/featur
 uv run python code/04b_solution_files.py  # Phase 5.5: 정답 파일 열람 사후 분석 (피처 아님) → results/phase5/solution_file*.csv, solution_files_summary.json (약 4초)
 uv run python code/04c_fig_auroc.py       # Phase 5: N별 AUROC 그림 → results/phase5/figures/auroc_by_n.png (1초 미만, 04_m1 결과 필요)
 uv run python code/04d_m1_supplementary.py --final  # Phase 5.7 보조 실험 (넓힌 그리드, N=25·30, 이전성 진단) → results/phase5/supplementary/, data/processed/supplementary/ (12코어 약 6분. --final 없이 실행하면 train OOF만 출력하고 파일을 쓰지 않는다)
+uv run --no-sync python code/05_m2.py          # Phase 6 개발: M2 LSTM 그리드·절제 학습, train OOF만 (test 안 봄) → data/processed/m2/, results/phase6/의 train 값 (GPU, dl 그룹 필요)
+uv run --no-sync python code/05_m2.py --final  # Phase 6 최종: 고른 설정으로 test 한 번 채점 → preds/m2_*, results/phase6/ (04_m1.py의 preds/m1_* 필요)
+uv run --no-sync python code/05b_m2_supplementary.py          # Phase 6.5 보조 실험 개발: 누적 집계 없는 M2 B1판 학습, train OOF만
+uv run --no-sync python code/05b_m2_supplementary.py --final  # Phase 6.5 보조 실험 최종: test 한 번 채점 → results/phase6/supplementary/ (주 결과 불변)
 uv run pytest                     # 단위 테스트 (data/processed/가 있으면 실제 데이터 통합 테스트도 돈다)
 ```
 
