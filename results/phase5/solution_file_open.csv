@@ -1,0 +1,5 @@
+scope,N,target,n_traj,n_issues,opened_rate
+all_models,,success,13313,763,0.997146
+all_models,,failure,22018,807,0.843265
+70b_eval_sets,,success,12393,762,0.997014
+70b_eval_sets,,failure,20478,802,0.842514

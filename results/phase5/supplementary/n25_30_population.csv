@@ -1,0 +1,5 @@
+split,N,n_running,success_rate,within_n_issues,share_of_all_traj
+train,25,20897,0.048045,344,0.335366
+test,25,4184,0.042065,73,0.335230
+train,30,16869,0.041022,272,0.270723
+test,30,3284,0.030451,54,0.263120

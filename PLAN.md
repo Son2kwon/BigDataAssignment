@@ -27,10 +27,10 @@
 | 제안서 | `docs/proposal.md`, `docs/proposal.pdf`, 수정 내역 `docs/proposal-changes.md` |
 | 환경 | `pyproject.toml` + `uv.lock` (Python 3.13). 기본 그룹: numpy, pandas, polars, pyarrow, datasets, scikit-learn, xgboost, shap, matplotlib, tqdm, ipykernel. `dl` 그룹: torch(CUDA 13.0), transformers, accelerate. 이 머신의 `.venv`에는 `dl` 그룹까지 설치되어 있다 |
 | 데이터 다운로드 | `data/download.sh`. HF revision 고정 + SHA-256 검증, 이어받기 지원. 이 머신의 `data/`에 4개 데이터셋 모두 받아져 있다 (3.4GB) |
-| 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics, preds, oof, evaluate, baselines`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2), `code/03_baselines.py`(Phase 4). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
+| 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics, preds, oof, evaluate, baselines, features`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2), `code/03_baselines.py`(Phase 4), `code/04_m1.py`·`04b_solution_files.py`(Phase 5). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
 | 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet, context_costs.parquet, preds/*.parquet` (git 밖). 검증 수치·결과 표 `results/phase1/`, `results/phase2/`, `results/phase4/` (git 안) |
 | 테스트·린트·CI | pytest(dev 그룹) 108개, `code/tests/`. 린트·CI 없음 |
-| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). 다음은 Phase 5 (M1) |
+| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). Phase 5 (M1·SHAP) 완료 ("Phase 5 결과 요약" 절, [docs/phase5.md](docs/phase5.md)). 다음은 Phase 6 (M2) |
 
 ### 데이터 구조 [확인, parquet 스키마와 샘플 행 조회]
 
@@ -92,6 +92,13 @@ code/
 - 중간 산출물은 `data/processed/`에 parquet로 저장한다. `.gitignore`의 `data/*` 규칙으로 이미 git에서 빠진다 [확인]. 결과 표·그림은 `results/`(작은 CSV·PNG, git에 올림)에 둔다 [결정 필요 D6].
 - 모든 데이터 로드는 `data/` 로컬 parquet에서만 한다. HF Hub 직접 로드 금지 (revision 고정 때문).
 - 난수 시드는 `afp/io.py`의 상수 하나로 통일한다.
+
+### 재현성: 결과 파일의 부동소수 (2026-11-06, Phase 5.0a)
+
+- **결과 요약 JSON 반올림**: 모든 `results/phase*/summary.json`은 `afp/io.write_summary` 하나로 쓰고, 이 함수가 float(numpy float 포함)를 소수 10자리(`io.SUMMARY_DIGITS`)로 반올림한다. 이유: PR #11에서 같은 코드를 다른 머신에서 돌리면 τ 같은 값이 최대 2.9e-12 달라 summary.json에 diff가 생겼다. 그 크기의 차이는 10자리 반올림으로 사라진다. 적용 전후로 바뀐 값은 반올림뿐이다 ([docs/phase5.md](docs/phase5.md) 5.0a)
+  - 한계: 값이 반올림 경계(소수 11째 자리가 정확히 5 근처)에 걸리면 머신 사이 차이가 반올림 뒤에도 드물게 남는다 (마지막 자리 1 차이). 이 경우도 플랫폼 차이로 보고 커밋하지 않는다
+  - CSV는 이미 `float_precision`(Phase 4는 6자리)으로 쓰므로 이 규칙과 별개다
+- **`b1_grid.csv`는 이 규칙으로 해결되지 않는다**: 고르지 않은 C ≥ 1 행의 OOF AUROC가 소수 **다섯째** 자리에서 다르다 (lbfgs가 멈추는 지점이 BLAS마다 다름, "손실 기준 변경" 절). 반올림 자릿수보다 훨씬 큰 차이라 따로 둔다: 기존 규칙대로 **플랫폼 차이만 있는 diff는 커밋하지 않는다** (CLAUDE.md 재현성). 고른 설정과 예측·판별 값은 같다
 
 ### 정의 (제안서 그대로, 코드에서 한 곳에만 둔다)
 
@@ -607,18 +614,34 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 ### Phase 5. M1 피처 모델 + SHAP (9~10주차, 2~3일) — 최소 범위의 핵심
 
+상세 기록: [docs/phase5.md](docs/phase5.md) (5.0a 반올림 ✓, 5.0 운영점 루프 이동 ✓, 5.1 피처 73개 ✓, 5.2 누수 테스트 ✓, 5.3 학습·평가 ✓, 5.4 SHAP ✓, 5.5 정답 파일 사후 분석 ✓ — 근사라 83%/40% 재현 안 됨, 5.6 결과 정리 ✓)
+
 | 작업 | 내용 |
 | --- | --- |
-| 5.0 | 선행 리팩터 (P5-D2): 운영점 선택·적용 루프를 `03_baselines.py`에서 `afp/evaluate.py`로 옮겨 M1~M3 스크립트가 같은 함수를 쓰게 한다. 옮긴 뒤 `03_baselines.py --force` 재실행 결과(`results/phase4/`·`preds/`)가 바이트 단위로 같아야 한다 |
-| 5.1 | 피처 (proposal.md §3): 명령 종류별 빈도, 에러 관측 수, 같은 명령 반복 수(연속·전체), 열어 본 고유 파일 수, `edit` 횟수, 관측 길이 통계. 추가 후보: 이슈 본문에 언급된 파일 경로를 열었는지(운영 중 계산 가능), 마지막 스텝의 명령·에러 여부 |
-| 5.2 | 피처는 N별로 **앞 N스텝만** 보고 계산. 누수 방지 테스트: N 이후 스텝을 바꿔도 피처가 같아야 한다 |
-| 5.3 | 로지스틱 회귀(표준화) → XGBoost. 각각 B1 점수 포함/제외. 하이퍼파라미터는 학습 이슈 5-fold로 선택. **N마다 모델을 따로 학습한다** (D2, 2026-11-05 확정). N을 피처로 넣은 단일 모델은 필요하면 보조 실험으로. **테스트 B1 입력은 P4-D7 ①**(M1 fold k ← B1 fold k 테스트 점수), **②**(M1 fold k를 B1 fold j≠k 4개로 각각 채점해 평균)는 민감도로만 보고. B1 평균 테스트 점수는 입력으로 쓰지 않는다 |
-| 5.4 | SHAP: XGBoost에 `shap.TreeExplainer`. N=5, 10, 20의 상위 피처와 의존 그림 |
-| 5.5 | 사후 분석 전용: 정답 파일 열람 여부(성공 83% / 실패 40%)는 피처로 쓰지 않고 별도 표로만 |
+| 5.0 ✓ | 선행 리팩터 (P5-D2): 운영점 선택·적용 루프를 `03_baselines.py`에서 `afp/evaluate.py`로 옮겨 M1~M3 스크립트가 같은 함수를 쓰게 한다. 옮긴 뒤 `03_baselines.py --force` 재실행 결과(`results/phase4/`·`preds/`)가 바이트 단위로 같아야 한다 |
+| 5.1 ✓ | 피처 (proposal.md §3): 명령 종류별 빈도, 에러 관측 수, 같은 명령 반복 수(연속·전체), 열어 본 고유 파일 수, `edit` 횟수, 관측 길이 통계. 추가 후보: 이슈 본문에 언급된 파일 경로를 열었는지(운영 중 계산 가능), 마지막 스텝의 명령·에러 여부 |
+| 5.2 ✓ | 피처는 N별로 **앞 N스텝만** 보고 계산. 누수 방지 테스트: N 이후 스텝을 바꿔도 피처가 같아야 한다 |
+| 5.3 ✓ | 로지스틱 회귀(표준화) → XGBoost. 각각 B1 점수 포함/제외. 하이퍼파라미터는 학습 이슈 5-fold로 선택. **N마다 모델을 따로 학습한다** (D2, 2026-11-05 확정). N을 피처로 넣은 단일 모델은 필요하면 보조 실험으로. **테스트 B1 입력은 P4-D7 ①**(M1 fold k ← B1 fold k 테스트 점수), **②**(M1 fold k를 B1 fold j≠k 4개로 각각 채점해 평균)는 민감도로만 보고. B1 평균 테스트 점수는 입력으로 쓰지 않는다 |
+| 5.4 ✓ | SHAP: XGBoost에 `shap.TreeExplainer`. N=5, 10, 20의 상위 피처와 의존 그림 |
+| 5.5 ✓ | 사후 분석 전용: 정답 파일 열람 여부(성공 83% / 실패 40%)는 피처로 쓰지 않고 별도 표로만 |
+| 5.7 ✓ | 보조 실험 (P5-D4·D5·D7, 주 결과는 바꾸지 않음): A2 넓힌 XGBoost 그리드, A3 N=25·30, A4 M1 운영점 이전성 진단. `code/04d_m1_supplementary.py` (`--final` 없이는 train OOF만), `results/phase5/supplementary/`. 결과: 셋 다 주 결론을 바꾸지 않음 ([docs/phase5.md](docs/phase5.md) 5.7) |
 
 리뷰 체크리스트 (PR #13): [docs/reviews/phase5-review.md](docs/reviews/phase5-review.md)
 
 완료 기준: test(70B)에서 모든 N의 지표 표, B1 포함/제외 차이, train에서 고른 K\*(=40) 대비 절약 스텝(주)·절약 토큰(같이 보고)과 판정(test 손실 95% 구간 상한 ≤5%). 운영점은 train 손실 ≤3.5%로 고른다. M1 운영점 평가(비용 곡선·운영점 적용·판정)는 P4-D6 규칙을 따른다: M1 fold k 모델 5개(각각 P4-D7 ① 입력)로 테스트를 채점해 τ·K를 각각 적용하고 결과를 평균한다 (판별 지표는 같은 5개 M1 점수의 평균). P4-D7 ② 민감도 결과(판별 지표·운영점의 ①과 차이)를 함께 보고하고, 차이가 크면 한계로 기록한다 (②를 보고 주 방식을 바꾸지 않는다). "좋은 N"은 train OOF에서만 고른다 (11절 N 선택). 결과가 K\*보다 나쁘거나 이슈 내 AUROC가 0.5 근처여도 그대로 보고한다 (proposal.md §5).
+
+#### Phase 5 결과 요약 (2026-11-06, 상세와 표는 [docs/phase5.md](docs/phase5.md) 5.6)
+
+실행 `uv run --no-sync python code/04_m1.py` (12코어 M4 Pro 4분 28초, 완료 기준 C1~C10 통과, 재실행 시 바이트 단위로 같음). 사후 분석 `code/04b_solution_files.py`. 모든 수치는 test(70B), 기준선 비교는 **K\*=40 대비**.
+
+- **판별**: M1은 N=8부터 B1보다 좋다 (N=10 test AUROC XGB 0.701, XGB+B1 0.712 vs B1 0.600, B0 0.53). 이슈 내 AUROC 0.59~0.69 (N=8~20) vs B0 0.53~0.55. N=3·5에서는 궤적 신호가 거의 없다 (이슈 내 0.50~0.54). B1을 넣으면 전체 AUROC가 +0.01~0.03 오르고 이슈 내 AUROC는 같다
+- **운영점**: 판정(손실 상한 ≤5%)을 통과하면서 K\*보다 유의하게 더 아끼는 M1 정책이 48개 중 24개. N=3~10 결합 정책 +0.1~+2.1%p, **N=15·20 결합·단독 +5.1~+8.0%p** (16개 중 13개, 최대 XGB+B1 단독 N=20 +8.04%p [+6.78, +9.16], 절약 27.9%). N=15·20 정책은 제안서 K=35(23.5%)보다도 많이 아낀다. N≤10 단독 정책은 판정 불충족
+- **손실 구간 폭 가설**(M1이 B1보다 좁다): 단독 정책 24개 모두, 결합 20/24에서 부합. M1이 더 많이 끊는데도 B1의 약 절반~4분의 3
+- **P4-D7 ② 민감도**: ①과 차이 AUROC ≤0.006, 손실·절약 ≤0.4%p. 한계로 기록할 차이 없음
+- **좋은 N** (train OOF): 네 모델 모두 N=20 (OOF AUROC가 N에 따라 단조 증가, 후보 끝)
+- **SHAP** 상위: `n_edit_ok`(모든 N 1위, B1 포함 모델은 N≤10에서 `b1_score` 다음), `cmd_find_file`·`obs_len_min`(N=5·10), `n_unique_files`·`cmd_python`·`n_steps_no_file`(N=20). fold 사이 순위 Spearman ≥0.91
+- **5.5**: 정답 패치가 없어 근사(다른 성공 궤적 패치 파일)로 계산 → 성공 99.7% / 실패 84.3% (데이터 카드 83% / 40% 재현 안 됨, 근사가 성공 있는 이슈에서만 정의됨)
+- 한계·미결: XGBoost 그리드 경계(가장 작은 설정이 골라짐, test를 본 뒤라 넓히지 않음), 선택과 평가에 같은 OOF를 쓴 약간의 낙관. `[결정 필요]` 목록은 phase5.md 5.6
 
 ### Phase 6. M2 LSTM (10주차, 2일)
 
@@ -681,6 +704,8 @@ uv run python "code/test for K/fixed_cap_k.py"       # K 기준선 재현
 uv run python code/01_parse.py                       # Phase 1 → data/processed/
 uv run python code/02_split.py                       # Phase 2 → 분할 수치 출력 (70B만, train / test)
 uv run --no-sync python code/03_baselines.py         # Phase 4 → preds/, results/phase4/ (16코어 약 2.5분. --n-boot 100, --skip-bootstrap은 개발용)
+uv run --no-sync python code/04_m1.py                # Phase 5 → features/, preds/m1_*, results/phase5/ (12코어 약 4.5분. brew install libomp 필요(macOS))
+uv run --no-sync python code/04b_solution_files.py   # Phase 5.5 사후 분석 (4초)
 uv run pytest                                        # 파서·지표·누수 테스트 (Phase 0.3 이후)
 ```
 
@@ -767,6 +792,11 @@ uv run pytest                                        # 파서·지표·누수 �
 | §4.3 | 테스트 셋 구성 | **확정 (회의 2026-11-05): 70B만, 테스트 이슈 무작위(층화) 추출.** 8B·405B는 평가에서 뺀다 |
 | P5-D1 | `tau_transfer*.csv`를 fold별 채점 기준으로 바꿀지 | **확정 (2026-11-05): 바꾸지 않는다.** 이 표는 τ가 테스트로 옮겨지지 않던 원인(테스트 이슈 선택, fold 평균 점수)을 진단한 표라서 평균 점수 기준이어야 의미가 있다. 주 운영점 결과는 `operating_points.csv`(P4-D6 적용)를 쓴다. 두 표의 B1 "주 운영점 → test" 값이 다른 것은 의도된 차이다 (`evaluate.transfer_rows` 문서) |
 | P5-D2 | 운영점 선택·적용 루프의 위치 | **확정 (2026-11-05): `afp/evaluate.py`로 옮긴다** (Phase 5 작업 5.0). M1~M3가 B0·B1과 같은 코드로 운영점을 골라야 비교가 성립한다. 조건: 옮긴 뒤 Phase 4 결과가 바이트 단위로 같을 것 |
+| P5-D3 | M1 피처 정의 | **확정 (손의권, 2026-11-06), 리뷰어 확인 대기**: 이슈 본문 파일 매칭 규칙을 유지한다. 근거: 운영 중 계산 가능하고 단순하다. 바꾸려면 train 분포만 보고 정해야 하는데, SHAP(test) 결과를 이미 봤다. (이전 기록) **확정 (Phase 5.1, 2026-11-06)**: 스텝 단위 값(`features.step_values`)의 앞 N스텝 집계 73개. 비율 피처와 같은 N 안의 선형 변환 피처는 넣지 않는다 (진행 중 궤적은 모두 N스텝을 봐서 정보가 같음). 에러·편집 실패는 B0 규칙 값 재사용. 이슈 본문 언급 추출 전에 정답 파일 목록 꼬리 제거 (`strip_hint`). M2는 같은 스텝 단위 값을 쓴다 |
+| P5-D4 | M1 하이퍼파라미터 | **확정 (손의권, 2026-11-06), 리뷰어 확인 대기**: 주 결과(현재 그리드)는 그대로 둔다. 넓힌 그리드는 보조 실험(5.7 A2)으로만 하고, 그 결과로 주 결과를 바꾸지 않는다. 근거: 그리드 경계를 확인한 개발 실행에서 test 지표를 이미 봤다 (5.3). (이전 기록) **확정 (Phase 5.3)**: (모델, N)마다 각 8개 그리드에서 train OOF AUROC 최대, 0.002 안이면 앞쪽(단순한) 설정. 불균형 처리는 그리드에 포함. XGBoost 그리드 경계 문제(가장 작은 설정이 골라짐)는 test 결과를 본 뒤라 그리드를 바꾸지 않았다. ~~`[결정 필요]`~~ 보조 실험으로 넓힐지 (권장: 주 결과는 그대로, 보조 실험은 train OOF만 비교) |
+| P5-D5 | 좋은 N 규칙의 세부 | **확정 (손의권, 2026-11-06), 리뷰어 확인 대기**: 좋은 N 규칙(동률 폭 0.005)을 유지한다. N=25·30은 보조 실험(5.7 A3)으로만 본다. 근거: 이번 결과에서 동률 폭이 선택을 바꾸지 않았고, 규칙을 test를 본 뒤 바꾸지 않는다. (이전 기록) **권장안으로 진행 (Phase 5.6), ~~`[결정 필요]`~~**: train OOF AUROC 최대에서 0.005 안의 N 중 train 결합 정책 절약 스텝이 큰 N. 이번에는 네 모델 모두 N=20 (동률 폭이 결과를 바꾸지 않음) **재검토 필요 (2026-11-06, 5.7 A3)**: AUROC 우선 규칙은 N 범위를 넓히면 다시 끝값(N=30)을 고르고, 절약은 N=20~25에서 최대다. 제안은 발표에서 N 트레이드오프 곡선, 하나를 고르면 train OOF 절약 스텝 기준. 리뷰에서 확정 (`docs/phase5.md` 5.7 A3, 리뷰 체크리스트 P5-D5) |
+| P5-D6 | 5.5 정답 파일 출처 | **확정 (손의권, 2026-11-06), 리뷰어 확인 대기**: 5.5는 대리 지표와 한계 보고로 마무리한다. 정답 패치 데이터는 추가하지 않는다. 근거: 피처가 아니라 발표의 동기 설명용이고, 방향과 N별 차이는 근사로도 보인다. 다운로드 경로를 바꾸는 비용에 비해 얻는 것이 작다. (이전 기록) **권장안으로 진행 (Phase 5.5), ~~`[결정 필요]`~~**: 정답 패치가 데이터에 없어 근사(같은 이슈 다른 성공 궤적 패치의 비테스트 파일, leave-one-out)로 계산. 선택지 (a) 근사를 한계와 함께 보고 (권장) / (b) 이슈 원본 데이터셋을 `download.sh`에 revision·체크섬 고정으로 추가. proposal-changes.md 18번 |
+| P5-D7 | M1 단독 정책의 train → test 손실 상승 (N=10 3.50% → 3.67~4.40%) | **확정 (손의권, 2026-11-06), 리뷰어 확인 대기**: M1 운영점 이전성 진단을 실행한다(5.7 A4). 진단용이고 선택 기준이나 운영점을 바꾸지 않는다. 근거: 손실 상승이 fold 사이 변동 범위 안인지 알아야 한계를 정확히 적을 수 있고, 새 학습이 필요 없다. (이전 기록) **~~`[결정 필요]`~~ (2026-11-06)**: 선택지 (a) M1에도 운영점 이전성 분석(`evaluate.transfer_rows`, 진단용, 새 학습 없음) (b) 한계로만 기록. 권장 (a). 결과로 선택 기준·운영점을 바꾸지 않는다. `docs/phase5.md` 5.6 미결 결과 (5.7 A4): N=10 단독 정책의 손실 상승(+0.17~+0.90%p)은 네 모델 모두 fold 사이 변동 범위 안 |
 | P6-D1 | M2에 B1 점수를 입력으로 넣을지 | **`[결정 필요]` (결정자: 차승준, Phase 6 시작 전)**. 선택지: 넣음 / 안 넣음 / 둘 다. 권장 (손의권 제안): **둘 다**. M1과 같은 구조라 비교가 깔끔하다. 넣는 쪽은 P4-D7(① M2 fold k ↔ B1 fold k, ② 민감도)을 따른다 |
 | P6-D2 | M2 모델 구조 | **`[결정 필요]` (결정자: 차승준, Phase 6 시작 전)**. 선택지: 모델 하나로 모든 N (각 시점의 은닉 상태로 예측) / N별 6개. 권장 (손의권 제안): **모델 하나** (6.2). 학습 비용이 1/6이다. 평가는 N별로 같은 하네스, 5-fold OOF, P4-D6를 따른다 |
 | P6-D3 | 실행 환경 | **`[결정 필요]` (결정자: 차승준, Phase 6 시작 전)**. 선택지: GPU (12절 리스크의 RTX 5070 [가정]) / CPU. 권장 (손의권 제안): 차승준 머신에서 GPU와 `uv sync --group dl` 설치를 먼저 확인한다. CPU라면 실험당 시간을 재서 계획을 조정한다 |

@@ -110,3 +110,24 @@ def test_vectorizer_fit_inside_fold():
     oof.oof_predict(rows, fit, predict)
     for folds, words in vocab.items():
         assert ("zebra" in words) == (0 in folds), folds
+
+
+def test_test_for_fold_gives_fold_specific_input():
+    """P4-D7 ①: fold k 모델은 test_for_fold(k)가 준 입력으로 채점한다. 학습 OOF와 모델은 그대로다."""
+    data, _ = memorization_data(n_issues=50)
+    test = pl.DataFrame({"instance_id": [1000, 1001], "x": [1.0, 2.0]})
+    fit = lambda rows: rows.height
+    predict = lambda model, rows: rows["x"].to_numpy() * model
+    res = oof.oof_predict(data.with_columns(x=pl.lit(1.0)), fit, predict, test=test,
+                          test_for_fold=lambda k, t: t.with_columns(x=pl.col("x") + k), keep_models=True)
+    sizes = [data.filter(pl.col("fold") != k).height for k in range(5)]
+    for k in range(5):
+        assert res.test_fold_scores[k].tolist() == [(1.0 + k) * sizes[k], (2.0 + k) * sizes[k]]
+    assert res.models == sizes
+    assert np.allclose(res.test["p_fail"].to_numpy(), res.test_fold_scores.mean(axis=0))
+    assert res.test.drop("p_fail").equals(test)  # 결과 test 행은 원래 입력
+    with pytest.raises(ValueError, match="행 수"):
+        oof.oof_predict(data.with_columns(x=pl.lit(1.0)), fit, predict, test=test, test_for_fold=lambda k, t: t.head(1))
+    with pytest.raises(ValueError, match="test_for_fold"):
+        oof.oof_predict(data.with_columns(x=pl.lit(1.0)), fit, predict, test=test, test_mode="refit", test_for_fold=lambda k, t: t)
+    assert oof.oof_predict(data.with_columns(x=pl.lit(1.0)), fit, predict).models is None

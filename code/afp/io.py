@@ -4,6 +4,8 @@
 HF Hub에서 직접 load_dataset 하지 않는다.
 """
 import hashlib
+import json
+import math
 from pathlib import Path
 
 import polars as pl
@@ -27,6 +29,40 @@ SPLITS_PATH = PROCESSED_DIR / "splits.parquet"
 # 라벨 누수 컬럼. 결과가 나온 뒤에야 정해지는 값이라 피처 코드에서는 읽지 않는다.
 # 읽어도 되는 곳은 사후 분석 전용 모듈(afp/leakage.py)과 Phase 1 파서(exit_status 보관)뿐이다.
 LEAKY_COLUMNS = ("exit_status", "generated_patch", "eval_logs")
+
+
+# 결과 JSON(summary.json)의 float 자릿수. 머신 사이 부동소수 차이(PR #11에서 τ 최대 2.9e-12)가 파일에 남지 않게
+# 모든 summary.json은 write_summary 하나로 쓴다. 반올림 경계(소수 11째 자리가 5 근처)에 걸린 값은 드물게 여전히 갈릴 수 있다
+SUMMARY_DIGITS = 10
+
+
+def round_floats(obj, digits: int = SUMMARY_DIGITS):
+    """중첩된 dict·list·tuple 안의 float(numpy float 포함)를 소수 digits자리로 반올림한다. NaN·inf는 그대로 둔다.
+
+    다른 타입(int, bool, str, None …)은 그대로 둔다. dict 키는 바꾸지 않는다.
+    """
+    if isinstance(obj, bool) or obj is None:
+        return obj
+    if isinstance(obj, float) or type(obj).__module__ == "numpy" and hasattr(obj, "dtype") and obj.dtype.kind == "f":
+        x = float(obj)
+        return round(x, digits) if math.isfinite(x) else x
+    if isinstance(obj, dict):
+        return {k: round_floats(v, digits) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [round_floats(v, digits) for v in obj]
+    return obj
+
+
+def write_summary(path: Path, obj, trailing_newline: bool = True) -> dict:
+    """결과 요약 JSON을 쓴다: float를 SUMMARY_DIGITS자리로 반올림, ensure_ascii=False, indent=2, 모르는 타입은 str.
+
+    trailing_newline은 기존 파일 형식을 그대로 두려고 둔다 (phase1·2는 끝 줄바꿈 없음, phase4부터 있음).
+    반올림한 객체를 돌려준다.
+    """
+    rounded = round_floats(obj)
+    text = json.dumps(rounded, ensure_ascii=False, indent=2, default=str)
+    Path(path).write_text(text + ("\n" if trailing_newline else ""))
+    return rounded
 
 
 def check_safe_columns(columns) -> list[str]:

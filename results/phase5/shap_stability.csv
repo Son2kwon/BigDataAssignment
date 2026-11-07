@@ -1,0 +1,7 @@
+model,N,top_k,fold_top_overlap_min,fold_top_overlap_max,fold_top_intersection,fold_rank_spearman_min,fold_rank_spearman_mean
+m1_xgb,5,10,9,10,7,0.907565,0.936520
+m1_xgb,10,10,9,9,8,0.914291,0.944197
+m1_xgb,20,10,8,10,8,0.930674,0.947856
+m1_xgb_b1,5,10,8,10,8,0.911677,0.940078
+m1_xgb_b1,10,10,8,9,8,0.923613,0.941272
+m1_xgb_b1,20,10,9,10,9,0.912210,0.936130

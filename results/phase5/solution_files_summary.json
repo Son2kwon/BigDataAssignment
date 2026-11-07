@@ -1,0 +1,102 @@
+{
+  "definition": "정답 파일 근사 = 같은 이슈의 다른 성공 궤적 generated_patch가 고친 기존 비테스트 파일 (자기 패치 제외). 열람 = 관측 상태 줄의 열린 파일 경로가 '/근사 경로'로 끝남",
+  "data_card": {
+    "success": 0.83,
+    "failure": 0.4
+  },
+  "opened_rate": {
+    "all_models/success": 0.9971456471,
+    "all_models/failure": 0.8432646017,
+    "70b_eval_sets/success": 0.9970144436,
+    "70b_eval_sets/failure": 0.8425139174
+  },
+  "n_traj_with_proxy": {
+    "all_models": 35331,
+    "70b_eval_sets": 32871
+  },
+  "n_traj_without_proxy": {
+    "all_models": 44705,
+    "success": 76,
+    "issues": 2829
+  },
+  "by_n_70b": [
+    {
+      "N": 3,
+      "target": "success",
+      "n_traj": 12350,
+      "opened_rate": 0.4187854251
+    },
+    {
+      "N": 3,
+      "target": "failure",
+      "n_traj": 20305,
+      "opened_rate": 0.3126323566
+    },
+    {
+      "N": 5,
+      "target": "success",
+      "n_traj": 11724,
+      "opened_rate": 0.6974582054
+    },
+    {
+      "N": 5,
+      "target": "failure",
+      "n_traj": 19428,
+      "opened_rate": 0.5419497632
+    },
+    {
+      "N": 8,
+      "target": "success",
+      "n_traj": 9755,
+      "opened_rate": 0.8749359303
+    },
+    {
+      "N": 8,
+      "target": "failure",
+      "n_traj": 17006,
+      "opened_rate": 0.7089262613
+    },
+    {
+      "N": 10,
+      "target": "success",
+      "n_traj": 7607,
+      "opened_rate": 0.9108715657
+    },
+    {
+      "N": 10,
+      "target": "failure",
+      "n_traj": 14958,
+      "opened_rate": 0.7536435352
+    },
+    {
+      "N": 15,
+      "target": "success",
+      "n_traj": 3681,
+      "opened_rate": 0.9372453138
+    },
+    {
+      "N": 15,
+      "target": "failure",
+      "n_traj": 10443,
+      "opened_rate": 0.7906731782
+    },
+    {
+      "N": 20,
+      "target": "success",
+      "n_traj": 1938,
+      "opened_rate": 0.959752322
+    },
+    {
+      "N": 20,
+      "target": "failure",
+      "n_traj": 7683,
+      "opened_rate": 0.7934400625
+    }
+  ],
+  "hint_check": {
+    "issues": 13,
+    "with_proxy": 1,
+    "hint_files": 13,
+    "hint_files_in_proxy": 1
+  }
+}
