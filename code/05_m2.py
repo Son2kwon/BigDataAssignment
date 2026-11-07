@@ -479,11 +479,11 @@ def comparison_tables(out_dir, disc, ops_df, boots) -> dict:
     return {"discrimination": dcomp, "operating": ocomp, "n_summary": nsum, "width_summary": width_sum, "cap_rows_match_phase4": bool(cap_same)}
 
 
-def paired_tasks(pairs: dict, model_preds: dict, sets, costs, chosen, n_boot) -> tuple[list, list]:
-    """M2 vs M1 짝지은 부트스트랩 작업 (모델·N마다). 같은 시드라 다른 표와 같은 재표본이다."""
+def paired_tasks(pairs, model_preds: dict, sets, costs, chosen, n_boot) -> tuple[list, list]:
+    """짝지은 부트스트랩 작업 (짝·N마다). pairs = {a: b} 또는 [(a, b)]. 같은 시드라 다른 표와 같은 재표본이다."""
     test = sets["test"]
     tasks, keys = [], []
-    for a, b in pairs.items():
+    for a, b in (pairs.items() if isinstance(pairs, dict) else pairs):
         for n in evaluate.N_GRID:
             pa = {pol: chosen[(a, n, pol)] for pol in evaluate.POLICIES}
             pb = {pol: chosen[(b, n, pol)] for pol in evaluate.POLICIES}

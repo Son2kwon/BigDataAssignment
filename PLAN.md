@@ -645,7 +645,7 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 ### Phase 6. M2 LSTM (10주차, 2일)
 
-상세 기록: [docs/phase6.md](docs/phase6.md) (6.0 설계·사전 등록 ✓, 6.1 시퀀스 입력 ✓, 6.2·6.3 모델·학습·평가 ✓, 6.4 결과 ✓). 브랜치 `phase/6-m2`. 11절 P6-D1~D10
+상세 기록: [docs/phase6.md](docs/phase6.md) (6.0 설계·사전 등록 ✓, 6.1 시퀀스 입력 ✓, 6.2·6.3 모델·학습·평가 ✓, 6.4 결과 ✓, 6.5 보조 실험: 사전 등록·구현 ✓, 실행 대기). 브랜치 `phase/6-m2`. 11절 P6-D1~D10
 
 | 작업 | 내용 |
 | --- | --- |
@@ -653,6 +653,7 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 | 6.2 ✓ (코드) | 하나의 모델로 모든 N 처리: ~~길이 N으로 자른 시퀀스를 학습에 섞거나,~~ 각 시점의 은닉 상태에서 예측 (P6-D2, `afp/lstm.py`) |
 | 6.3 ✓ (코드) | 클래스 불균형: `pos_weight` 또는 샘플 가중 → 가중 없음 (M1에서 balanced가 OOF AUROC를 올리지 않음). 조기 종료와 검증 조각은 **fold k를 뺀 나머지 train 안에서 이슈 단위로** 뗀다 (fold k와 test는 쓰지 않는다, CLAUDE.md "누수 방지"). 2026-11-06 수정: 이전 문구 "검증 fold로 조기 종료"는 fold k를 조기 종료에 쓰는 것으로 읽힐 수 있어 바꿨다. 구현: 검증 조각 = fit 이슈의 1/8, 점수 = N 6개 AUROC 평균, patience 4 |
 | 6.4 ✓ | 실행 (차승준, 2026-11-07): `code/05_m2.py` 개발(train OOF만, 약 10.6분) → `--final`(약 3.2분). 완료 기준 C1~C10 통과, 재실행 바이트 단위 동일. 결과 정리 docs/phase6.md 6.4 |
+| 6.5 | 보조 실험 (P6-D9): 누적 집계 없는 M2(`m2x_nocum`, `m2x_nocum_b1`)의 test 평가. 사전 등록·구현·점검 완료, 실행 대기. `code/05b_m2_supplementary.py` 개발 → `--final`, 결과 `results/phase6/supplementary/`. 주 결과 불변. docs/phase6.md 6.5 |
 
 완료 기준: M1과 같은 표. 학습 시간 기록 (제안서 예상 10~30분/실험). 추가 (6.0 사전 등록): M2 vs M1 짝지은 비교(`m2_vs_m1.csv`), 절제 실험(train OOF만), 모든 운영점 표·N 요약에 절약 토큰. `--final` 완료 기준 C1~C10 (`results/phase6/summary.json`)
 
@@ -721,6 +722,8 @@ uv run --no-sync python code/04_m1.py                # Phase 5 → features/, pr
 uv run --no-sync python code/04b_solution_files.py   # Phase 5.5 사후 분석 (4초)
 uv run --no-sync python code/05_m2.py                # Phase 6 개발: train OOF만 (GPU, data/processed/m2/, results/phase6/의 train 값)
 uv run --no-sync python code/05_m2.py --final        # Phase 6 최종: test 한 번 채점·평가 (04_m1.py의 preds/m1_* 필요)
+uv run --no-sync python code/05b_m2_supplementary.py          # Phase 6.5 보조 개발: m2x_nocum_b1 학습 + train OOF만
+uv run --no-sync python code/05b_m2_supplementary.py --final  # Phase 6.5 보조 최종: test 한 번 채점 → results/phase6/supplementary/
 uv run pytest                                        # 파서·지표·누수 테스트 (Phase 0.3 이후)
 ```
 
@@ -820,7 +823,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | P6-D6 | M2 하이퍼파라미터 | **확정 (2026-11-07, 사전 등록 docs/phase6.md 6.0)**: hidden {16, 32, 64} × dropout {0.3, 0.1}, 모델마다 train OOF AUROC N 평균으로 선택 (동률 0.002 → 작은 hidden). 고른 hidden이 그리드 끝이면 train OOF만 보고 사다리 {8, …, 256}에서 한 단계씩 넓힌다 (최대 2번). 고정: AdamW lr 1e-3, wd 1e-4, 배치 512, patience 4, 최대 40 epoch, seed 3개 앙상블. 근거: M1 그리드 경계 문제(P5-D4)를 test를 보기 전에 해결하는 규칙 |
 | P6-D7 | 개발/최종 분리 | **확정 (2026-11-07)**: `05_m2.py` 기본 실행은 train OOF만 계산·출력하고 test 시퀀스·B1 test 점수를 읽지 않는다. `--final`이 저장된 fold 모델로 test를 한 번 채점한다 (재학습 없음, 최종 OOF = 개발 OOF 비트 단위 확인 C3). CLAUDE.md "개발 중 테스트 지표 금지" |
 | P6-D8 | M2 vs M1 비교 대상 | **확정 (2026-11-07, 사전 등록)**: `m2_lstm` ↔ `m1_xgb`, `m2_lstm_b1` ↔ `m1_xgb_b1` (같은 B1 조건에서 가장 강한 M1). 같은 부트스트랩 재표본에서 판별 지표·운영점(각자 train에서 고른 τ·K) 차이. M1 운영점은 이 머신의 M1 예측 파일에서 같은 함수로 다시 고른다 |
-| P6-D9 | 누적 집계 없는 M2(`m2x_nocum`)의 test 평가 | **`[결정 필요]` (결정자 차승준)**. 배경: 절제(train OOF만)에서 누적 집계를 빼면 OOF AUROC +0.012 (N=20 +0.034)로 사전 등록한 주 모델보다 좋았다. 선택지: (a) train OOF 절제 결과로만 보고 (b) 보조 실험: 이미 학습된 `m2x_nocum`(h32 d0.1)과 같은 설정의 B1 포함판을 test에 한 번 채점 (실행 전 사전 등록, 주 결과 불변, Phase 5.7 방식). 권장 (b): 선택 근거가 train OOF뿐이고, "순서 정보가 도움이 되는가"에 원래 제안서 형태로 답한다. 주 결과 test를 본 뒤의 추가 실험이라 보조로만 보고한다 |
+| P6-D9 | 누적 집계 없는 M2(`m2x_nocum`)의 test 평가 | **확정 (차승준, 2026-11-07): (b) 보조 실험.** `m2x_nocum`(재학습 없음)과 `m2x_nocum_b1`(`m2_lstm_b1` 설정에서 누적 집계만 뺌, 새로 학습)을 test에 한 번 채점한다. 사전 등록 docs/phase6.md 6.5, `code/05b_m2_supplementary.py`, 주 결과 불변. (이전 기록) 배경: 절제(train OOF만)에서 누적 집계를 빼면 OOF AUROC +0.012 (N=20 +0.034)로 사전 등록한 주 모델보다 좋았다. 선택지: (a) train OOF 절제 결과로만 보고 (b) 보조 실험: 이미 학습된 `m2x_nocum`(h32 d0.1)과 같은 설정의 B1 포함판을 test에 한 번 채점 (실행 전 사전 등록, 주 결과 불변, Phase 5.7 방식). 권장 (b): 선택 근거가 train OOF뿐이고, "순서 정보가 도움이 되는가"에 원래 제안서 형태로 답한다. 주 결과 test를 본 뒤의 추가 실험이라 보조로만 보고한다 |
 | P6-D10 | M1 기준 값의 출처 (Mac 커밋본 vs 이 머신 재실행) | **권장안으로 진행 (2026-11-07) `[결정 필요]`**: `results/phase5/`는 커밋된 Mac 결과를 공식으로 두고, Linux 재실행 diff는 커밋하지 않는다 (플랫폼 차이). Phase 6 비교 표는 커밋본을 읽는다. 짝지은 비교(`m2_vs_m1.csv`)만 이 머신의 M1 예측을 쓰고, 차이(XGBoost test AUROC 최대 0.004)를 한계로 기록한다. 기각: Linux 결과로 Phase 5 갱신 (Phase 5 문서의 수치와 어긋남) |
 
 ## 12. 리스크
