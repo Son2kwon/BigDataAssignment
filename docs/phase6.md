@@ -107,3 +107,59 @@
 
 ### 미결
 - 없음
+
+---
+
+## 6.2·6.3 모델·학습·평가 (2026-11-07)
+
+### 한 일
+- `code/afp/lstm.py`: `M2Config`, `Net`(임베딩 + LSTM/절제용 순환 없는 층 + 머리), `fit`(검증 조각 분리 → 표준화 → seed마다 조기 종료 학습), `predict`(seed 평균 확률, 진행 중이 아닌 위치는 NaN), `save`·`load`
+- `code/afp/evaluate.py`: `pair_preds`·`unpair`·`paired_stat`(두 모델을 같은 재표본에서 비교, M3도 쓸 수 있다), `n_summary`(test 운영점 N 요약, 절약 스텝·토큰과 K\* 대비 차이 [95%])
+- `code/05_m2.py`
+  - 개발(기본): 그리드·확장·절제 학습 → `oof.oof_predict`로 train OOF 수집 → 선택 → train 운영점·좋은 N → `results/phase6/`의 train 값 파일
+  - `--final`: 고른 설정의 fold 모델로 test를 채점(학습 안 함) → 예측 파일 → 판별·운영점·부트스트랩·② 민감도·M1 짝 비교·비교 표·완료 기준 C1~C10
+  - `--smoke`: train 이슈 480개를 가짜 train/test로 나눠 위 경로를 모두 돈다. 결과는 `data/processed/m2_smoke/`에만 쓰고, 실제 test·예측 파일은 건드리지 않는다
+- fold 모델 수집에 `oof.oof_predict`를 그대로 쓴다. fit 콜백은 학습하지 않고 저장된 fold k 모델을 읽는다. 그리고 그 모델의 학습 이슈 해시가 "fold k를 뺀 train 이슈"와 같은지 대조한다. seen-issue 검사·전체 커버 검사·`test_for_fold`(P4-D7 ①)는 Phase 4·5와 같은 코드다
+
+### 결정과 근거
+- **실행 장치는 GPU, deterministic 모드** (P6-D3). 측정값 [확인, 2026-11-07, Ryzen 9 9950X 32스레드 + RTX 5070, 45k 시퀀스 × 20스텝, hidden 64]:
+
+  | 방식 | epoch당 시간 (프로세스 하나) | 처리량 |
+  | --- | --- | --- |
+  | CPU 1개 (단일 스레드) | 1.4초 | 0.7 epoch/s |
+  | CPU 30개 동시 | 9.9초 (메모리 대역폭 경합) | 약 3 epoch/s |
+  | GPU 1개 | 0.15초 | 6.7 epoch/s |
+  | GPU 4개 동시 | 0.28초 | 약 14 epoch/s |
+
+  처음에는 "CPU 병렬이 GPU와 비슷하고 CPU만 재현된다"고 보고 CPU를 기본값으로 하려 했는데, 실측해 보니 틀렸다 (차승준 지적). `torch.use_deterministic_algorithms(True)`(에러 모드), cuDNN deterministic, `CUBLAS_WORKSPACE_CONFIG=:4096:8`에서 GPU 학습을 두 번 하면 비트 단위로 같았다. 그래서 기본값은 `--device auto`(GPU가 있으면 cuda), 학습 병렬 4로 정했다. CPU와 GPU, 또는 다른 GPU 사이에서는 부동소수 결과가 다르다 (플랫폼 차이). 개발과 최종은 같은 장치여야 한다 (스크립트가 검사한다)
+- **조기 종료 지표 = N 6개 AUROC 평균**: 평가 시점과 같고, 모델 하나가 모든 N을 맡으므로 특정 N에 맞추지 않는다. 기각: 검증 손실(BCE). 위치가 많은 작은 t(모든 궤적이 진행 중)가 손실을 지배한다
+- **검증 조각 1/8**: 학습 fold 4개(약 2,390이슈) 중 약 300이슈다. 기각: 1/5. 학습 데이터가 줄어든다. 조기 종료 뒤 전체 fit 행으로 다시 학습하는 안도 기각했다. 고른 epoch 수가 데이터 양에 따라 달라지고, 단순한 쪽을 택했다
+- **seed 3개 앙상블**: LSTM은 seed 변동이 있다. GPU에서 싸서(fold 모델당 약 30초 [가정]) 넣었다. seed는 fold 번호로만 정해서 모든 설정이 같은 seed를 쓴다 (설정 사이의 비교가 seed 운에 덜 흔들린다)
+- **클래스 가중 없음** (6.3 "pos_weight 또는 샘플 가중"): AUROC·순위 기반 운영점에는 영향이 작고, M1에서 balanced가 OOF AUROC를 올리지 않았다. τ는 같은 OOF 척도에서 고른다
+- **fold 모델 캐시** (`data/processed/m2/models/<model>/<config>/fold<k>.pt`): meta(설정·fold·seed·데이터 지문·학습 이슈 해시·장치)가 같으면 다시 학습하지 않는다. 개발 실행이 중간에 끊겨도 이어서 할 수 있다. `--final`은 학습하지 않고 이 파일만 읽는다. 최종 OOF가 개발 OOF와 비트 단위로 같은지 완료 기준 C3로 확인한다
+
+### 검증
+- `code/tests/test_lstm.py` (함수 6개·케이스 7개): 위치 N 출력이 N 뒤 입력(명령·스텝·누적·B1)에 무관하다 (같은 길이에서 비트 단위, 순환/비순환). fit에 넘기지 않은 fold의 입력·라벨을 바꿔도 표준화·검증 곡선·예측이 같다 (조기 종료가 fit 행 안에서만 이뤄진다). 같은 seed로 다시 학습하면 비트 단위로 같다. 검증 조각은 fit 행 안의 이슈 단위 부분집합이다. 저장·읽기 왕복, B1 없는 B1 모델 거부, seed 규칙
+- `code/tests/test_evaluate_paired.py` (3개): 자기 자신과 짝지으면 차이가 0이고 단일 모델 값과 같다. 차이 = 따로 계산한 두 값의 차. 부트스트랩 구간이 추정값을 포함한다. N 요약 형식
+- 전체 `uv run --no-sync pytest`: **150개 통과**, skip 0 [확인]
+- 점검 모드 [확인, GPU]: `--smoke --smoke-epochs 25` 개발 → `--final`이 완료 기준 C1~C10을 통과했다 (점검 모드에서는 C4·C5·C8을 건너뛴다). 그리드 확장 경로(32 → 64 → 128)도 돌았다. `--force`로 두 번 처음부터 학습하면 개발 산출물 8개(`m2_grid.csv`, `m2_train_log.csv`, `ablation_oof.csv`, `train_operating_points.csv`, `good_n.csv`, `summary_dev.json`, `oof_*.parquet`)가 바이트 단위로 같다
+- 개발 경로가 test를 보지 않음: 개발 모드는 test 시퀀스를 만들지 않고, B1 test 점수도 읽지 않는다 (`load_b1_frames(final=False)`). 출력하는 M1 비교 값은 `results/phase5/`의 train 행뿐이다
+
+### 산출물
+- 코드: `code/afp/lstm.py`, `code/afp/evaluate.py`(추가), `code/05_m2.py`, 테스트 `code/tests/test_lstm.py`, `code/tests/test_evaluate_paired.py`
+- 개발 실행: `results/phase6/m2_grid.csv`, `m2_train_log.csv`, `ablation_oof.csv`, `train_operating_points.csv`, `good_n.csv`, `summary_dev.json`
+- 최종 실행: `data/processed/preds/m2_lstm*.parquet`·`.test_folds.parquet`, `results/phase6/discrimination*.csv`, `operating_points*.csv`, `cost_curves/`, `b1_input_sensitivity.csv`, `m2_vs_m1.csv`, `n_summary.csv`, `discrimination_compare.csv`, `operating_points_compare.csv`, `loss_ci_width_*.csv`, `summary.json`
+
+### 계획과 다른 점
+- PLAN 6.2의 두 안 중 "각 시점의 은닉 상태에서 예측"을 택했다 (P6-D2). 길이 N으로 자른 시퀀스를 섞는 안은 같은 궤적을 여러 번 넣는 것과 같아서 기각했다
+- 평가에 M2 vs M1 짝지은 비교와 절제 실험을 더했다 (PLAN 완료 기준 "M1과 같은 표"에 추가)
+
+### 미결
+- `[결정 필요]` P6-D1·D2는 권장안으로 진행했다. P6-D3은 GPU, P6-D4는 2026-11-07 지시대로 진행했다. 결정자(차승준)가 확인한다 (PLAN 11절)
+- `[결정 필요]` 좋은 N 규칙(P5-D5 재검토 중): `good_n.csv`에 두 규칙을 같이 낸다
+
+---
+
+## 6.4 결과 (실행 후 작성)
+
+개발 실행과 `--final` 실행 결과를 받은 뒤 이 절을 채운다.

@@ -30,7 +30,7 @@
 | 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics, preds, oof, evaluate, baselines, features`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2), `code/03_baselines.py`(Phase 4), `code/04_m1.py`·`04b_solution_files.py`(Phase 5). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
 | 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet, context_costs.parquet, preds/*.parquet` (git 밖). 검증 수치·결과 표 `results/phase1/`, `results/phase2/`, `results/phase4/` (git 안) |
 | 테스트·린트·CI | pytest(dev 그룹) 108개, `code/tests/`. 린트·CI 없음 |
-| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). Phase 5 (M1·SHAP) 완료 ("Phase 5 결과 요약" 절, [docs/phase5.md](docs/phase5.md)). 다음은 Phase 6 (M2) |
+| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). Phase 5 (M1·SHAP) 완료 ("Phase 5 결과 요약" 절, [docs/phase5.md](docs/phase5.md)). Phase 6 (M2) 코드 완료, 실행 대기 ([docs/phase6.md](docs/phase6.md)) |
 
 ### 데이터 구조 [확인, parquet 스키마와 샘플 행 조회]
 
@@ -645,15 +645,16 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 ### Phase 6. M2 LSTM (10주차, 2일)
 
-시작 전에 11절 P6-D1~D4를 확정한다.
+상세 기록: [docs/phase6.md](docs/phase6.md) (6.0 설계·사전 등록 ✓, 6.1 시퀀스 입력 ✓, 6.2·6.3 모델·학습·평가 코드 ✓, 6.4 결과는 실행 후). 브랜치 `phase/6-m2`. 11절 P6-D1~D8
 
 | 작업 | 내용 |
 | --- | --- |
-| 6.1 | 입력: 스텝별 `command_name` 임베딩 + 스텝 수치 피처(에러 여부, 관측 길이 등). `torch.nn.LSTM` + `pack_padded_sequence` |
-| 6.2 | 하나의 모델로 모든 N 처리: 길이 N으로 자른 시퀀스를 학습에 섞거나, 각 시점의 은닉 상태에서 예측 |
-| 6.3 | 클래스 불균형: `pos_weight` 또는 샘플 가중. 조기 종료와 검증 조각은 **fold k를 뺀 나머지 train 안에서 이슈 단위로** 뗀다 (fold k와 test는 쓰지 않는다, CLAUDE.md "누수 방지"). 2026-11-06 수정: 이전 문구 "검증 fold로 조기 종료"는 fold k를 조기 종료에 쓰는 것으로 읽힐 수 있어 바꿨다 |
+| 6.1 ✓ (코드) | 입력: 스텝별 `command_name` 임베딩 + 스텝 수치 피처(에러 여부, 관측 길이 등). `torch.nn.LSTM` + `pack_padded_sequence`. **2026-11-07: 시점 t의 M1 누적 집계 41개를 스텝 입력에 더한다** (P6-D5, `afp/sequences.py`) |
+| 6.2 ✓ (코드) | 하나의 모델로 모든 N 처리: ~~길이 N으로 자른 시퀀스를 학습에 섞거나,~~ 각 시점의 은닉 상태에서 예측 (P6-D2, `afp/lstm.py`) |
+| 6.3 ✓ (코드) | 클래스 불균형: `pos_weight` 또는 샘플 가중 → 가중 없음 (M1에서 balanced가 OOF AUROC를 올리지 않음). 조기 종료와 검증 조각은 **fold k를 뺀 나머지 train 안에서 이슈 단위로** 뗀다 (fold k와 test는 쓰지 않는다, CLAUDE.md "누수 방지"). 2026-11-06 수정: 이전 문구 "검증 fold로 조기 종료"는 fold k를 조기 종료에 쓰는 것으로 읽힐 수 있어 바꿨다. 구현: 검증 조각 = fit 이슈의 1/8, 점수 = N 6개 AUROC 평균, patience 4 |
+| 6.4 | 실행 (차승준): `code/05_m2.py` 개발(train OOF만) → `--final`. 결과 정리는 docs/phase6.md 6.4 |
 
-완료 기준: M1과 같은 표. 학습 시간 기록 (제안서 예상 10~30분/실험).
+완료 기준: M1과 같은 표. 학습 시간 기록 (제안서 예상 10~30분/실험). 추가 (6.0 사전 등록): M2 vs M1 짝지은 비교(`m2_vs_m1.csv`), 절제 실험(train OOF만), 모든 운영점 표·N 요약에 절약 토큰. `--final` 완료 기준 C1~C10 (`results/phase6/summary.json`)
 
 ### Phase 7. M3 Transformer fine-tune (11주차, 선택 범위)
 
@@ -706,6 +707,8 @@ uv run python code/02_split.py                       # Phase 2 → 분할 수치
 uv run --no-sync python code/03_baselines.py         # Phase 4 → preds/, results/phase4/ (16코어 약 2.5분. --n-boot 100, --skip-bootstrap은 개발용)
 uv run --no-sync python code/04_m1.py                # Phase 5 → features/, preds/m1_*, results/phase5/ (12코어 약 4.5분. brew install libomp 필요(macOS))
 uv run --no-sync python code/04b_solution_files.py   # Phase 5.5 사후 분석 (4초)
+uv run --no-sync python code/05_m2.py                # Phase 6 개발: train OOF만 (GPU, data/processed/m2/, results/phase6/의 train 값)
+uv run --no-sync python code/05_m2.py --final        # Phase 6 최종: test 한 번 채점·평가 (04_m1.py의 preds/m1_* 필요)
 uv run pytest                                        # 파서·지표·누수 테스트 (Phase 0.3 이후)
 ```
 
@@ -753,7 +756,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | main 재실행 확인 | 차승준 | PR #11 (머지 손의권) |
 | 작업 규칙 (CLAUDE.md) | 손의권 | PR #12 |
 | 5 M1·SHAP | 손의권 | PR #13 (리뷰 차승준 예정, [docs/reviews/phase5-review.md](docs/reviews/phase5-review.md)) |
-| 6 M2 LSTM | 차승준 | 예정 |
+| 6 M2 LSTM | 차승준 | 브랜치 `phase/6-m2` (코드·문서 작성 Claude Code, 학습 실행 차승준, P6-D4) |
 | 7 M3, 8 일반화(선택), 9 정리 | `[확인 필요]` | 아직 정하지 않음. 발표는 공동 (제안 당시 계획) |
 | 리뷰 | `[확인 필요]` | GitHub에 기록된 리뷰(approve·comment)는 PR #1~#12 모두 없다. 다른 사람이 머지한 PR은 #6, #10, #11 |
 
@@ -797,10 +800,14 @@ uv run pytest                                        # 파서·지표·누수 �
 | P5-D5 | 좋은 N 규칙의 세부 | **확정 (손의권, 2026-11-06), 리뷰어 확인 대기**: 좋은 N 규칙(동률 폭 0.005)을 유지한다. N=25·30은 보조 실험(5.7 A3)으로만 본다. 근거: 이번 결과에서 동률 폭이 선택을 바꾸지 않았고, 규칙을 test를 본 뒤 바꾸지 않는다. (이전 기록) **권장안으로 진행 (Phase 5.6), ~~`[결정 필요]`~~**: train OOF AUROC 최대에서 0.005 안의 N 중 train 결합 정책 절약 스텝이 큰 N. 이번에는 네 모델 모두 N=20 (동률 폭이 결과를 바꾸지 않음) **재검토 필요 (2026-11-06, 5.7 A3)**: AUROC 우선 규칙은 N 범위를 넓히면 다시 끝값(N=30)을 고르고, 절약은 N=20~25에서 최대다. 제안은 발표에서 N 트레이드오프 곡선, 하나를 고르면 train OOF 절약 스텝 기준. 리뷰에서 확정 (`docs/phase5.md` 5.7 A3, 리뷰 체크리스트 P5-D5) |
 | P5-D6 | 5.5 정답 파일 출처 | **확정 (손의권, 2026-11-06), 리뷰어 확인 대기**: 5.5는 대리 지표와 한계 보고로 마무리한다. 정답 패치 데이터는 추가하지 않는다. 근거: 피처가 아니라 발표의 동기 설명용이고, 방향과 N별 차이는 근사로도 보인다. 다운로드 경로를 바꾸는 비용에 비해 얻는 것이 작다. (이전 기록) **권장안으로 진행 (Phase 5.5), ~~`[결정 필요]`~~**: 정답 패치가 데이터에 없어 근사(같은 이슈 다른 성공 궤적 패치의 비테스트 파일, leave-one-out)로 계산. 선택지 (a) 근사를 한계와 함께 보고 (권장) / (b) 이슈 원본 데이터셋을 `download.sh`에 revision·체크섬 고정으로 추가. proposal-changes.md 18번 |
 | P5-D7 | M1 단독 정책의 train → test 손실 상승 (N=10 3.50% → 3.67~4.40%) | **확정 (손의권, 2026-11-06), 리뷰어 확인 대기**: M1 운영점 이전성 진단을 실행한다(5.7 A4). 진단용이고 선택 기준이나 운영점을 바꾸지 않는다. 근거: 손실 상승이 fold 사이 변동 범위 안인지 알아야 한계를 정확히 적을 수 있고, 새 학습이 필요 없다. (이전 기록) **~~`[결정 필요]`~~ (2026-11-06)**: 선택지 (a) M1에도 운영점 이전성 분석(`evaluate.transfer_rows`, 진단용, 새 학습 없음) (b) 한계로만 기록. 권장 (a). 결과로 선택 기준·운영점을 바꾸지 않는다. `docs/phase5.md` 5.6 미결 결과 (5.7 A4): N=10 단독 정책의 손실 상승(+0.17~+0.90%p)은 네 모델 모두 fold 사이 변동 범위 안 |
-| P6-D1 | M2에 B1 점수를 입력으로 넣을지 | **`[결정 필요]` (결정자: 차승준, Phase 6 시작 전)**. 선택지: 넣음 / 안 넣음 / 둘 다. 권장 (손의권 제안): **둘 다**. M1과 같은 구조라 비교가 깔끔하다. 넣는 쪽은 P4-D7(① M2 fold k ↔ B1 fold k, ② 민감도)을 따른다 |
-| P6-D2 | M2 모델 구조 | **`[결정 필요]` (결정자: 차승준, Phase 6 시작 전)**. 선택지: 모델 하나로 모든 N (각 시점의 은닉 상태로 예측) / N별 6개. 권장 (손의권 제안): **모델 하나** (6.2). 학습 비용이 1/6이다. 평가는 N별로 같은 하네스, 5-fold OOF, P4-D6를 따른다 |
-| P6-D3 | 실행 환경 | **`[결정 필요]` (결정자: 차승준, Phase 6 시작 전)**. 선택지: GPU (12절 리스크의 RTX 5070 [가정]) / CPU. 권장 (손의권 제안): 차승준 머신에서 GPU와 `uv sync --group dl` 설치를 먼저 확인한다. CPU라면 실험당 시간을 재서 계획을 조정한다 |
-| P6-D4 | 진행 방식 | **`[결정 필요]` (결정자: 차승준, Phase 6 시작 전)**. 선택지: 끝까지 자동 / 단계마다 멈춤. 권장 (손의권 제안): **6.1(시퀀스 데이터) 뒤 멈추고 보고**. 데이터 형태를 먼저 확인한다 |
+| P6-D1 | M2에 B1 점수를 입력으로 넣을지 | **권장안으로 진행 (2026-11-07), 결정자 차승준 확인 `[결정 필요]`**: 둘 다 (`m2_lstm`, `m2_lstm_b1`). B1은 머리에만 넣고, 위치 t에는 t 이하 가장 큰 그리드 N의 `b1_n` 점수를 쓴다. test는 P4-D7 ①(fold k ↔ B1 fold k), ②는 민감도. 근거: M1과 같은 구조라 비교가 깔끔하다 (손의권 제안) |
+| P6-D2 | M2 모델 구조 | **권장안으로 진행 (2026-11-07), 결정자 차승준 확인 `[결정 필요]`**: 모델 하나로 모든 N (각 시점의 은닉 상태로 예측). 설정 선택 = train OOF AUROC의 N 6개 평균. 근거: 학습 비용이 1/6이고 N 사이에 통계적 힘을 나눈다. 평가는 N별로 같은 하네스, 5-fold OOF, P4-D6 |
+| P6-D3 | 실행 환경 | **확정 (2026-11-07)**: GPU (RTX 5070 12GB, CUDA 13.0, torch 2.14.1+cu130 [확인]), deterministic 모드, 학습 병렬 4. 측정: GPU 4개 동시 약 14 epoch/s vs CPU 30개 동시 약 3 epoch/s. 같은 머신에서 GPU 재학습이 비트 단위로 같음 [확인]. `--device cpu`도 지원 (장치가 다르면 결과가 플랫폼 차이만큼 다르다). docs/phase6.md 6.2 |
+| P6-D4 | 진행 방식 | **확정 (차승준, 2026-11-07)**: 코드·아키텍처는 Claude Code가 끝까지 작성하고, 학습(오래 걸리는 명령)은 차승준이 실행한다. 실행 결과를 받아 분석·문서화한다. 개발 실행(train OOF만)과 `--final`(test 한 번) 사이에서 한 번 멈춰 그리드 경계·epoch 경고를 확인한다 |
+| P6-D5 | M2 스텝 입력에 M1 누적 집계를 넣을지 | **권장안으로 진행 (2026-11-07) `[결정 필요]`**: 넣는다 (시점 t의 M1 피처 41개, log1p). 근거: M1 신호의 중심이 횟수 피처이고(SHAP), 작은 데이터에서 LSTM이 정확한 횟수를 배우기 어렵다 [가정]. M2가 매 시점 M1과 같은 정보를 가져서 차이가 "순서 + 모든 N 공동 학습"에서 나온다. 원래 형태(명령 + 스텝 값만)는 절제 실험 `m2x_nocum`으로 같이 잰다 (train OOF만). proposal-changes.md 19번 |
+| P6-D6 | M2 하이퍼파라미터 | **확정 (2026-11-07, 사전 등록 docs/phase6.md 6.0)**: hidden {16, 32, 64} × dropout {0.3, 0.1}, 모델마다 train OOF AUROC N 평균으로 선택 (동률 0.002 → 작은 hidden). 고른 hidden이 그리드 끝이면 train OOF만 보고 사다리 {8, …, 256}에서 한 단계씩 넓힌다 (최대 2번). 고정: AdamW lr 1e-3, wd 1e-4, 배치 512, patience 4, 최대 40 epoch, seed 3개 앙상블. 근거: M1 그리드 경계 문제(P5-D4)를 test를 보기 전에 해결하는 규칙 |
+| P6-D7 | 개발/최종 분리 | **확정 (2026-11-07)**: `05_m2.py` 기본 실행은 train OOF만 계산·출력하고 test 시퀀스·B1 test 점수를 읽지 않는다. `--final`이 저장된 fold 모델로 test를 한 번 채점한다 (재학습 없음, 최종 OOF = 개발 OOF 비트 단위 확인 C3). CLAUDE.md "개발 중 테스트 지표 금지" |
+| P6-D8 | M2 vs M1 비교 대상 | **확정 (2026-11-07, 사전 등록)**: `m2_lstm` ↔ `m1_xgb`, `m2_lstm_b1` ↔ `m1_xgb_b1` (같은 B1 조건에서 가장 강한 M1). 같은 부트스트랩 재표본에서 판별 지표·운영점(각자 train에서 고른 τ·K) 차이. M1 운영점은 이 머신의 M1 예측 파일에서 같은 함수로 다시 고른다 |
 
 ## 12. 리스크
 
