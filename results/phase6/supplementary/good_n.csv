@@ -1,0 +1,13 @@
+model,N,train_oof_auroc,train_saved_steps_combined,in_tie_band,selected_auroc_first,selected_saved_first
+m2x_nocum,3,0.625904,0.202521,false,false,false
+m2x_nocum,5,0.671198,0.206363,false,false,false
+m2x_nocum,8,0.700722,0.210965,false,false,false
+m2x_nocum,10,0.709996,0.217790,false,false,false
+m2x_nocum,15,0.727048,0.258975,false,false,false
+m2x_nocum,20,0.745747,0.278190,true,true,true
+m2x_nocum_b1,3,0.676917,0.208397,false,false,false
+m2x_nocum_b1,5,0.698606,0.215724,false,false,false
+m2x_nocum_b1,8,0.717349,0.220133,false,false,false
+m2x_nocum_b1,10,0.724753,0.235429,false,false,false
+m2x_nocum_b1,15,0.733520,0.265884,false,false,false
+m2x_nocum_b1,20,0.750391,0.278589,true,true,true
