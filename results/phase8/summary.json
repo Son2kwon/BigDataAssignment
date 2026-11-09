@@ -1,0 +1,215 @@
+{
+  "mode": "final",
+  "models": [
+    "m1_xgb",
+    "m1_lr"
+  ],
+  "n_grid": [
+    3,
+    5,
+    8,
+    10,
+    15,
+    20
+  ],
+  "k_star": 40,
+  "k_proposal": 35,
+  "sets": {
+    "x8b_unseen": {
+      "traj": 707,
+      "issues": 87
+    },
+    "x405b_unseen": {
+      "traj": 255,
+      "issues": 22
+    },
+    "x8b_all": {
+      "traj": 4053,
+      "issues": 528
+    },
+    "x405b_all": {
+      "traj": 1191,
+      "issues": 100
+    }
+  },
+  "features_rows_per_N": {
+    "3": 5221,
+    "5": 5007,
+    "8": 4608,
+    "10": 4190,
+    "15": 3452,
+    "20": 3022
+  },
+  "refit_vs_stored": {
+    "m1_xgb_N3": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_xgb_N5": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_xgb_N8": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_xgb_N10": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_xgb_N15": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_xgb_N20": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_lr_N3": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_lr_N5": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_lr_N8": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_lr_N10": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_lr_N15": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    },
+    "m1_lr_N20": {
+      "oof_max_abs_diff": 0.0,
+      "test_folds_max_abs_diff": 0.0
+    }
+  },
+  "repro_tol": 1e-09,
+  "chosen_points": {
+    "m1_xgb_N3_single": {
+      "tau": 0.9208393693,
+      "cap": null
+    },
+    "m1_xgb_N3_combined": {
+      "tau": 0.9508294463,
+      "cap": 42
+    },
+    "m1_xgb_N5_single": {
+      "tau": 0.9303911924,
+      "cap": null
+    },
+    "m1_xgb_N5_combined": {
+      "tau": 0.9551123977,
+      "cap": 43
+    },
+    "m1_xgb_N8_single": {
+      "tau": 0.9412171245,
+      "cap": null
+    },
+    "m1_xgb_N8_combined": {
+      "tau": 0.9639525414,
+      "cap": 42
+    },
+    "m1_xgb_N10_single": {
+      "tau": 0.9462247491,
+      "cap": null
+    },
+    "m1_xgb_N10_combined": {
+      "tau": 0.9721173048,
+      "cap": 41
+    },
+    "m1_xgb_N15_single": {
+      "tau": 0.9484414458,
+      "cap": null
+    },
+    "m1_xgb_N15_combined": {
+      "tau": 0.9561935067,
+      "cap": 58
+    },
+    "m1_xgb_N20_single": {
+      "tau": 0.9464526772,
+      "cap": null
+    },
+    "m1_xgb_N20_combined": {
+      "tau": 0.9545728564,
+      "cap": 60
+    },
+    "m1_lr_N3_single": {
+      "tau": 0.925136366,
+      "cap": null
+    },
+    "m1_lr_N3_combined": {
+      "tau": 0.9955999725,
+      "cap": 40
+    },
+    "m1_lr_N5_single": {
+      "tau": 0.934695782,
+      "cap": null
+    },
+    "m1_lr_N5_combined": {
+      "tau": 0.9781933825,
+      "cap": 41
+    },
+    "m1_lr_N8_single": {
+      "tau": 0.94450616,
+      "cap": null
+    },
+    "m1_lr_N8_combined": {
+      "tau": 0.9765623558,
+      "cap": 42
+    },
+    "m1_lr_N10_single": {
+      "tau": 0.9457029295,
+      "cap": null
+    },
+    "m1_lr_N10_combined": {
+      "tau": 0.9761086751,
+      "cap": 42
+    },
+    "m1_lr_N15_single": {
+      "tau": 0.9464244774,
+      "cap": null
+    },
+    "m1_lr_N15_combined": {
+      "tau": 0.9528489783,
+      "cap": 60
+    },
+    "m1_lr_N20_single": {
+      "tau": 0.9465556691,
+      "cap": null
+    },
+    "m1_lr_N20_combined": {
+      "tau": 0.9548876791,
+      "cap": 60
+    }
+  },
+  "chosen_points_same_as_committed_phase5_csv": {
+    "m1_xgb": {
+      "same": 0,
+      "total": 12
+    },
+    "m1_lr": {
+      "same": 12,
+      "total": 12
+    }
+  },
+  "bootstrap": {
+    "n_boot": 1000,
+    "tasks": 65,
+    "seed": 42
+  },
+  "criteria": {
+    "C1_cross_sets": true,
+    "C2_features_one_to_one_finite": true,
+    "C3_refit_reproduces_stored_preds": true,
+    "C4_k_star": true,
+    "C5_points_complete": true
+  },
+  "criteria_note": "pytest 통과와 재실행 시 results/phase8/ 바이트 동일은 스크립트 밖에서 확인한다. 실행 시간은 표준 출력에만 남긴다"
+}
