@@ -683,3 +683,29 @@ N별 대상 (진행 중 궤적):
 산출물: `code/04d_m1_supplementary.py`, `results/phase5/supplementary/` (`wide_grid.csv`, `wide_vs_main_discrimination.csv`, `wide_vs_main_operating_points.csv`, `n25_30_grid.csv`, `n25_30_population.csv`, `good_n_extended.csv`, `tau_transfer_m1.csv`, `tau_transfer_m1_summary.csv`, A2·A3 모델 공통의 `discrimination.csv`, `discrimination_ci.csv`, `operating_points.csv`, `summary.json`), `data/processed/supplementary/` (N=25·30 피처·B1 점수, 보조 실험 예측, git 밖)
 
 미결: 없음. 주 결과·좋은 N·운영점은 그대로다 (P5-D4·D5·D7)
+
+## 5.8 수정: SHAP 그림 정리 범위 (2026-11-09)
+
+### 한 일
+- `code/04_m1.py`가 SHAP 단계 시작 때 `results/phase5/figures/`를 통째로 지우던 것(`shutil.rmtree`)을 고쳤다. 이 폴더에는 `code/04c_fig_auroc.py`가 만드는 `auroc_by_n.png`도 있어서, 04_m1.py를 다시 돌리면 그 그림이 지워졌다 (발견: `docs/phase6.md` "M1 플랫폼 차이")
+- `afp/io.clear_owned_files(폴더, 패턴)`를 추가했다. 폴더를 (없으면) 만들고, 바로 아래에서 패턴에 맞는 파일만 지운다. 04_m1.py는 `SHAP_FIG_PATTERNS = ("shap_summary_*.png", "shap_dependence_*.png")`만 지운다
+- 완료 기준 C10의 그림 개수 검사도 같은 패턴의 파일만 센다. 전에는 폴더의 `*.png`를 모두 세었는데, 지금은 `auroc_by_n.png`가 남아 있어 그대로 두면 C10이 실패한다
+
+### 결정과 근거
+- 패턴 목록으로 "이 스크립트가 만드는 파일"을 정한다. 그림 이름은 `shap_analysis`가 이 두 형식으로만 쓴다
+- 기각: (a) 04c의 그림을 다른 폴더로 옮기기 (`docs/phase5.md` 5.6과 리뷰 문서의 경로가 바뀐다) (b) 지우지 않고 덮어쓰기만 (SHAP 상위 피처가 바뀌면 옛 dependence 그림이 남는다)
+- `cost_curves/`의 `rmtree`는 그대로 둔다. 그 폴더는 04_m1.py만 쓴다
+
+### 검증 [확인]
+- 테스트 `test_io.py::test_clear_owned_files_keeps_other_files`: 함수를 만들기 전에 실패하는 것을 확인했고, 만든 뒤 통과한다. 다른 파일·하위 폴더를 남기는지, 없는 폴더를 만드는지 본다
+- `uv run --no-sync python code/04_m1.py` 전체 실행(부트스트랩·SHAP 포함, `--force` 없음, Mac 12코어 285초): 완료 기준 통과 (C10 true). **`results/phase5/` 104개 파일과 `data/processed/features/m1_n.parquet`·`preds/m1_*`가 실행 전과 바이트 단위로 같다**. `auroc_by_n.png`가 남아 있다. PR #16 머지 뒤 main으로 rebase하고(`afp/evaluate.py`·`preds.py`가 바뀜) 다시 실행해도 같다
+- `uv run --no-sync pytest`: 154개 통과 (rebase 뒤, 새 테스트 1개 포함)
+
+### 산출물
+- `code/afp/io.py` (`clear_owned_files`), `code/04_m1.py`, `code/tests/test_io.py`. 결과 파일 변경 없음
+
+### 계획과 다른 점
+- 없음. P6-D10 변경(발표 전 Linux 일괄 재실행)의 선행 작업이다 (PLAN 11절)
+
+### 미결
+- 없음

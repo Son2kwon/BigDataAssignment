@@ -33,3 +33,18 @@ def test_write_summary_format(tmp_path):
     assert json.loads(text) == out
     io.write_summary(p, {"x": 1.0}, trailing_newline=False)
     assert p.read_text().endswith("}")
+
+
+def test_clear_owned_files_keeps_other_files(tmp_path):
+    """04_m1.py SHAP 그림 정리: 자기 패턴 파일만 지우고 다른 스크립트 그림(auroc_by_n.png 등)은 남긴다."""
+    d = tmp_path / "figures"
+    io.clear_owned_files(d, ("shap_summary_*.png", "shap_dependence_*.png"))  # 폴더가 없으면 만든다
+    assert d.is_dir() and not any(d.iterdir())
+    for name in ("auroc_by_n.png", "shap_summary_m1_xgb_N5.png", "shap_dependence_m1_xgb_N5_n_edit_ok.png", "notes.txt"):
+        (d / name).write_bytes(b"x")
+    (d / "sub").mkdir()
+    (d / "sub" / "shap_summary_x.png").write_bytes(b"x")  # 하위 폴더는 건드리지 않는다
+    removed = io.clear_owned_files(d, ("shap_summary_*.png", "shap_dependence_*.png"))
+    assert sorted(p.name for p in removed) == ["shap_dependence_m1_xgb_N5_n_edit_ok.png", "shap_summary_m1_xgb_N5.png"]
+    assert sorted(p.name for p in d.iterdir()) == ["auroc_by_n.png", "notes.txt", "sub"]
+    assert (d / "sub" / "shap_summary_x.png").exists()
