@@ -1,0 +1,109 @@
+{
+  "mode": "dev (train OOF only, test not scored)",
+  "device": "cuda",
+  "jobs": 4,
+  "fixed": {
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 512,
+    "max_epochs": 40,
+    "patience": 4,
+    "n_seeds": 3,
+    "emb_dim": 8,
+    "recurrent": true,
+    "use_cum": true
+  },
+  "grid": {
+    "hidden_start": [
+      16,
+      32,
+      64
+    ],
+    "hidden_ladder": [
+      8,
+      16,
+      32,
+      64,
+      128,
+      256
+    ],
+    "dropouts": [
+      0.3,
+      0.1
+    ],
+    "max_extensions": 2,
+    "tie": 0.002
+  },
+  "selection_path": {
+    "m2_lstm": [
+      "h32_d10"
+    ],
+    "m2_lstm_b1": [
+      "h32_d30"
+    ]
+  },
+  "selected": {
+    "m2_lstm": {
+      "config": "h32_d10",
+      "cfg": {
+        "hidden": 32,
+        "dropout": 0.1,
+        "lr": 0.001,
+        "weight_decay": 0.0001,
+        "batch_size": 512,
+        "max_epochs": 40,
+        "patience": 4,
+        "n_seeds": 3,
+        "emb_dim": 8,
+        "recurrent": true,
+        "use_cum": true,
+        "use_b1": false
+      },
+      "oof_auroc_mean": 0.6852590066,
+      "at_boundary": false
+    },
+    "m2_lstm_b1": {
+      "config": "h32_d30",
+      "cfg": {
+        "hidden": 32,
+        "dropout": 0.3,
+        "lr": 0.001,
+        "weight_decay": 0.0001,
+        "batch_size": 512,
+        "max_epochs": 40,
+        "patience": 4,
+        "n_seeds": 3,
+        "emb_dim": 8,
+        "recurrent": true,
+        "use_cum": true,
+        "use_b1": true
+      },
+      "oof_auroc_mean": 0.7056863369,
+      "at_boundary": false
+    }
+  },
+  "ablation": {
+    "m2x_nocum": {
+      "config": "h32_d10_nocum",
+      "oof_auroc_mean": 0.6967692221,
+      "d_vs_base": 0.0115102155
+    },
+    "m2x_norec": {
+      "config": "h32_d10_norec",
+      "oof_auroc_mean": 0.6692085839,
+      "d_vs_base": -0.0160504227
+    }
+  },
+  "k_star_train": {
+    "K": 40,
+    "stop_rate": 0.1601803855,
+    "lost_success": 0.0348646827,
+    "saved_steps": 0.2020838568,
+    "saved_tokens": 0.351624504
+  },
+  "fold_models_hit_max_epochs": 0,
+  "data": {
+    "train_sequences": 62225,
+    "fingerprint": "b36f8b3979d78def4ccc00953c837603fa93b604016b17dfcbe4fd27aea295b6"
+  }
+}

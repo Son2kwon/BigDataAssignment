@@ -1,0 +1,13 @@
+model,N,train_oof_auroc,train_saved_steps_combined,in_tie_band,selected_auroc_first,selected_saved_first
+m2_lstm,3,0.633654,0.202643,false,false,false
+m2_lstm,5,0.669955,0.204513,false,false,false
+m2_lstm,8,0.694465,0.205773,false,false,false
+m2_lstm,10,0.698648,0.212427,false,false,false
+m2_lstm,15,0.702727,0.236365,false,false,false
+m2_lstm,20,0.712105,0.262639,true,true,true
+m2_lstm_b1,3,0.678778,0.208345,false,false,false
+m2_lstm_b1,5,0.697132,0.211444,false,false,false
+m2_lstm_b1,8,0.711144,0.216476,false,false,false
+m2_lstm_b1,10,0.713429,0.221878,false,false,false
+m2_lstm_b1,15,0.712540,0.242671,false,false,false
+m2_lstm_b1,20,0.721094,0.265412,true,true,true

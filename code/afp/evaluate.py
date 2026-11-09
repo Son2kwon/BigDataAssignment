@@ -575,3 +575,68 @@ def loss_ci_width(ops_df: pl.DataFrame, k_star: int, models=None) -> dict:
             "models_half_width_max": float(m["w"].max()) / 2,
             "combined_half_width_median": float(m.filter(pl.col("policy") == "combined")["w"].median()) / 2,
             "single_half_width_median": float(m.filter(pl.col("policy") == "single")["w"].median()) / 2}
+
+
+# ---- 두 모델 짝지은 비교 (Phase 6, M2 vs M1. M3도 같은 함수) ----
+# 두 모델의 test 예측을 한 프레임에 두고 같은 부트스트랩 재표본에서 차이(a − b)를 잰다. b의 컬럼에는 PAIR_PREFIX를 붙인다.
+
+PAIR_PREFIX = "b__"
+PAIR_DISC = ("auroc", "pr_auc", "within_pair", "within_issue_mean")
+
+
+def pair_preds(a: pl.DataFrame, b: pl.DataFrame) -> pl.DataFrame:
+    """두 모델의 같은 (traj_id, N) 예측을 한 프레임으로. a·b 모두 traj_id, N, p_fail(+ p_fail_fold{k}).
+
+    b의 점수 컬럼은 b__p_fail, b__p_fail_fold{k}가 된다. 두 모델의 (traj_id, N)이 다르면 멈춘다.
+    """
+    score_b = [c for c in b.columns if c == "p_fail" or c.startswith(FOLD_SCORE_PREFIX)]
+    bb = b.select("traj_id", pl.col("N").cast(a["N"].dtype), *[pl.col(c).alias(PAIR_PREFIX + c) for c in score_b])
+    out = a.join(bb, on=["traj_id", "N"], how="full", coalesce=True)
+    if out.select(pl.any_horizontal(pl.all().is_null())).to_series().any():
+        raise ValueError("두 모델의 (traj_id, N) 예측이 다르다")
+    return out.sort("N", "traj_id")
+
+
+def unpair(preds: pl.DataFrame) -> tuple[pl.DataFrame, pl.DataFrame]:
+    a = preds.select([c for c in preds.columns if not c.startswith(PAIR_PREFIX)])
+    b = preds.select("traj_id", "N", *[pl.col(c).alias(c[len(PAIR_PREFIX):]) for c in preds.columns if c.startswith(PAIR_PREFIX)])
+    return a, b
+
+
+def paired_stat(n: int, points_a: dict, points_b: dict, costs: pl.DataFrame | None):
+    """부트스트랩 stat: a·b의 판별 지표와 차이 d_<지표> = a − b, 운영점 points(정책 → (τ, K))마다 <정책>.d_<지표>.
+
+    points_a·points_b는 같은 정책 이름을 가진다 (각 모델이 train에서 고른 자기 τ·K). 운영점은 test_point (fold 점수가
+    있으면 fold마다 적용해 평균, P4-D6). costs는 compressed_costs로 두 모델의 K를 모두 경계에 넣어 준다.
+    """
+    def stat(trajs, preds):
+        a, b = unpair(preds)
+        da = discrimination_row(trajs, a.select("traj_id", "N", "p_fail"), n)
+        db = discrimination_row(trajs, b.select("traj_id", "N", "p_fail"), n)
+        out = {}
+        for c in PAIR_DISC:
+            out.update({f"a.{c}": da[c], f"b.{c}": db[c], f"d_{c}": da[c] - db[c]})
+        for name in points_a:
+            pa = test_point(trajs, a, n, *points_a[name], costs, spread=False)
+            pb = test_point(trajs, b, n, *points_b[name], costs, spread=False)
+            for c in POINT_COLUMNS:
+                out.update({f"{name}.a.{c}": pa[c], f"{name}.b.{c}": pb[c], f"{name}.d_{c}": pa[c] - pb[c]})
+        return out
+    return stat
+
+
+N_SUMMARY_COLUMNS = [
+    "model", "policy", "N", "tau", "cap", "stop_rate", "lost_success", "lost_success_hi", "meets_judge_ci_hi",
+    "saved_steps", "d_saved_steps", "d_saved_steps_lo", "d_saved_steps_hi",
+    "saved_tokens", "d_saved_tokens", "d_saved_tokens_lo", "d_saved_tokens_hi",
+]
+
+
+def n_summary(ops_df: pl.DataFrame) -> pl.DataFrame:
+    """운영점 표(operating_table) → test 행의 N 요약. 절약 스텝과 절약 토큰을 K* 대비 차이 [95%]와 함께 (CLAUDE.md 평가 규칙).
+
+    고정 상한 행(b0_cap)은 N이 없어서 맨 앞에 둔다.
+    """
+    t = ops_df.filter(pl.col("split").is_in(TEST_SPLITS))
+    return pl.concat([t.filter(pl.col("model") == "b0_cap").select(N_SUMMARY_COLUMNS),
+                      t.filter(pl.col("model") != "b0_cap").sort("model", "policy", "N").select(N_SUMMARY_COLUMNS)])
