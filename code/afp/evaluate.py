@@ -525,12 +525,15 @@ def discrimination_ci(boots: dict, no_within=()) -> pl.DataFrame:
     return pl.concat(rows).select("model", "split", "N", "stat", "estimate", "lo", "hi", "n_boot")
 
 
-def attach_ci(main_rows: list[dict], boots: dict) -> list[dict]:
-    """주 운영점 행에 테스트 부트스트랩 구간을 붙인다. boots[(model, split, N)] = bootstrap 출력."""
+def attach_ci(main_rows: list[dict], boots: dict, test_splits=TEST_SPLITS) -> list[dict]:
+    """주 운영점 행에 테스트 부트스트랩 구간을 붙인다. boots[(model, split, N)] = bootstrap 출력.
+
+    test_splits: 구간을 붙일 평가 집합 이름 (기본 test. Phase 8 보조 실험은 다른 모델 궤적 집합 이름을 넘긴다).
+    """
     out = []
     for r in main_rows:
         r = dict(r)
-        if r["split"] in TEST_SPLITS and boots:
+        if r["split"] in test_splits and boots:
             if r["model"] == "b0_cap":
                 b, prefix = boots[("b0_cap", r["split"], None)], f"K{r['cap']}."
             else:
@@ -544,9 +547,9 @@ def attach_ci(main_rows: list[dict], boots: dict) -> list[dict]:
     return out
 
 
-def operating_table(rows: list[dict], boots: dict) -> pl.DataFrame:
+def operating_table(rows: list[dict], boots: dict, test_splits=TEST_SPLITS) -> pl.DataFrame:
     """운영점 행(cap_rows + operating_points) → 구간·손실 기준 표시를 붙인 operating_points.csv 형식 표."""
-    ops = attach_ci(rows, boots)
+    ops = attach_ci(rows, boots, test_splits)
     for r in ops:
         r.update(loss_flags(r))
     return frame(ops, OP_COLUMNS, {**OP_SCHEMA, **dict.fromkeys(LOSS_FLAG_COLUMNS, pl.Boolean)})
