@@ -50,6 +50,7 @@ SHAP_N = (5, 10, 20)
 SHAP_TOP = 10
 SHAP_PLOT_TOP = 15
 DEPENDENCE_TOP = 3
+SHAP_FIG_PATTERNS = ("shap_summary_*.png", "shap_dependence_*.png")  # 이 스크립트가 만드는 그림 (다시 실행할 때 이것만 지운다)
 FLOAT = 6
 FEATURES_PATH = io.PROCESSED_DIR / "features" / "m1_n.parquet"
 COMPARE_MODELS = ("b0_err", "b0_editfail", "b1_static", "b1_n")  # Phase 4 비교 대상 (results/phase4/에서 읽음)
@@ -398,9 +399,7 @@ def main():
     shap_imp, shap_stab = [], []
     if not args.skip_shap:
         fig_dir = out_dir / "figures"
-        if fig_dir.exists():
-            shutil.rmtree(fig_dir)
-        fig_dir.mkdir()
+        io.clear_owned_files(fig_dir, SHAP_FIG_PATTERNS)  # figures/에는 다른 스크립트 그림(04c_fig_auroc.py)도 있다
         for m in ("m1_xgb", "m1_xgb_b1"):
             for n in SHAP_N:
                 imp, stab = shap_analysis(m, n, refits[(m, n)]["models"], designs[(m, n)], fig_dir)
@@ -555,7 +554,7 @@ def check(args, out_dir, sets, feat_counts, feats_written, grid_df, selected, de
         and (args.skip_bootstrap or (m1_test["lost_success_hi"].null_count() == 0 and m1_test["meets_judge_ci_hi"].null_count() == 0)),
         "C8_cap_rows_match_phase4": args.skip_bootstrap or compare["cap_rows_match_phase4"],
         "C9_b1_sensitivity": sens2.height > 0 and sens2["sens_2"].null_count() == 0,
-        "C10_shap": args.skip_shap or (len(shap_stab) == 2 * len(SHAP_N) and len(list((out_dir / "figures").glob("*.png"))) == 2 * len(SHAP_N) * (1 + DEPENDENCE_TOP)),
+        "C10_shap": args.skip_shap or (len(shap_stab) == 2 * len(SHAP_N) and len({p for pat in SHAP_FIG_PATTERNS for p in (out_dir / "figures").glob(pat)}) == 2 * len(SHAP_N) * (1 + DEPENDENCE_TOP)),
     }
     s["criteria"] = crit
     s["criteria_note"] = "pytest 전체 통과(누수 테스트 포함)와 재실행 시 results/·preds/ 변화 없음은 스크립트 밖에서 확인한다. 실행 시간은 표준 출력에만 남긴다"

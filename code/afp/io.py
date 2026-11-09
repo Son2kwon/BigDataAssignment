@@ -65,6 +65,20 @@ def write_summary(path: Path, obj, trailing_newline: bool = True) -> dict:
     return rounded
 
 
+def clear_owned_files(directory: Path, patterns) -> list[Path]:
+    """폴더를 (없으면) 만들고, 바로 아래에서 patterns(glob)에 맞는 파일만 지운다.
+
+    여러 스크립트가 같은 출력 폴더를 쓸 때, 다시 실행하는 스크립트가 남의 산출물을 지우지 않게 한다.
+    지운 파일 목록(정렬)을 돌려준다.
+    """
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    removed = sorted({p for pat in patterns for p in directory.glob(pat) if p.is_file()})
+    for p in removed:
+        p.unlink()
+    return removed
+
+
 def check_safe_columns(columns) -> list[str]:
     """피처 쪽 입력 컬럼 목록을 검사한다. 컬럼을 명시하지 않거나 누수 컬럼이 있으면 멈춘다."""
     if columns is None or isinstance(columns, str):

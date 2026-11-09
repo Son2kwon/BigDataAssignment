@@ -625,6 +625,7 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 | 5.4 ✓ | SHAP: XGBoost에 `shap.TreeExplainer`. N=5, 10, 20의 상위 피처와 의존 그림 |
 | 5.5 ✓ | 사후 분석 전용: 정답 파일 열람 여부(성공 83% / 실패 40%)는 피처로 쓰지 않고 별도 표로만 |
 | 5.7 ✓ | 보조 실험 (P5-D4·D5·D7, 주 결과는 바꾸지 않음): A2 넓힌 XGBoost 그리드, A3 N=25·30, A4 M1 운영점 이전성 진단. `code/04d_m1_supplementary.py` (`--final` 없이는 train OOF만), `results/phase5/supplementary/`. 결과: 셋 다 주 결론을 바꾸지 않음 ([docs/phase5.md](docs/phase5.md) 5.7) |
+| 5.8 ✓ | 수정: `04_m1.py`가 `results/phase5/figures/`를 통째로 지우지 않고 자기 SHAP 그림만 지운다 (`afp/io.clear_owned_files`). 재실행 시 `results/phase5/` 바이트 단위로 같음 ([docs/phase5.md](docs/phase5.md) 5.8) |
 
 리뷰 체크리스트 (PR #13): [docs/reviews/phase5-review.md](docs/reviews/phase5-review.md)
 
