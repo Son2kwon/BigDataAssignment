@@ -30,7 +30,7 @@
 | 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics, preds, oof, evaluate, baselines, features`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2), `code/03_baselines.py`(Phase 4), `code/04_m1.py`·`04b_solution_files.py`(Phase 5). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
 | 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet, context_costs.parquet, preds/*.parquet` (git 밖). 검증 수치·결과 표 `results/phase1/`, `results/phase2/`, `results/phase4/` (git 안) |
 | 테스트·린트·CI | pytest(dev 그룹) 108개, `code/tests/`. 린트·CI 없음 |
-| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). Phase 5 (M1·SHAP) 완료 ("Phase 5 결과 요약" 절, [docs/phase5.md](docs/phase5.md)). Phase 6 (M2) 완료 ("Phase 6 결과 요약" 절, [docs/phase6.md](docs/phase6.md)) |
+| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). Phase 5 (M1·SHAP) 완료 ("Phase 5 결과 요약" 절, [docs/phase5.md](docs/phase5.md)). Phase 6 (M2) 완료 ("Phase 6 결과 요약" 절, [docs/phase6.md](docs/phase6.md)). Phase 7 (M3) 완료 ("Phase 7 결과 요약" 절, [docs/phase7.md](docs/phase7.md)) |
 
 ### 데이터 구조 [확인, parquet 스키마와 샘플 행 조회]
 
@@ -687,13 +687,34 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 ### Phase 7. M3 Transformer fine-tune (11주차, 선택 범위)
 
+상세 기록: [docs/phase7.md](docs/phase7.md) (7.0 설계·사전 등록 ✓, 7.1 모델·학습 ✓, 7.2 텍스트 입력 ✓, 7.3 실행 스크립트 ✓, 7.4 결과 ✓). 브랜치 `phase/7`. 11절 P7-D1~D6
+
 | 작업 | 내용 |
 | --- | --- |
-| 7.1 | `transformers` `AutoModelForSequenceClassification` + `answerdotai/ModernBERT-base`, `Trainer`, bf16 |
-| 7.2 | 입력: 앞 N스텝 원문, 관측은 스텝당 앞부분만 (예: 200토큰). 최대 길이는 VRAM 12GB에 맞춰 조정 |
-| 7.3 | 범위 축소안 (proposal-changes.md 남은 일): N=5, 10, 20만 학습, 학습 궤적은 이슈 균형 샘플링으로 줄인다 [결정 필요 D7] |
+| 7.1 ✓ (코드) | ~~`transformers` `AutoModelForSequenceClassification` + `answerdotai/ModernBERT-base`, `Trainer`, bf16~~ → ModernBERT-base(revision 고정, 평균 풀링, logit 1개) + **직접 짠 학습 루프** (epoch마다 이슈 균형 표본, 토큰 예산 배치, deterministic, 이슈 단위 검증 조각으로 최고 가중치), bf16 autocast (`afp/m3.py`) |
+| 7.2 ✓ (코드) | 입력: 앞 N스텝 원문. ~~관측은 스텝당 앞부분만 (예: 200토큰)~~ → 스텝당 생각 32 + 명령 24 + 관측 앞 26·뒤 12토큰. N=20도 2,048 안이라 자르지 않는다. 이슈 본문 없음 (`afp/m3_text.py`, P7-D4·D5) |
+| 7.3 ✓ (코드) | 범위 축소 (D7 확정): N=5, 10, 20만, 모델 하나. epoch마다 이슈당 4궤적. B1은 late fusion(`m3_bert_b1`). `code/06_m3.py` 개발(train OOF만, GPU 약 4~4.5시간 [가정]) / `--final`(test 한 번, 약 40분 [가정]) / `--smoke` |
+| 7.4 ✓ | 실행 (차승준, 2026-11-09~10): 개발(약 3시간, fold 3에서 외부 원인으로 한 번 멈춰 같은 명령으로 이어서 실행) → `[주의]` 없음 → `--final`(약 30분). 완료 기준 C1~C10 통과, 재실행 바이트 단위 동일. 사후 분석 `code/06b_m3_fold_spread.py`. 결과 정리 docs/phase7.md 7.4 |
 
-완료 기준: 고른 N에서 M1과 같은 표. 실패하거나 시간이 부족하면 "가능한 N까지만" 보고.
+완료 기준: 고른 N에서 M1과 같은 표. 실패하거나 시간이 부족하면 "가능한 N까지만" 보고. 추가 (7.0 사전 등록): M3 vs M1 XGB 짝지은 비교(주)와 vs M2(보조) (`paired.csv`), 모든 운영점 표·N 요약에 절약 토큰. `--final` 완료 기준 C1~C10 (`results/phase7/summary.json`)
+
+#### Phase 7 결과 요약 (2026-11-10, 상세와 표는 [docs/phase7.md](docs/phase7.md) 7.4)
+
+모든 수치는 test(70B)이고, 기준선 비교는 **K\*=40 대비**다. 출처는 `results/phase7/`다. 스텝·토큰은 %p다.
+
+| 모델 | test AUROC N=5 / 10 / 20 | AUROC − M1 XGB(같은 B1 조건) N=5 · 10 · 20 [95%] | N=20 결합: 스텝 · 토큰 | M1 XGB 대비 N=20 결합 스텝 · 토큰 [95%] | 판정 통과 + K\*보다 더 아낌 (스텝 / 토큰) |
+| --- | --- | --- | --- | --- | --- |
+| M1 XGB | 0.646 / 0.701 / 0.745 | (기준) | +7.45 · +9.08 | (기준) | 3/6 · 2/6 |
+| `m3_bert` | 0.680 / 0.705 / 0.742 | +0.034 [+0.002, +0.069] · +0.005 [−0.024, +0.033] · −0.007 [−0.044, +0.028] | +3.74 · +3.84 | −3.57 [−4.29, −2.90] · −5.08 [−6.09, −4.09] | 4/6 · 3/6 |
+| `m3_bert_b1` | 0.663 / 0.693 / 0.736 | +0.002 [−0.023, +0.030] · −0.021 [−0.047, +0.004] · −0.022 [−0.057, +0.009] | +4.36 · +4.86 | −3.2 [−3.9, −2.5] · −4.5 [−5.5, −3.5] (vs XGB+B1) | 2/6 · 1/6 |
+
+- 판정 통과 수는 N 5·10·20 × 정책 2 = 6개 기준이다 (`n_summary.csv`). M1·M2의 N 8개 기준 수와는 다르다
+- **판별**: M1·M2와 같은 수준이다. 사전 등록 규칙(주 짝 하한 > 0인 N이 여러 개)으로는 "M3가 M1보다 낫다"고 쓸 수 없다 (N=5 하나뿐). 이슈 내 AUROC는 N≥10에서 M1보다 낮다 (−0.02~−0.05)
+- **평균 점수 효과** (사후 분석 `fold_spread.csv`): M3 fold 모델끼리 test AUROC가 0.06~0.07씩 다르다 (M1·M2 ≤0.03). 5개 평균 점수가 fold 모델 하나보다 +0.03 높다 (M1·M2 +0.002~+0.011). 운영점은 fold 모델별 채점이라(P4-D6) 이 효과가 없다. 그래서 판별에 비해 절약이 나쁘다. 학습은 약 0.5 epoch 뒤 과적합했다 (5개 중 3개 fold가 첫 검증이 최고)
+- **운영점**: N=20 결합이 K\*보다 스텝 +3.7%p · 토큰 +3.8%p를 더 아끼지만 M1 XGB의 절반 정도다 (짝지은 차이 구간이 0 아래). 토큰은 제안서 K=35(+6.3%p)보다 적다. N≤10은 K\*와 거의 같다 (N=5 결합 정지율 0.08%)
+- **B1 결합은 test에서 도움이 되지 않았다** (평균 점수 AUROC −0.006~−0.017). fold 모델 하나 기준으로는 차이가 ±0.005이고, 결합하면 평균 효과가 줄어든다
+- **실행 시간**: 개발 약 3시간(fold당 학습 약 31분, GPU), `--final` 약 30분. M1(CPU 약 4.5분)·M2(GPU 약 11분)보다 수십 배 비싸다
+- **Phase 5~7 종합** `[결정 필요]` 발표의 주 모델: 판별은 M1 XGB, 누적 없는 M2(보조), M3가 같은 수준이다. 절약은 누적 없는 M2 ≥ M1 XGB > 공식 M2 > M3 순이다 (N=20 결합 K\* 대비 스텝 +8.5 / +7.5 / +6.8 / +3.7%p). 누적 없는 M2의 M1 대비 우위는 N=20 하나에서 작고 보조 실험이라 주장하지 않는다 (P6-D11). 권장: **M1 XGB를 주 모델로** 둔다 (같은 수준 중 가장 싸고, SHAP으로 설명 가능). M2·M3는 "순서·원문을 더 읽어도 나아지지 않는다"는 결과로 보고한다
 
 ### Phase 8. 일반화 테스트 (11~12주차)
 
@@ -740,6 +761,10 @@ uv run --no-sync python code/05_m2.py                # Phase 6 개발: train OOF
 uv run --no-sync python code/05_m2.py --final        # Phase 6 최종: test 한 번 채점·평가 (04_m1.py의 preds/m1_* 필요)
 uv run --no-sync python code/05b_m2_supplementary.py          # Phase 6.5 보조 개발: m2x_nocum_b1 학습 + train OOF만
 uv run --no-sync python code/05b_m2_supplementary.py --final  # Phase 6.5 보조 최종: test 한 번 채점 → results/phase6/supplementary/
+uv run --no-sync python code/06_m3.py                # Phase 7 개발: M3 fold 모델 5개 + train OOF만 (GPU 실측 약 3시간, 멈추면 같은 명령으로 이어서. 캐시가 있으면 11초)
+uv run --no-sync python code/06_m3.py --final        # Phase 7 최종: 저장된 fold 모델로 test 한 번 채점·평가 (실측 약 30분, 채점 캐시가 있으면 8분)
+uv run --no-sync python code/06b_m3_fold_spread.py   # Phase 7.4 사후 분석: fold 모델 하나 vs 평균 점수 test AUROC (--final 뒤)
+uv run --no-sync python code/06_m3.py --smoke        # Phase 7 점검: 작은 무작위 모델로 전체 경로 (1분 안, --final 붙여 최종 경로도)
 uv run pytest                                        # 파서·지표·누수 테스트 (Phase 0.3 이후)
 ```
 
@@ -757,7 +782,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | B1 | `TfidfVectorizer` + `LogisticRegression` | |
 | M1 | `xgboost`, `shap.TreeExplainer` | |
 | M2 | `torch.nn.LSTM` | |
-| M3 | `transformers` `Trainer` + ModernBERT-base | |
+| M3 | `transformers` `AutoModelForSequenceClassification` + ModernBERT-base, 학습 루프는 직접 작성 | `Trainer`로는 epoch마다 이슈 균형 재표본·토큰 예산 배치·deterministic 통제를 하려면 sampler·collator·callback을 다 바꿔야 한다 (docs/phase7.md 7.1) |
 | 테스트 | pytest (dev 의존성 추가 필요) | `unittest`로도 가능하지만 pytest가 간단 |
 | 실험 기록 | CSV/JSON 파일 | 실험 수가 적어 MLflow·W&B는 과함 |
 
@@ -812,7 +837,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | D4 | 토큰 근사 방법 | 문자 수 기반. 필요하면 ModernBERT 토크나이저로 샘플 보정. **문자 수 기반으로 구현됨 (Phase 3.4), 보정은 안 함** |
 | D5 | pytest 도입 (`pyproject.toml`·`uv.lock` 변경) | **확정: 도입함** |
 | D6 | `results/`를 git에 올릴지 | **확정: 작은 CSV·JSON을 올린다** (`results/phase1/`, `results/phase2/`) |
-| D7 | M3 범위 | N=5, 10, 20만 |
+| D7 | M3 범위 | N=5, 10, 20만. **확정·구현 (2026-11-09)**: 모델 하나로 세 N, epoch마다 이슈당 4궤적 (P7-D2·D3) |
 | D8 | 비용 곡선이 단일 시점 정책만 볼지, 여러 시점(N=5, 10, 20에서 차례로 검사) 정책도 볼지 | 단일 시점을 주 결과로, 다중 시점은 시간이 남으면 |
 | P4-D1 | 모델 비교의 고정 상한 기준선 | **확정 (회의 2026-11-05): train에서 고른 K\*** (선택 기준 train 손실 ≤3.5% 적용 → **K\*=40**). 제안서 K=35는 같은 표의 참고 행(`cap_proposal`). 5% 기준이었을 때는 35 (예전 분할 34) |
 | P4-D2 | OOF 모델의 테스트 점수 | **5개 fold 모델 평균으로 구현.** 전체 재학습과의 차이는 작다 (`b1_scale.csv`: test_same N=0 AUROC 0.6318 vs 0.6316). **2026-11-05: 판별 지표(AUROC, PR-AUC, 이슈 내 AUROC)에 한해 유지, 운영점 평가는 P4-D6** |
@@ -842,6 +867,12 @@ uv run pytest                                        # 파서·지표·누수 �
 | P6-D9 | 누적 집계 없는 M2(`m2x_nocum`)의 test 평가 | **확정 (차승준, 2026-11-07): (b) 보조 실험.** `m2x_nocum`(재학습 없음)과 `m2x_nocum_b1`(`m2_lstm_b1` 설정에서 누적 집계만 뺌, 새로 학습)을 test에 한 번 채점한다. 사전 등록 docs/phase6.md 6.5, `code/05b_m2_supplementary.py`, 주 결과 불변. (이전 기록) 배경: 절제(train OOF만)에서 누적 집계를 빼면 OOF AUROC +0.012 (N=20 +0.034)로 사전 등록한 주 모델보다 좋았다. 선택지: (a) train OOF 절제 결과로만 보고 (b) 보조 실험: 이미 학습된 `m2x_nocum`(h32 d0.1)과 같은 설정의 B1 포함판을 test에 한 번 채점 (실행 전 사전 등록, 주 결과 불변, Phase 5.7 방식). 권장 (b): 선택 근거가 train OOF뿐이고, "순서 정보가 도움이 되는가"에 원래 제안서 형태로 답한다. 주 결과 test를 본 뒤의 추가 실험이라 보조로만 보고한다 |
 | P6-D10 | M1 기준 값의 출처 (Mac 커밋본 vs 이 머신 재실행) | **변경 (손의권, 2026-11-09): 발표 전에 Linux에서 전체를 한 번에 재실행해 수치를 통일한다.** 재실행 결과는 각 Phase 문서의 새 절에 기록하고, 기존 절의 값은 고치지 않는다(메모만 단다). 재실행 전에 `04_m1.py`가 `results/phase5/figures/`를 통째로 지우는 버그(`docs/phase6.md` "M1 플랫폼 차이")를 먼저 고친다 (`fix/m1-figures`). 그때까지는 아래 이전 기록대로 둔다 (본문 M1 = Mac 커밋본, 짝지은 비교 M1 = Linux). 근거: 본문과 짝지은 비교의 M1 출처가 달라 발표 수치가 어긋난다. (이전 기록) **권장안으로 진행 (2026-11-07) ~~`[결정 필요]`~~**: `results/phase5/`는 커밋된 Mac 결과를 공식으로 두고, Linux 재실행 diff는 커밋하지 않는다 (플랫폼 차이). Phase 6 비교 표는 커밋본을 읽는다. 짝지은 비교(`m2_vs_m1.csv`)만 이 머신의 M1 예측을 쓰고, 차이(XGBoost test AUROC 최대 0.004)를 한계로 기록한다. 기각: Linux 결과로 Phase 5 갱신 (Phase 5 문서의 수치와 어긋남) |
 | P6-D11 | 보조 실험 6.5 결과를 발표·보고서에서 쓰는 방식 | **확정 (차승준 2026-11-07, 손의권 확인 2026-11-09): (b) 본문에 공식 결과와 나란히** (구분 표시, 결론은 공식 → 보조 순서, 보조는 "M1과 같은 수준"까지만 쓴다, docs/phase6.md "Phase 6 본문 보고 형식"·PLAN Phase 6 결과 요약 표). (이전 기록) 선택지: (a) 주 결과(누적 포함 M2)만 본문, 보조는 부록 (b) 본문에 주 결과와 보조 결과를 나란히 두고 보조는 "주 결과 test를 본 뒤 설계한 추가 실험"임을 명시. 권장 (b): 사전 등록 절차(train OOF 근거, 새 선택 없음, 주 결과 불변)를 지켰고, "순서 정보가 도움이 되는가"에 가장 직접 답한다. 주 결과만 쓰면 M2가 M1보다 못한 원인이 입력 설계라는 점이 빠진다. docs/phase6.md 6.5 |
+| P7-D1 | M3에 B1(이슈 본문) 정보를 넣는 방식 | **권장안으로 진행 (2026-11-09), 결정자 차승준 확인 `[결정 필요]`**: late fusion. `m3_bert`(원문만)와 `m3_bert_b1`(N별 로지스틱 회귀 [logit M3, logit `b1_n`])을 둘 다 낸다. 결합기 k는 fold k를 뺀 train OOF로 학습. test는 P4-D7 ①, ②는 민감도. 한계: M3 OOF를 낸 fold j 모델이 fold k를 포함해 학습 (P4-D7과 같은 stacking 수준). 기각: 이슈 본문을 입력에 넣음 (P7-D5) |
+| P7-D2 | M3 모델 구조와 학습 예 | **권장안으로 진행 (2026-11-09) `[결정 필요]`**: 모델 하나로 N ∈ {5, 10, 20}. epoch마다 N별 이슈당 최대 4궤적을 새로 뽑는다. 근거: 이슈당 궤적 중앙값 13·평균 20.8이고 같은 이슈 궤적이 비슷해서, 이슈를 모두 보면서 계산량을 약 1/4로 줄인다. 기각: 전체 궤적(5 fold 10시간+), N별 모델 3개(비용 3배) |
+| P7-D3 | M3 하이퍼파라미터 | **권장안으로 진행 (2026-11-09) `[결정 필요]`**: 그리드 없이 고정 (사전 등록 docs/phase7.md 7.0). AdamW lr 3e-5, wd 0.01, warmup 6% + 선형 감소, 최대 2 epoch, 유효 배치 32, 검증 = fit 이슈의 1/8, epoch마다 2번, 최고 가중치. 근거: fold 모델당 약 45분이라 그리드가 비싸다. 위험: lr이 이 데이터에 맞지 않을 수 있다 (검증 AUROC < 0.55면 개발 실행이 `[주의]`를 내고 멈춰 보고) |
+| P7-D4 | M3 입력 예산 | **권장안으로 진행 (2026-11-09) `[결정 필요]`**: 스텝당 생각 32 + 명령 24 + 관측 앞 26·뒤 12토큰 (최대 101), 최대 2,022 ≤ 2,048. 근거: N=20까지 자르지 않고 같은 규칙, 12GB에서 학습 최대 7.5 GiB [확인]. 기각: 관측 앞 200토큰 (N=20에서 4,000토큰 초과, 8k 문맥은 VRAM·시간 4배) |
+| P7-D5 | 이슈 본문을 M3 입력에 넣을지 | **권장안으로 진행 (2026-11-09) `[결정 필요]`**: 넣지 않는다. B1이 이미 쓰고 결합은 P7-D1. 넣으면 궤적 예산이 줄어든다 |
+| P7-D6 | 개발/최종 분리와 진행 방식 | **확정 (2026-11-09)**: P6-D4·D7과 같다. `06_m3.py` 기본 실행은 train OOF만, `--final`이 저장된 fold 모델로 test를 한 번 채점 (재학습 없음, C3로 개발 OOF와 비트 단위 확인). 코드·문서는 Copilot, 학습 실행은 차승준. 개발과 `--final` 사이에서 한 번 멈춰 결과를 확인한다 |
 
 ## 12. 리스크
 
@@ -859,3 +890,8 @@ uv run pytest                                        # 파서·지표·누수 �
 | 일정 지연 (현재 약 1주 [가정]) | M3·외부 테스트 누락 | 최소 범위(B0·B1·M1·M2)를 먼저 끝냄. 7절 기준 |
 | 2.1GB openhands 파일 메모리 사용 | 선택 과제에서만 | row group 단위로 읽기 |
 | GPU 환경 (RTX 5070 12GB, CUDA 13.0 + 드라이버 580 이상) [가정: 제안서 §7의 머신이 학습 머신] | M2·M3 지연 | M2는 CPU로도 가능하도록 작게 유지 |
+| M3 학습 시간 (fold당 약 45분, 개발 전체 4~4.5시간 [가정]. 2026-11-10 실측 fold당 약 31분, 개발 약 3시간) | 중단·재실행 비용 | fold 모델·채점 캐시를 meta와 함께 저장해 같은 명령으로 이어서 실행. 이슈당 4궤적 표본 (P7-D2) |
+| M3 VRAM (12GB) | OOM | 토큰 예산 배치(학습 8,192 / 예측 32,768), bf16 autocast, `expandable_segments`. 실측 최대 7.5 GiB [확인] |
+| M3 고정 하이퍼파라미터가 맞지 않음 (그리드 없음) | M3 성능 과소평가 | 검증 AUROC 경고 후 보고. test를 본 뒤에는 바꾸지 않는다 (P7-D3) |
+| M3 stacking 누수 (`m3_bert_b1`의 M3 OOF 점수를 낸 fold j 모델이 fold k를 포함해 학습) | `m3_bert_b1` train OOF가 약간 낙관적 | P4-D7과 같은 수준으로 기록만 한다 |
+| M3 fold 모델 사이 차이가 큼 (test AUROC 폭 0.06~0.07, 2026-11-10 실측) | 평균 점수 판별(P4-D2)이 운영점(P4-D6)보다 좋아 보임 | 판별과 운영점을 같이 보고하고 `fold_spread.csv`로 평균 효과를 밝힌다. 결과를 본 뒤라 설정은 바꾸지 않는다 (P7-D3) |
