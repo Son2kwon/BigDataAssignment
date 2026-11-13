@@ -1,8 +1,12 @@
 """Phase 5b: M1 개선 보조 실험 — 마지막 k스텝 창 피처 (PLAN "Phase 5b~5e", 11절 P5b-D1~D11, docs/phase5b.md)
 
 실행:
-  uv run --no-sync python code/04e_m1_window.py [--jobs 24] [--n-boot 1000] [--skip-bootstrap]
+  uv run --no-sync python code/04e_m1_window.py [--device cuda|cpu] [--gpu-jobs 4] [--jobs 24] [--n-boot 1000] [--skip-bootstrap]
   uv run --no-sync python code/04e_m1_window.py --smoke     # 점검: train 이슈 1/10·그리드 2개·부트스트랩 20회, 결과는 data/processed/phase5b_smoke/
+
+장치 (P5b-D15): XGBoost 학습은 기본 cuda (GPU hist). 그리드 학습만 GPU에서 --gpu-jobs개를 동시에 돌리고, 운영점·부트스트랩은
+CPU --jobs개다. GPU hist는 CPU hist와 합산 순서가 달라 점수가 조금 다르므로, ①은 공식 M1(CPU)과 비트 단위로 같지 않다.
+5b의 비교는 모두 같은 장치로 학습한 ① 대비다. --device cpu면 04_m1.py와 같은 경로라 ①이 공식 M1 OOF와 같은지 확인한다 (C3).
 
 **train OOF만 쓴다.** test 궤적은 피처도 만들지 않고 채점하지 않는다. 5b~5e의 test 평가(--final)는 5e를 마친 뒤
 한 번만 따로 실행한다 (P5b-D1). 공식 M1(Phase 5) 결과는 바꾸지 않는다.
@@ -113,12 +117,42 @@ def design(train: pl.DataFrame, feats: dict, b1: pl.DataFrame | None, n: int, co
 
 # ---- 학습 (train OOF만) ----
 
-def oof_task(key, cfg, X, y, inst, fold):
+def fit_xgb(cfg, X, y, device):
+    """cpu = 04_m1.fit_model 그대로. cuda = 같은 설정·고정값에 device="cuda"만 바꾼다 (GPU hist).
+    학습 후 예측은 CPU로 한다 (numpy 입력과 장치가 달라 생기는 경고·복사를 피한다. 예측은 트리 잎 값의 합이다)."""
+    if device == "cpu":
+        return m1.fit_model("xgb", cfg, X, y)
+    from xgboost import XGBClassifier
+    n_fail, n_succ = int(y.sum()), int((~y.astype(bool)).sum())
+    spw = n_succ / n_fail if cfg["balance"] else 1.0
+    m = XGBClassifier(n_estimators=cfg["n_estimators"], max_depth=cfg["max_depth"], scale_pos_weight=spw,
+                      **{**m1.XGB_FIXED, "device": device}).fit(X, y)
+    m.set_params(device="cpu")
+    return ("xgb", m)
+
+
+def check_device(device):
+    """cuda를 골랐는데 GPU 학습이 안 되면 CPU로 몰래 바꾸지 않고 멈춘다."""
+    if device == "cpu":
+        return
+    import warnings
+    from xgboost import XGBClassifier
+    rng = np.random.default_rng(io.SEED)
+    X, y = rng.random((200, 4)), rng.random(200) < 0.5
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        try:
+            XGBClassifier(n_estimators=2, device=device, tree_method="hist").fit(X, y)
+        except Exception as e:
+            sys.exit(f"--device {device}로 XGBoost를 학습할 수 없다: {e}. --device cpu로 실행하거나 GPU를 확인한다.")
+
+
+def oof_task(key, cfg, X, y, inst, fold, device="cpu"):
     rows = pl.DataFrame({"instance_id": inst, "fold": fold, "_i": np.arange(len(y))})
 
     def fit(r):
         idx = r["_i"].to_numpy()
-        return m1.fit_model("xgb", cfg, X[idx], y[idx])
+        return fit_xgb(cfg, X[idx], y[idx], device)
 
     def predict(model, r):
         return m1.predict_model(model, X[r["_i"].to_numpy()])
@@ -166,6 +200,12 @@ def oof_stat(n, points_a, points_o, k_ref, costs):
     return stat
 
 
+def _yp(train, p, n):
+    """train 진행 중 궤적의 (실패 라벨, p_fail) — 공식 OOF AUROC 참고값용."""
+    a = metrics.align(train, p, n)
+    return (~a["target"]).to_numpy(), a["p_fail"].to_numpy()
+
+
 def boot_task(key, train, p_pair, stat, n_boot):
     return {"key": key, "boot": metrics.bootstrap(train, p_pair, stat, n_boot=n_boot)}
 
@@ -210,13 +250,17 @@ def main():
     ap = argparse.ArgumentParser(description="Phase 5b: M1 창 피처 (train OOF만)")
     ap.add_argument("--n-boot", type=int, default=evaluate.N_BOOT)
     ap.add_argument("--skip-bootstrap", action="store_true", help="부트스트랩 구간을 건너뜀 (개발용, 완료 기준 C6 불충족)")
-    ap.add_argument("--jobs", type=int, default=min(16, os.cpu_count() or 1))
+    ap.add_argument("--jobs", type=int, default=min(16, os.cpu_count() or 1), help="CPU 작업 수 (운영점·부트스트랩, --device cpu면 학습도)")
+    ap.add_argument("--device", choices=("cuda", "cpu"), default="cuda", help="XGBoost 학습 장치 (기본 cuda, P5b-D15)")
+    ap.add_argument("--gpu-jobs", type=int, default=4, help="--device cuda일 때 동시에 학습하는 프로세스 수 (GPU 메모리에 맞춘다)")
     ap.add_argument("--smoke", action="store_true", help="train 이슈 1/10, 그리드 앞 2개, 부트스트랩 20회. results/를 쓰지 않는다")
     args = ap.parse_args()
     for p, script in ((io.TRAJECTORIES_PATH, "01_parse.py"), (io.STEPS_PATH, "01_parse.py"), (io.SPLITS_PATH, "02_split.py"),
                       (preds.path(m1.B1_MODEL), "03_baselines.py")):
         if not p.exists():
             sys.exit(f"{p}가 없다. 먼저 uv run --no-sync python code/{script} 를 실행한다.")
+    check_device(args.device)
+    train_jobs = args.gpu_jobs if args.device == "cuda" else args.jobs
     t0 = time.time()
     timings = {}
 
@@ -252,10 +296,10 @@ def main():
                 if key not in designs:
                     designs[key] = design(train, feats, b1_train if use_b1 else None, n, cols)
     keys = list(designs)
-    tasks = [((j, i), cfg, designs[k]["X"], designs[k]["y"], designs[k]["inst"], designs[k]["fold"])
+    tasks = [((j, i), cfg, designs[k]["X"], designs[k]["y"], designs[k]["inst"], designs[k]["fold"], args.device)
              for j, k in enumerate(keys) for i, cfg in enumerate(grid)]
     tasks.sort(key=lambda t: -t[1]["n_estimators"] * t[1]["max_depth"])  # 무거운 작업부터 (결과는 순서와 무관)
-    res = {r["key"]: r for r in evaluate.parallel(oof_task, tasks, args.jobs)}
+    res = {r["key"]: r for r in evaluate.parallel(oof_task, tasks, train_jobs)}
     assert all(r["seen_issue_scores"] == 0 for r in res.values())
     selected = {}
     for j, k in enumerate(keys):
@@ -265,7 +309,7 @@ def main():
                   "oof_auroc": res[(keys.index(key_of[(b, m, n)]), i)]["oof_auroc"], "selected": i == selected[key_of[(b, m, n)]]["i"]}
                  for (b, m, n) in key_of for i in range(len(grid))]
     grid_df = pl.DataFrame(grid_rows)
-    lap(f"그리드 OOF (설계 {len(keys)}개 × 설정 {len(grid)}개 = {len(tasks)}개)")
+    lap(f"그리드 OOF ({args.device}, 동시 {train_jobs}개, 설계 {len(keys)}개 × 설정 {len(grid)}개 = {len(tasks)}개)")
 
     # 3. 묶음별 OOF 점수와 판별 지표
     oof_p = {}
@@ -289,8 +333,9 @@ def main():
         ref = preds.read(m).join(train.select("traj_id"), on="traj_id", how="semi").sort("N", "traj_id")
         mine = oof_p[(BASE, m)]
         same_rows = ref.select("traj_id", "N").equals(mine.select("traj_id", pl.col("N").cast(ref["N"].dtype)))
-        repro[m] = {"same_rows": bool(same_rows),
-                    "max_abs_diff": float(np.abs(ref["p_fail"].to_numpy() - mine["p_fail"].to_numpy()).max()) if same_rows else None}
+        repro[m] = {"device": args.device, "same_rows": bool(same_rows),
+                    "max_abs_diff": float(np.abs(ref["p_fail"].to_numpy() - mine["p_fail"].to_numpy()).max()) if same_rows else None,
+                    "official_oof_auroc_by_N": {str(n): float(roc_auc_score(*_yp(train, ref, n))) for n in evaluate.N_GRID} if same_rows else None}
     lap("OOF 점수·판별 지표")
 
     # 4. train 운영점
@@ -418,7 +463,9 @@ def main():
     crit = {
         "C1_features_finite_and_official_same_as_04_m1": args.smoke or feat_info["official_matches_04_m1_cache"] is not False,
         "C2_no_seen_issue_scores": True,  # 위 assert
-        "C3_official_reproduces_04_m1_oof": args.smoke or all(r is not None and r["same_rows"] and r["max_abs_diff"] == 0 for r in repro.values()),
+        # cpu: ① = 공식 M1 OOF (비트 단위). cuda: 장치가 달라 같을 수 없으므로 행이 같은지만 보고 차이는 summary에 남긴다
+        "C3_official_reproduces_04_m1_oof": args.smoke or all(
+            r is not None and r["same_rows"] and (args.device == "cuda" or r["max_abs_diff"] == 0) for r in repro.values()),
         "C4_k_star": args.smoke or k_star == 40,
         "C5_tables_complete": disc_df.height == len(ALL_BUNDLES) * len(MODELS) * len(evaluate.N_GRID)
         and ops_df.filter(pl.col("model") != "b0_cap").height == len(ALL_BUNDLES) * len(MODELS) * len(evaluate.N_GRID) * len(evaluate.POLICIES),
@@ -426,6 +473,7 @@ def main():
     }
     summary = {
         "mode": "smoke" if args.smoke else "train OOF only (test not read)",
+        "device": args.device,
         "bundles": {b: {"label": v[0], "n_features_by_N": {str(n): n_features(b, n) for n in evaluate.N_GRID}} for b, v in ALL_BUNDLES.items()},
         "models": list(MODELS), "grid": [dict(c) for c in grid], "xgb_fixed": m1.XGB_FIXED, "grid_tie": m1.GRID_TIE,
         "k_star": k_star, "features": feat_info, "reproduce_official_oof": repro,
