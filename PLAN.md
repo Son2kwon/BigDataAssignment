@@ -730,13 +730,13 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 ### Phase 5b~5e. M1 개선 보조 실험 (사전 등록 2026-11-12, P9-D1)
 
-상세 기록: [docs/phase5b.md](docs/phase5b.md) (5b.0에 공통 규칙), [docs/phase5c.md](docs/phase5c.md), [docs/phase5d.md](docs/phase5d.md), [docs/phase5e.md](docs/phase5e.md). 네 문서 모두 아직 쓰지 않았다. 결정은 11절 P5b-D1~D11, P5c-D1~D7, P5d-D1~D12, P5e-D1~D8에 있다
+상세 기록: [docs/phase5b.md](docs/phase5b.md) (5b.0에 공통 규칙, 5b.1 구현 ✓), [docs/phase5c.md](docs/phase5c.md), [docs/phase5d.md](docs/phase5d.md), [docs/phase5e.md](docs/phase5e.md). 5c~5e 문서는 아직 쓰지 않았다. 결정은 11절 P5b-D1~D11, P5c-D1~D7, P5d-D1~D12, P5e-D1~D8에 있다
 
 이 실험은 보조 실험이고 공식 M1(Phase 5)은 바꾸지 않는다. Phase 하나가 방법 하나다. 각 Phase에서 고른 묶음(S1~S3)이 다음 Phase의 출발점이 된다. 작업 단계 번호는 5b.1, 5c.1, …처럼 붙이고, 결정 ID는 P5b-D\* ~ P5e-D\*로 쓴다.
 
 | Phase | 방법 | 출발점 → 고르는 묶음 | 비교할 묶음 | 상태 |
 | --- | --- | --- | --- | --- |
-| 5b | 마지막 k스텝 세기 | 공식 M1 → S1 | ① 공식 ② +창 k=3 ③ +창 k=5 ④ +창 k=3·5 ⑤ ④+최근성 | 사전 등록 |
+| 5b | 마지막 k스텝 세기 | 공식 M1 → S1 | ① 공식 ② +창 k=3 ③ +창 k=5 ④ +창 k=3·5 ⑤ ④+최근성 | 5b.1 구현 ✓ (2026-11-13, `code/04e_m1_window.py`), 학습 실행 대기 |
 | 5c | N스텝과 k스텝 가중 | S1 → S2 | 7개 (P5c-D5) | 사전 등록 |
 | 5d | 생각 텍스트 | S2 → S3 | S2 / +길이 / +어휘 / +길이+어휘 | 사전 등록 |
 | 5e | 비용 가중 학습 (학습 가중치만 바꿈) | S3 → S4 | S3 / +스텝 가중(원값) / +스텝 가중(√) / +토큰 가중(원값) | 사전 등록 |
@@ -832,6 +832,7 @@ uv run python code/02_split.py                       # Phase 2 → 분할 수치
 uv run --no-sync python code/03_baselines.py         # Phase 4 → preds/, results/phase4/ (16코어 약 2.5분. --n-boot 100, --skip-bootstrap은 개발용)
 uv run --no-sync python code/04_m1.py                # Phase 5 → features/, preds/m1_*, results/phase5/ (12코어 약 4.5분. brew install libomp 필요(macOS))
 uv run --no-sync python code/04b_solution_files.py   # Phase 5.5 사후 분석 (4초)
+uv run --no-sync python code/04e_m1_window.py       # Phase 5b 보조: 창 피처 묶음 5개 + 비례 k, train OOF만 → results/phase5b/ (test 안 읽음. --smoke는 16초)
 uv run --no-sync python code/05_m2.py                # Phase 6 개발: train OOF만 (GPU, data/processed/m2/, results/phase6/의 train 값)
 uv run --no-sync python code/05_m2.py --final        # Phase 6 최종: test 한 번 채점·평가 (04_m1.py의 preds/m1_* 필요)
 uv run --no-sync python code/05b_m2_supplementary.py          # Phase 6.5 보조 개발: m2x_nocum_b1 학습 + train OOF만
@@ -966,6 +967,9 @@ uv run pytest                                        # 파서·지표·누수 �
 | P5b-D9 | 5b 가설 (사전 등록) | **`[권장 적용]` (2026-11-12)**: S1은 N≥8에서 공식 M1보다 OOF 이슈 내 AUROC가 높다 (선택 규칙의 N 범위와 맞춤). 기대치 +0.01~0.03 `[가정]` |
 | P5b-D10 | 사전 등록 시점 | **확정 (2026-11-12)**: 사전 등록은 5b~5e 설계를 마친 뒤 한 번에 쓴다. 5b OOF 개발은 그 전에 시작해도 된다 |
 | P5b-D11 | P5(관측 내용) 피처 | **확정 (팀 결정, 2026-11-12): 범위에서 뺀다.** 5b 문서에 기각한 안으로 적는다 |
+| P5b-D12 | 5b~5d 다음 묶음을 고르는 모델 | **`[결정 필요]` 권장안으로 진행 (2026-11-13)**: `m1_xgb` (B1 없음). `m1_xgb_b1`로 고른 결과도 같이 내고 다르면 보고한다. 근거: 선택 지표가 이슈 내 AUROC이고 B1은 이슈 안에서 같은 값이라, B1 없는 모델이 궤적 피처의 몫을 바로 보여 준다. 기각: 두 모델 평균. docs/phase5b.md 5b.1 |
+| P5b-D13 | train OOF 구간 | **확정 (2026-11-13)**: train 이슈 단위 부트스트랩 1,000회, τ·K 고정 (재표본마다 다시 고르지 않음, 선택 불확실성 미포함). 묶음 − ① 짝지은 차이도 같은 재표본. 5c~5e도 같은 방식 |
+| P5b-D14 | 비례 k 확인의 비교 대상 | **`[결정 필요]` 권장안으로 진행 (2026-11-13)**: 창이 하나인 ②·③ 중 선택 지표가 큰 쪽 (피처 수가 같음). S1 대비 차이도 같이 낸다. 기각: ④·⑤와 비교 (피처 수 차이를 잼) |
 | P5c-D1 | 5c 출발점과 k 집합 | **확정 (2026-11-12)**: 출발점은 S1이고 새 피처는 S1에 더한다. 가중 피처의 k 집합은 S1의 k 집합을 따른다 (S1이 ①이면 {3, 5}). k ≥ N이면 창 기반 피처를 뺀다 |
 | P5c-D2 | 가중 방식 | **확정 (2026-11-12)**: 대상은 5b 창 피처 7개 전부. α·γ는 모든 피처에 같은 값. (a) 가중합: 이전 구간 + α×창, α∈{2, 4, 8} (c) 변화율: 창횟수/k − 이전횟수/(N−k) (k ≥ N 제외 규칙 때문에 이전 구간이 0스텝인 경우는 없다) (b) 지수 감쇠: Σγ^(N−t)·x_t, γ∈{0.5, 0.7, 0.9}, 비교용이고 N=3에도 넣는다 |
 | P5c-D3 | `obs_len`·`n_new_files`의 가중 처리 | **확정 (2026-11-12)**: `obs_len`은 (a)에서 (이전 합 + α×창 합) / ((N−k) + α·k), (c)에서 창 평균 − 이전 평균. `n_new_files`의 이전 구간 값은 창 시작 전에 처음 연 파일 수 |
