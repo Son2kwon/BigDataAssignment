@@ -730,13 +730,13 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 ### Phase 5b~5e. M1 개선 보조 실험 (사전 등록 2026-11-12, P9-D1)
 
-상세 기록: [docs/phase5b.md](docs/phase5b.md) (5b.0에 공통 규칙), [docs/phase5c.md](docs/phase5c.md), [docs/phase5d.md](docs/phase5d.md), [docs/phase5e.md](docs/phase5e.md). 네 문서 모두 아직 쓰지 않았다. 결정은 11절 P5b-D1~D11, P5c-D1~D7, P5d-D1~D12, P5e-D1~D8에 있다
+상세 기록: [docs/phase5b.md](docs/phase5b.md) (5b.0에 공통 규칙, 5b.1 구현 ✓), [docs/phase5c.md](docs/phase5c.md), [docs/phase5d.md](docs/phase5d.md), [docs/phase5e.md](docs/phase5e.md). 5c~5e 문서는 아직 쓰지 않았다. 결정은 11절 P5b-D1~D11, P5c-D1~D7, P5d-D1~D12, P5e-D1~D8에 있다
 
 이 실험은 보조 실험이고 공식 M1(Phase 5)은 바꾸지 않는다. Phase 하나가 방법 하나다. 각 Phase에서 고른 묶음(S1~S3)이 다음 Phase의 출발점이 된다. 작업 단계 번호는 5b.1, 5c.1, …처럼 붙이고, 결정 ID는 P5b-D\* ~ P5e-D\*로 쓴다.
 
 | Phase | 방법 | 출발점 → 고르는 묶음 | 비교할 묶음 | 상태 |
 | --- | --- | --- | --- | --- |
-| 5b | 마지막 k스텝 세기 | 공식 M1 → S1 | ① 공식 ② +창 k=3 ③ +창 k=5 ④ +창 k=3·5 ⑤ ④+최근성 | 사전 등록 |
+| 5b | 마지막 k스텝 세기 | 공식 M1 → S1 | ① 공식 ② +창 k=3 ③ +창 k=5 ④ +창 k=3·5 ⑤ ④+최근성 | ✓ (2026-11-13). **S1 = ② +창 k=3** (train OOF 이슈 내 AUROC N 8~20 평균 0.6127 vs ① 0.6087, +0.004. 가설 +0.01~0.03에는 못 미침). 운영점 이득은 일관되지 않음 (`m1_xgb` 결합 N=10 스텝 +0.21%p·토큰 −1.33%p). 비례 k는 고정 k와 같음. `results/phase5b/`, docs/phase5b.md 5b.2 |
 | 5c | N스텝과 k스텝 가중 | S1 → S2 | 7개 (P5c-D5) | 사전 등록 |
 | 5d | 생각 텍스트 | S2 → S3 | S2 / +길이 / +어휘 / +길이+어휘 | 사전 등록 |
 | 5e | 비용 가중 학습 (학습 가중치만 바꿈) | S3 → S4 | S3 / +스텝 가중(원값) / +스텝 가중(√) / +토큰 가중(원값) | 사전 등록 |
@@ -764,6 +764,7 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 - 가중합 (a), 변화율 (c), 지수 감쇠 (b), 창 안 `obs_len` OLS 기울기를 S1에 더한다
 - 선택·모델·테스트는 5b와 같다
 - 가설: S2는 N≥8에서 S1보다 OOF 이슈 내 AUROC가 높다 `[가정]`. 방향만 쓰고 기대치는 쓰지 않는다
+- 메모 (2026-11-13, 5b 결과): S1 = ② (창 k=3)이라 P5c-D1에 따라 가중 피처의 k 집합은 {3}이다. P5c-D5의 기울기 묶음(5. k=5, 6. k=5·3)은 S1에 없는 k=5 창을 쓰므로, 그대로 둘지 k=3만 쓸지 5c 시작 전에 정한다 `[결정 필요]` (권장: 사전 등록대로 둔다. 기울기는 창 피처와 별개로 정의됐고(P5c-D4), 바꾸면 결과를 본 뒤 설계를 고치는 것이 된다)
 
 **5d 생각 텍스트** (P5d-D1~D12)
 
@@ -832,6 +833,7 @@ uv run python code/02_split.py                       # Phase 2 → 분할 수치
 uv run --no-sync python code/03_baselines.py         # Phase 4 → preds/, results/phase4/ (16코어 약 2.5분. --n-boot 100, --skip-bootstrap은 개발용)
 uv run --no-sync python code/04_m1.py                # Phase 5 → features/, preds/m1_*, results/phase5/ (12코어 약 4.5분. brew install libomp 필요(macOS))
 uv run --no-sync python code/04b_solution_files.py   # Phase 5.5 사후 분석 (4초)
+uv run --no-sync python code/04e_m1_window.py       # Phase 5b 보조: 창 피처 묶음 5개 + 비례 k, train OOF만 → results/phase5b/ (test 안 읽음. 기본 --device cuda, --smoke는 cuda 3분·cpu 16초)
 uv run --no-sync python code/05_m2.py                # Phase 6 개발: train OOF만 (GPU, data/processed/m2/, results/phase6/의 train 값)
 uv run --no-sync python code/05_m2.py --final        # Phase 6 최종: test 한 번 채점·평가 (04_m1.py의 preds/m1_* 필요)
 uv run --no-sync python code/05b_m2_supplementary.py          # Phase 6.5 보조 개발: m2x_nocum_b1 학습 + train OOF만
@@ -966,6 +968,10 @@ uv run pytest                                        # 파서·지표·누수 �
 | P5b-D9 | 5b 가설 (사전 등록) | **`[권장 적용]` (2026-11-12)**: S1은 N≥8에서 공식 M1보다 OOF 이슈 내 AUROC가 높다 (선택 규칙의 N 범위와 맞춤). 기대치 +0.01~0.03 `[가정]` |
 | P5b-D10 | 사전 등록 시점 | **확정 (2026-11-12)**: 사전 등록은 5b~5e 설계를 마친 뒤 한 번에 쓴다. 5b OOF 개발은 그 전에 시작해도 된다 |
 | P5b-D11 | P5(관측 내용) 피처 | **확정 (팀 결정, 2026-11-12): 범위에서 뺀다.** 5b 문서에 기각한 안으로 적는다 |
+| P5b-D12 | 5b~5d 다음 묶음을 고르는 모델 | **권장안으로 진행 (2026-11-13), 5b에서는 두 모델이 같은 묶음(②)을 골라 영향 없음**: `m1_xgb` (B1 없음). `m1_xgb_b1`로 고른 결과도 같이 내고 다르면 보고한다. 근거: 선택 지표가 이슈 내 AUROC이고 B1은 이슈 안에서 같은 값이라, B1 없는 모델이 궤적 피처의 몫을 바로 보여 준다. 기각: 두 모델 평균. docs/phase5b.md 5b.1 |
+| P5b-D13 | train OOF 구간 | **확정 (2026-11-13)**: train 이슈 단위 부트스트랩 1,000회, τ·K 고정 (재표본마다 다시 고르지 않음, 선택 불확실성 미포함). 묶음 − ① 짝지은 차이도 같은 재표본. 5c~5e도 같은 방식 |
+| P5b-D14 | 비례 k 확인의 비교 대상 | **권장안으로 진행 (2026-11-13). 결과: 차이 −0.0007로 0.002 안, 고정 k 유지**: 창이 하나인 ②·③ 중 선택 지표가 큰 쪽 (피처 수가 같음). S1 대비 차이도 같이 낸다. 기각: ④·⑤와 비교 (피처 수 차이를 잼) |
+| P5b-D15 | 5b~5e XGBoost 학습 장치 | **확정 (차승준, 2026-11-13): cuda (GPU hist)가 기본.** `--device cpu`도 남긴다. 결과: ①은 공식 M1(CPU)과 비트 단위로 같지 않다 (같은 설정 N=3 OOF AUROC 차이 0.001~0.003 [확인]). 5b~5e의 비교는 모두 같은 장치로 학습한 ① 대비이고, `--final`의 공식 M1 짝지은 비교는 장치 차이를 포함한다 (문서에 명시). cuda 재실행은 바이트 단위로 같다 [확인: --smoke 2회]. 기각: cpu 고정 (공식과 비트 일치, 이 작은 모델에서는 더 빠름: --smoke 학습 7초 vs 169초) |
 | P5c-D1 | 5c 출발점과 k 집합 | **확정 (2026-11-12)**: 출발점은 S1이고 새 피처는 S1에 더한다. 가중 피처의 k 집합은 S1의 k 집합을 따른다 (S1이 ①이면 {3, 5}). k ≥ N이면 창 기반 피처를 뺀다 |
 | P5c-D2 | 가중 방식 | **확정 (2026-11-12)**: 대상은 5b 창 피처 7개 전부. α·γ는 모든 피처에 같은 값. (a) 가중합: 이전 구간 + α×창, α∈{2, 4, 8} (c) 변화율: 창횟수/k − 이전횟수/(N−k) (k ≥ N 제외 규칙 때문에 이전 구간이 0스텝인 경우는 없다) (b) 지수 감쇠: Σγ^(N−t)·x_t, γ∈{0.5, 0.7, 0.9}, 비교용이고 N=3에도 넣는다 |
 | P5c-D3 | `obs_len`·`n_new_files`의 가중 처리 | **확정 (2026-11-12)**: `obs_len`은 (a)에서 (이전 합 + α×창 합) / ((N−k) + α·k), (c)에서 창 평균 − 이전 평균. `n_new_files`의 이전 구간 값은 창 시작 전에 처음 연 파일 수 |
@@ -1015,6 +1021,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | M3 고정 하이퍼파라미터가 맞지 않음 (그리드 없음) | M3 성능 과소평가 | 검증 AUROC 경고 후 보고. test를 본 뒤에는 바꾸지 않는다 (P7-D3) |
 | M3 stacking 누수 (`m3_bert_b1`의 M3 OOF 점수를 낸 fold j 모델이 fold k를 포함해 학습) | `m3_bert_b1` train OOF가 약간 낙관적 | P4-D7과 같은 수준으로 기록만 한다 |
 | Phase 5b~5e의 OOF 선택 횟수가 많음 (묶음·α·γ·t·K·λ, 여러 단계에 걸친 선택) | S1~S4의 train OOF 지표가 낙관적 | 선택 횟수를 문서에 적고(P5b-D3), test는 5e 뒤 `--final` 한 번만 본다. 결론은 N 전체의 경향으로 쓴다 |
+| 5b~5e XGBoost를 cuda로 학습 (P5b-D15) | 공식 M1(CPU)과 점수가 다르다. 같은 설정에서도 고른 그리드 설정이 바뀔 수 있다 (5b ①: N=8 등에서 `balance` 변경) | 5b~5e 안 비교는 모두 같은 장치의 ① 대비로 한다. `--final`의 공식 M1 짝지은 비교는 장치 차이를 포함한다고 명시하고, 필요하면 ①(cuda)과의 비교를 같이 낸다 |
 | 5e 가중치가 N 이후 정보(n_steps)로 만들어짐 | 가중치가 OOF·test 행에 들어가면 누수 | fit fold 행에만 쓰고, 테스트로 강제한다 (P5e-D7) |
 | 5d 어휘가 특정 저장소·이슈 단어에 묶임 | 이슈 내 구분이 아니라 저장소 구분을 배움, 해석 왜곡 | 연관 점수는 이슈 안 잔차로 계산(P5d-D9), 최소 빈도 t를 이슈 수로 둠(P5d-D11), 5d.1 진단으로 저장소 집중 비율을 본다. 해석은 fold 사이 겹침이 큰 n-gram에만 한다 |
 | M3 fold 모델 사이 차이가 큼 (test AUROC 폭 0.06~0.07, 2026-11-10 실측) | 평균 점수 판별(P4-D2)이 운영점(P4-D6)보다 좋아 보임 | 판별과 운영점을 같이 보고하고 `fold_spread.csv`로 평균 효과를 밝힌다. 결과를 본 뒤라 설정은 바꾸지 않는다 (P7-D3) |

@@ -173,18 +173,91 @@ def m1_features(values: pl.DataFrame, trajs: pl.DataFrame, n_grid, mentions: pl.
     return pl.concat(out).sort("N", "traj_id")
 
 
-def check_features(feats: pl.DataFrame, trajs: pl.DataFrame, n_grid) -> dict:
-    """실데이터 점검: 모든 N에서 진행 중 궤적과 1:1, 결측·무한값 없음. 출력 {N: 행 수}."""
+def check_features(feats: pl.DataFrame, trajs: pl.DataFrame, n_grid, columns=None) -> dict:
+    """실데이터 점검: 모든 N에서 진행 중 궤적과 1:1, 결측·무한값 없음. 출력 {N: 행 수}.
+
+    columns: 검사할 피처 컬럼 (기본 FEATURES). N마다 다르면 함수 columns(n) -> 컬럼 목록 (Phase 5b 창 피처)."""
     counts = {}
     for n in n_grid:
         f = feats.filter(pl.col("N") == n)
         alive = metrics.running(trajs, n)
         if f["traj_id"].n_unique() != f.height or f.height != alive.height or f.join(alive, on="traj_id", how="anti").height:
             raise ValueError(f"N={n}: 피처 행이 진행 중 궤적과 1:1이 아님 ({f.height} vs {alive.height})")
-        x = f.select(FEATURES)
+        cols = FEATURES if columns is None else (columns(n) if callable(columns) else list(columns))
+        x = f.select(cols)
         nulls = x.null_count().sum_horizontal().item()
         nonfinite = x.select(pl.any_horizontal(~pl.all().is_finite())).to_series().sum()
         if nulls or nonfinite:
             raise ValueError(f"N={n}: 결측 {nulls}개, 무한값 행 {nonfinite}개")
         counts[n] = f.height
     return counts
+
+
+# ---- Phase 5b: 마지막 k스텝 창·최근성 (PLAN 11절 P5b-D4~D6, docs/phase5b.md) ----
+# 창 k = 스텝 N−k+1..N. k ≥ N이면 그 k의 창 피처는 만들지 않는다 (N=3은 창 없음, N=5는 k=3만, P5b-D4).
+# 창 피처는 k마다 7개, 원시 횟수만 (비율·차이·감쇠·기울기는 5c, P5b-D5). 최근성 3개는 창과 무관하다 (P5b-D6).
+# 모두 스텝 1..N의 스텝 단위 값(step_values)에서만 계산한다. 스텝 N 이후, 궤적 길이(n_steps)는 쓰지 않는다
+# (n_steps는 "N에 진행 중인가"만 정한다).
+
+WINDOW_KS = (3, 5)
+WINDOW_BASES = ("n_error", "n_edit_failed", "n_edit_ok", "n_repeat_consec", "n_repeat_any", "n_new_files", "obs_len_mean")
+RECENCY_FEATURES = ["steps_since_edit_ok", "steps_since_new_file", "cur_error_run"]
+
+
+def window_name(base: str, k: int) -> str:
+    return f"{base}_w{k}"
+
+
+def window_columns(n: int, ks) -> list[str]:
+    """시점 N에 쓸 창 피처 이름. k ≥ N인 k는 뺀다 (k 순서, k 안에서는 WINDOW_BASES 순서)."""
+    return [window_name(b, k) for k in ks if k is not None and k < n for b in WINDOW_BASES]
+
+
+def proportional_k(n: int) -> int | None:
+    """비례 창 k = ⌈N/4⌉ (P5b-D8 확인용). k=1이거나 k ≥ N이면 창 없음 (None): 고정 k와 조건을 맞춘다."""
+    k = -(-n // 4)
+    return k if 2 <= k < n else None
+
+
+def window_features(values: pl.DataFrame, trajs: pl.DataFrame, n: int, ks=WINDOW_KS, recency: bool = True) -> pl.DataFrame:
+    """시점 N 진행 중 궤적(n_steps > N)마다 창 피처(k < N인 k만)와 최근성 피처. 출력 (traj_id, 피처…), traj_id 정렬, Float64.
+
+    values: step_values 출력 (몇 스텝까지 들어 있든 step_idx ≤ N만 쓴다). trajs: traj_id, n_steps.
+    - n_error_w{k}, n_edit_failed_w{k}, n_repeat_consec_w{k}, n_repeat_any_w{k}: 창 안 스텝 값의 합 (repeat_any는 창 이전
+      명령과 같아도 센다)
+    - n_edit_ok_w{k}: 창 안 성공 편집(edit 명령이고 edit_failed가 아님) 수
+    - n_new_files_w{k}: 창 시작 전에 한 번도 열리지 않았고 창 안에서 처음 열린 파일 수 (open_file 첫 등장 스텝이 창 안)
+    - obs_len_mean_w{k}: 창 안 관측 길이 평균
+    - steps_since_edit_ok: N − 마지막 성공 편집 스텝 (없으면 N), steps_since_new_file: N − 마지막으로 새 파일을 연 스텝 (없으면 N)
+    - cur_error_run: 스텝 N에서 끝나는 연속 에러 스텝 수 (스텝 N이 에러가 아니면 0)
+    """
+    ks = sorted({k for k in ks if k is not None and k < n})
+    alive = metrics.running(trajs.select("traj_id", "n_steps"), n).select("traj_id")
+    v = (values.filter(pl.col("step_idx") <= n).join(alive, on="traj_id", how="semi").sort("traj_id", "step_idx")
+         .with_columns(_edit_ok=(pl.col("command_name") == "edit") & ~pl.col("edit_failed"),
+                       _first=pl.col("step_idx").cum_count().over("traj_id", "open_file")))
+    v = v.with_columns(_new_file=pl.col("open_file").is_not_null() & (pl.col("_first") == 1))
+    aggs = []
+    for k in ks:
+        w = pl.col("step_idx") > n - k
+        aggs += [
+            (pl.col("is_error") & w).sum().cast(pl.Float64).alias(window_name("n_error", k)),
+            (pl.col("edit_failed") & w).sum().cast(pl.Float64).alias(window_name("n_edit_failed", k)),
+            (pl.col("_edit_ok") & w).sum().cast(pl.Float64).alias(window_name("n_edit_ok", k)),
+            (pl.col("repeat_prev") & w).sum().cast(pl.Float64).alias(window_name("n_repeat_consec", k)),
+            (pl.col("repeat_any") & w).sum().cast(pl.Float64).alias(window_name("n_repeat_any", k)),
+            (pl.col("_new_file") & w).sum().cast(pl.Float64).alias(window_name("n_new_files", k)),
+            pl.col("obs_len").filter(w).cast(pl.Float64).mean().alias(window_name("obs_len_mean", k)),
+        ]
+    if recency:
+        aggs += [
+            (n - pl.col("step_idx").filter(pl.col("_edit_ok")).max().fill_null(0)).cast(pl.Float64).alias("steps_since_edit_ok"),
+            (n - pl.col("step_idx").filter(pl.col("_new_file")).max().fill_null(0)).cast(pl.Float64).alias("steps_since_new_file"),
+            (n - pl.col("step_idx").filter(~pl.col("is_error")).max().fill_null(0)).cast(pl.Float64).alias("cur_error_run"),
+        ]
+    agg = v.group_by("traj_id").agg(*aggs, _n=pl.len(), _max=pl.col("step_idx").max())
+    bad = agg.filter((pl.col("_n") != n) | (pl.col("_max") != n)).height
+    if bad or agg.height != alive.height:
+        raise ValueError(f"N={n}: 앞 N스텝이 모두 있지 않은 진행 중 궤적 {bad}개 / 행 {agg.height} != 진행 중 {alive.height}")
+    cols = window_columns(n, ks) + (RECENCY_FEATURES if recency else [])
+    return agg.select("traj_id", *cols).sort("traj_id")

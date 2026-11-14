@@ -1,0 +1,301 @@
+{
+  "mode": "train OOF only (test not read)",
+  "device": "cuda",
+  "bundles": {
+    "official": {
+      "label": "①",
+      "n_features_by_N": {
+        "3": 73,
+        "5": 73,
+        "8": 73,
+        "10": 73,
+        "15": 73,
+        "20": 73
+      }
+    },
+    "w3": {
+      "label": "②",
+      "n_features_by_N": {
+        "3": 73,
+        "5": 80,
+        "8": 80,
+        "10": 80,
+        "15": 80,
+        "20": 80
+      }
+    },
+    "w5": {
+      "label": "③",
+      "n_features_by_N": {
+        "3": 73,
+        "5": 73,
+        "8": 80,
+        "10": 80,
+        "15": 80,
+        "20": 80
+      }
+    },
+    "w35": {
+      "label": "④",
+      "n_features_by_N": {
+        "3": 73,
+        "5": 80,
+        "8": 87,
+        "10": 87,
+        "15": 87,
+        "20": 87
+      }
+    },
+    "w35_rec": {
+      "label": "⑤",
+      "n_features_by_N": {
+        "3": 76,
+        "5": 83,
+        "8": 90,
+        "10": 90,
+        "15": 90,
+        "20": 90
+      }
+    },
+    "wprop": {
+      "label": "비례 k",
+      "n_features_by_N": {
+        "3": 73,
+        "5": 80,
+        "8": 80,
+        "10": 80,
+        "15": 80,
+        "20": 80
+      }
+    }
+  },
+  "models": [
+    "m1_xgb",
+    "m1_xgb_b1"
+  ],
+  "grid": [
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": true
+    }
+  ],
+  "xgb_fixed": {
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 1.0,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "n_jobs": 1,
+    "random_state": 42,
+    "eval_metric": "logloss"
+  },
+  "grid_tie": 0.002,
+  "k_star": 40,
+  "features": {
+    "official_matches_04_m1_cache": true,
+    "rows_per_N": {
+      "3": 61786,
+      "5": 59232,
+      "8": 52207,
+      "10": 46167,
+      "15": 33367,
+      "20": 25864
+    }
+  },
+  "reproduce_official_oof": {
+    "m1_xgb": {
+      "device": "cuda",
+      "same_rows": true,
+      "max_abs_diff": 0.4538997412,
+      "official_oof_auroc_by_N": {
+        "3": 0.6269743738,
+        "5": 0.6680486978,
+        "8": 0.6957266729,
+        "10": 0.6986461904,
+        "15": 0.7121048972,
+        "20": 0.727746334
+      }
+    },
+    "m1_xgb_b1": {
+      "device": "cuda",
+      "same_rows": true,
+      "max_abs_diff": 0.4389547706,
+      "official_oof_auroc_by_N": {
+        "3": 0.661444643,
+        "5": 0.6948955872,
+        "8": 0.714066553,
+        "10": 0.7174746534,
+        "15": 0.7245600398,
+        "20": 0.7411188589
+      }
+    }
+  },
+  "unique_designs": 56,
+  "grid_fits": 448,
+  "selection": {
+    "rule": "P5b-D3",
+    "model": "m1_xgb",
+    "N": [
+      8,
+      10,
+      15,
+      20
+    ],
+    "tie": 0.002,
+    "scores": {
+      "official": 0.6086561614,
+      "w3": 0.6127105414,
+      "w5": 0.6117117915,
+      "w35": 0.6135495117,
+      "w35_rec": 0.6142288788
+    },
+    "best": 0.6142288788,
+    "S1": "w3",
+    "S1_label": "②",
+    "pick_by_model": {
+      "m1_xgb": "w3",
+      "m1_xgb_b1": "w3"
+    },
+    "models_agree": true
+  },
+  "candidates_seen": {
+    "bundles": 5,
+    "check_bundles": 1,
+    "grid_configs_per_bundle_model_N": 8
+  },
+  "prop_k_check": [
+    {
+      "model": "m1_xgb",
+      "wprop_select_mean": 0.6119782346,
+      "best_fixed_single": "w3",
+      "best_fixed_select_mean": 0.6127105414,
+      "d_wprop_minus_fixed": -0.0007323069,
+      "d_wprop_minus_S1": -0.0007323069,
+      "exceeds_tie": false
+    },
+    {
+      "model": "m1_xgb_b1",
+      "wprop_select_mean": 0.6155557073,
+      "best_fixed_single": "w5",
+      "best_fixed_select_mean": 0.6162083088,
+      "d_wprop_minus_fixed": -0.0006526016,
+      "d_wprop_minus_S1": -4.75096e-05,
+      "exceeds_tie": false
+    }
+  ],
+  "hypothesis_P5b_D9": {
+    "rows": [
+      {
+        "model": "m1_xgb",
+        "N": 8,
+        "d_within_pair": -0.0002506489,
+        "d_within_pair_lo": -0.003169226,
+        "d_within_pair_hi": 0.0031146252
+      },
+      {
+        "model": "m1_xgb",
+        "N": 10,
+        "d_within_pair": 0.0032597119,
+        "d_within_pair_lo": -0.0002842109,
+        "d_within_pair_hi": 0.0070845
+      },
+      {
+        "model": "m1_xgb",
+        "N": 15,
+        "d_within_pair": 0.0029713524,
+        "d_within_pair_lo": -0.0015955531,
+        "d_within_pair_hi": 0.0085207819
+      },
+      {
+        "model": "m1_xgb",
+        "N": 20,
+        "d_within_pair": 0.0102371046,
+        "d_within_pair_lo": 0.0013277436,
+        "d_within_pair_hi": 0.0192513604
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 8,
+        "d_within_pair": 0.0033595032,
+        "d_within_pair_lo": 0.0002847838,
+        "d_within_pair_hi": 0.0065377442
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 10,
+        "d_within_pair": 0.0039805063,
+        "d_within_pair_lo": -0.0002511044,
+        "d_within_pair_hi": 0.0079111571
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 15,
+        "d_within_pair": 0.0038774151,
+        "d_within_pair_lo": -0.0013903759,
+        "d_within_pair_hi": 0.0098235813
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 20,
+        "d_within_pair": 0.0026088105,
+        "d_within_pair_lo": -0.007306112,
+        "d_within_pair_hi": 0.0121188572
+      }
+    ],
+    "n_positive": 7,
+    "n_ci_lo_positive": 2,
+    "n": 8
+  },
+  "bootstrap": {
+    "n_boot": 1000,
+    "seed": 42,
+    "unit": "train issue",
+    "note": "운영점 선택은 다시 하지 않는다 (선택 불확실성 미포함)"
+  },
+  "criteria": {
+    "C1_features_finite_and_official_same_as_04_m1": true,
+    "C2_no_seen_issue_scores": true,
+    "C3_official_reproduces_04_m1_oof": true,
+    "C4_k_star": true,
+    "C5_tables_complete": true,
+    "C6_bootstrap_ci": true
+  },
+  "criteria_note": "pytest 전체 통과와 재실행 시 results/phase5b/ 바이트 동일은 스크립트 밖에서 확인한다. 실행 시간은 표준 출력에만 남긴다"
+}
