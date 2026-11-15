@@ -132,11 +132,20 @@ def fit_xgb(cfg, X, y, device):
 
 
 def check_device(device):
-    """cuda를 골랐는데 GPU 학습이 안 되면 CPU로 몰래 바꾸지 않고 멈춘다."""
+    """cuda를 골랐는데 GPU 학습이 안 되면 CPU로 몰래 바꾸지 않고 멈춘다.
+
+    CUDA 없이 빌드된 XGBoost(macOS 휠 등)는 device="cuda"를 받으면 경고만 내고 CPU로 학습한다. 그 경고는 ctypes
+    콜백 안에서 나서 warnings 필터로 예외가 되지 않으므로, 빌드 정보를 먼저 본다 (2026-11-15, docs/phase5c.md 5c.1).
+    reflop 같은 PyTorch용 원격 GPU 도구는 XGBoost에 영향이 없다."""
     if device == "cpu":
         return
     import warnings
+
+    import xgboost
     from xgboost import XGBClassifier
+    if not xgboost.build_info().get("USE_CUDA"):
+        sys.exit(f"--device {device}: 이 XGBoost({xgboost.__version__})는 CUDA 없이 빌드되어 CPU로 학습한다. "
+                 "--device cpu로 실행하거나 CUDA 빌드가 있는 GPU 머신에서 실행한다.")
     rng = np.random.default_rng(io.SEED)
     X, y = rng.random((200, 4)), rng.random(200) < 0.5
     with warnings.catch_warnings():
