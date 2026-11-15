@@ -261,3 +261,107 @@ def window_features(values: pl.DataFrame, trajs: pl.DataFrame, n: int, ks=WINDOW
         raise ValueError(f"N={n}: 앞 N스텝이 모두 있지 않은 진행 중 궤적 {bad}개 / 행 {agg.height} != 진행 중 {alive.height}")
     cols = window_columns(n, ks) + (RECENCY_FEATURES if recency else [])
     return agg.select("traj_id", *cols).sort("traj_id")
+
+
+# ---- Phase 5c: N스텝과 k스텝 가중 (PLAN 11절 P5c-D1~D8, docs/phase5c.md) ----
+# 대상은 5b 창 피처 7개의 스텝 단위 계열 (TREND_SERIES). 창 = 스텝 N−k+1..N, 이전 구간 = 스텝 1..N−k.
+# (a) 가중합: 이전 + α×창 (obs_len은 (이전 합 + α×창 합) / ((N−k) + α·k)). k ≥ N이면 없음
+# (c) 변화율: 창/k − 이전/(N−k) (obs_len은 창 평균 − 이전 평균). k ≥ N이면 없음
+# (b) 지수 감쇠: Σ_{t≤N} γ^(N−t)·x_t (obs_len 포함, 창과 무관해서 N=3에도 있다)
+# 기울기: 창 안 obs_len의 스텝 번호에 대한 OLS 기울기. k ≥ N이면 없음 (k=3은 N ≥ 5, k=5는 N ≥ 8, P5c-D4)
+# n_new_files의 스텝 계열은 "이 스텝에서 그 파일을 처음 열었다"(window_features와 같은 정의)라서, 이전 구간 값은 창 시작 전에
+# 처음 연 파일 수다 (P5c-D3). 모두 스텝 1..N의 스텝 단위 값에서만 계산한다 (스텝 N 이후, n_steps는 쓰지 않는다).
+
+ALPHAS = (2, 4, 8)
+GAMMAS = (0.5, 0.7, 0.9)
+SLOPE_KS = (3, 5)
+# 창 피처 이름(WINDOW_BASES 순서) → 스텝 단위 계열 (_trend_series에서 만든다)
+TREND_SERIES = {"n_error": "is_error", "n_edit_failed": "edit_failed", "n_edit_ok": "_edit_ok", "n_repeat_consec": "repeat_prev",
+                "n_repeat_any": "repeat_any", "n_new_files": "_new_file", "obs_len_mean": "obs_len"}
+assert tuple(TREND_SERIES) == WINDOW_BASES
+
+
+def _gamma_tag(g: float) -> str:
+    return f"g{round(g * 10):02d}"  # 0.5 → g05
+
+
+def alpha_name(base: str, alpha, k: int) -> str:
+    return f"{base}_a{alpha}_w{k}"
+
+
+def change_name(base: str, k: int) -> str:
+    return f"{base}_chg_w{k}"
+
+
+def decay_name(base: str, gamma: float) -> str:
+    # obs_len은 감쇠 가중 "합"이라 이름을 obs_len_sum으로 둔다 (평균이 아님)
+    return f"{'obs_len_sum' if base == 'obs_len_mean' else base}_{_gamma_tag(gamma)}"
+
+
+def slope_name(k: int) -> str:
+    return f"obs_len_slope_w{k}"
+
+
+def alpha_columns(n: int, ks, alpha) -> list[str]:
+    return [alpha_name(b, alpha, k) for k in ks if k < n for b in WINDOW_BASES]
+
+
+def change_columns(n: int, ks) -> list[str]:
+    return [change_name(b, k) for k in ks if k < n for b in WINDOW_BASES]
+
+
+def decay_columns(gamma: float) -> list[str]:
+    return [decay_name(b, gamma) for b in WINDOW_BASES]
+
+
+def slope_columns(n: int, ks) -> list[str]:
+    return [slope_name(k) for k in ks if k < n]
+
+
+def _trend_series(values: pl.DataFrame, trajs: pl.DataFrame, n: int) -> tuple[pl.DataFrame, pl.DataFrame]:
+    """진행 중 궤적의 스텝 1..N 행에 TREND_SERIES 계열(Float64)을 붙인다. window_features와 같은 _edit_ok·_new_file 정의."""
+    alive = metrics.running(trajs.select("traj_id", "n_steps"), n).select("traj_id")
+    v = (values.filter(pl.col("step_idx") <= n).join(alive, on="traj_id", how="semi").sort("traj_id", "step_idx")
+         .with_columns(_edit_ok=(pl.col("command_name") == "edit") & ~pl.col("edit_failed"),
+                       _first=pl.col("step_idx").cum_count().over("traj_id", "open_file")))
+    v = v.with_columns(_new_file=pl.col("open_file").is_not_null() & (pl.col("_first") == 1))
+    v = v.with_columns([pl.col(s).cast(pl.Float64).alias(f"_x_{b}") for b, s in TREND_SERIES.items()])
+    return v, alive
+
+
+def trend_features(values: pl.DataFrame, trajs: pl.DataFrame, n: int, ks=(3,), alphas=ALPHAS, gammas=GAMMAS,
+                   slope_ks=SLOPE_KS) -> pl.DataFrame:
+    """시점 N 진행 중 궤적마다 5c 피처 전부. 출력 (traj_id, (a) α마다, (c), (b) γ마다, 기울기), traj_id 정렬, Float64.
+
+    ks: (a)·(c)의 창 k (P5c-D1: S1의 k 집합). slope_ks: 기울기의 창 k (P5c-D5·D8). k ≥ N인 k는 빠진다.
+    values: step_values 출력 (step_idx ≤ N만 쓴다). trajs: traj_id, n_steps.
+    """
+    ks = sorted({k for k in ks if k < n})
+    slope_ks = sorted({k for k in slope_ks if k < n})
+    v, alive = _trend_series(values, trajs, n)
+    aggs = []
+    for k in ks:
+        w, prev = pl.col("step_idx") > n - k, pl.col("step_idx") <= n - k
+        for b in WINDOW_BASES:
+            x = pl.col(f"_x_{b}")
+            win, before = x.filter(w).sum(), x.filter(prev).sum()
+            for a in alphas:
+                val = (before + a * win) / ((n - k) + a * k) if b == "obs_len_mean" else before + a * win
+                aggs.append(val.alias(alpha_name(b, a, k)))
+            chg = win / k - before / (n - k)  # obs_len: 창 평균 − 이전 평균, 횟수: 창/k − 이전/(N−k) (같은 식)
+            aggs.append(chg.alias(change_name(b, k)))
+    for g in gammas:
+        wt = pl.lit(g, dtype=pl.Float64).pow(n - pl.col("step_idx"))
+        aggs += [(wt * pl.col(f"_x_{b}")).sum().alias(decay_name(b, g)) for b in WINDOW_BASES]
+    for k in slope_ks:
+        tbar = n - (k - 1) / 2
+        sxx = k * (k * k - 1) / 12  # Σ(t − t̄)², t = N−k+1..N
+        w = pl.col("step_idx") > n - k
+        aggs.append((((pl.col("step_idx") - tbar) * pl.col("_x_obs_len_mean")).filter(w).sum() / sxx).alias(slope_name(k)))
+    agg = v.group_by("traj_id").agg(*aggs, _n=pl.len(), _max=pl.col("step_idx").max())
+    bad = agg.filter((pl.col("_n") != n) | (pl.col("_max") != n)).height
+    if bad or agg.height != alive.height:
+        raise ValueError(f"N={n}: 앞 N스텝이 모두 있지 않은 진행 중 궤적 {bad}개 / 행 {agg.height} != 진행 중 {alive.height}")
+    cols = ([c for a in alphas for c in alpha_columns(n, ks, a)] + change_columns(n, ks)
+            + [c for g in gammas for c in decay_columns(g)] + slope_columns(n, slope_ks))
+    return agg.select("traj_id", *[pl.col(c).cast(pl.Float64) for c in cols]).sort("traj_id")
