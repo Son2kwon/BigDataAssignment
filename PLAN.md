@@ -27,10 +27,10 @@
 | 제안서 | `docs/proposal.md`, `docs/proposal.pdf`, 수정 내역 `docs/proposal-changes.md` |
 | 환경 | `pyproject.toml` + `uv.lock` (Python 3.13). 기본 그룹: numpy, pandas, polars, pyarrow, datasets, scikit-learn, xgboost, shap, matplotlib, tqdm, ipykernel. `dl` 그룹: torch(CUDA 13.0), transformers, accelerate. 이 머신의 `.venv`에는 `dl` 그룹까지 설치되어 있다 |
 | 데이터 다운로드 | `data/download.sh`. HF revision 고정 + SHA-256 검증, 이어받기 지원. 이 머신의 `data/`에 4개 데이터셋 모두 받아져 있다 (3.4GB) |
-| 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics, preds, oof, evaluate, baselines, features`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2), `code/03_baselines.py`(Phase 4), `code/04_m1.py`·`04b_solution_files.py`(Phase 5). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 |
-| 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet, context_costs.parquet, preds/*.parquet` (git 밖). 검증 수치·결과 표 `results/phase1/`, `results/phase2/`, `results/phase4/` (git 안) |
-| 테스트·린트·CI | pytest(dev 그룹) 108개, `code/tests/`. 린트·CI 없음 |
-| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). Phase 5 (M1·SHAP) 완료 ("Phase 5 결과 요약" 절, [docs/phase5.md](docs/phase5.md)). Phase 6 (M2) 완료 ("Phase 6 결과 요약" 절, [docs/phase6.md](docs/phase6.md)). Phase 7 (M3) 완료 ("Phase 7 결과 요약" 절, [docs/phase7.md](docs/phase7.md)) |
+| 분석 코드 | `code/afp/` 공용 모듈(`io, parse, split, leakage, metrics, preds, oof, evaluate, baselines, features, sequences, lstm, m3, m3_text, cross`), 실행 스크립트 `code/01_parse.py`(Phase 1), `code/02_split.py`(Phase 2), `code/03_baselines.py`(Phase 4), `code/04_m1.py`·`04b_solution_files.py`·`04c_fig_auroc.py`·`04d_m1_supplementary.py`(Phase 5), `code/05_m2.py`·`05b_m2_supplementary.py`(Phase 6), `code/06_m3.py`·`06b_m3_fold_spread.py`(Phase 7), `code/07_m1_cross.py`(Phase 8.1 보조), `code/04e_m1_window.py`(Phase 5b 보조). 평가 하네스 `afp/metrics.py`(Phase 3). 예전 `code/test for K/fixed_cap_k.py`(HF Hub 로드)도 남아 있다 (2026-11-15 갱신) |
+| 중간 산출물 | `data/processed/trajectories.parquet, steps.parquet, splits.parquet, context_costs.parquet, features/, preds/*.parquet` (git 밖). M2·M3·5b 산출물(`data/processed/m2/`, M3 fold 모델, `phase5b/`)은 학습을 돌린 Linux 머신에만 있다 [확인: 이 Mac의 `data/processed/`에는 없음]. 검증 수치·결과 표 `results/phase1/`, `phase2/`, `phase4/`, `phase5/`, `phase5b/`, `phase6/`, `phase7/`, `phase8/` (git 안) |
+| 테스트·린트·CI | pytest(dev 그룹) 186개, `code/tests/` [확인: 2026-11-15 main `d4289a2`, 186 passed]. 린트·CI 없음 |
+| 진행 | Phase 0(0.2·0.4 일부 제외)~4 완료 (3.5 운영점 선택 포함). 2026-11-05 회의 §4.3에 따라 테스트를 70B 무작위 분할로 바꾸고 Phase 2~4를 다시 돌렸다 ("Phase 2~4 재실행" 절). 같은 회의 §4.1의 손실 기준(선택 3.5% / 판정 구간 상한 5%)을 반영했다 ("손실 기준 변경" 절). P4-D6(운영점 평가 = 테스트를 fold 모델별로 채점)·P4-D7(M1 테스트 B1 입력)을 구현했다 ("Phase 5 선행: P4-D6·P4-D7 구현" 절, 5.0.1~5.0.6 완료). Phase 5 (M1·SHAP) 완료 ("Phase 5 결과 요약" 절, [docs/phase5.md](docs/phase5.md)). Phase 6 (M2) 완료 ("Phase 6 결과 요약" 절, [docs/phase6.md](docs/phase6.md)). Phase 7 (M3) 완료 ("Phase 7 결과 요약" 절, [docs/phase7.md](docs/phase7.md)). Phase 8.1 보조(70B M1의 8B·405B 적용) 완료 ([docs/phase8.md](docs/phase8.md)). M1 개선 보조 실험 5b 완료 (train OOF만, S1 = 창 k=3, [docs/phase5b.md](docs/phase5b.md)). **다음: 5c** (Mac에서 먼저 실행, P9-D2). 5c~5e·`--final`, Linux 전체 재실행, Phase 9가 남았다 |
 
 ### 데이터 구조 [확인, parquet 스키마와 샘플 행 조회]
 
@@ -56,6 +56,8 @@
 최소 발표 범위 [확인, proposal.md §7]: M3·외부 테스트가 늦으면 B0·B1·M1·M2로 발표한다. 따라서 **1~5 중 M3를 뺀 부분이 반드시 끝나야 하는 범위**다.
 
 ## 4. 격차 (제안서 대비 비어 있는 것)
+
+> 2026-11-15 메모: 아래 "M1, M2, M3가 아직 없다"는 해소됐다 (Phase 5~7 완료, 2절 "진행" 행). 남은 격차는 5c~5e 보조 실험과 `--final`, Linux 전체 재실행(P6-D10), Phase 9 정리·README 재현 순서다. `fixed_cap_k.py`(0.2)는 그대로다. 아래는 당시 기록이다.
 
 2026-10-31 기준. 파싱·스텝 테이블(Phase 1), 분할·누수 점검(Phase 2), 평가 하네스(Phase 3, 3.5 포함), 기준선 B0·B1·오라클(Phase 4)은 끝났다. 궤적 ID(`traj_id`), 토큰 근사(문자 수 기반 맥락 길이), pytest, 공용 예측 파일·OOF·평가 드라이버도 생겼다. 남은 것:
 
@@ -730,7 +732,7 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 ### Phase 5b~5e. M1 개선 보조 실험 (사전 등록 2026-11-12, P9-D1)
 
-상세 기록: [docs/phase5b.md](docs/phase5b.md) (5b.0에 공통 규칙, 5b.1 구현 ✓), [docs/phase5c.md](docs/phase5c.md), [docs/phase5d.md](docs/phase5d.md), [docs/phase5e.md](docs/phase5e.md). 5c~5e 문서는 아직 쓰지 않았다. 결정은 11절 P5b-D1~D11, P5c-D1~D7, P5d-D1~D12, P5e-D1~D8에 있다
+상세 기록: [docs/phase5b.md](docs/phase5b.md) (5b.0에 공통 규칙, 5b.1 구현 ✓, 5b.2 결과 ✓), [docs/phase5c.md](docs/phase5c.md), [docs/phase5d.md](docs/phase5d.md), [docs/phase5e.md](docs/phase5e.md). 5c~5e 문서는 아직 쓰지 않았다. 결정은 11절 P5b-D1~D11, P5c-D1~D7, P5d-D1~D12, P5e-D1~D8에 있다
 
 이 실험은 보조 실험이고 공식 M1(Phase 5)은 바꾸지 않는다. Phase 하나가 방법 하나다. 각 Phase에서 고른 묶음(S1~S3)이 다음 Phase의 출발점이 된다. 작업 단계 번호는 5b.1, 5c.1, …처럼 붙이고, 결정 ID는 P5b-D\* ~ P5e-D\*로 쓴다.
 
@@ -764,7 +766,7 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 - 가중합 (a), 변화율 (c), 지수 감쇠 (b), 창 안 `obs_len` OLS 기울기를 S1에 더한다
 - 선택·모델·테스트는 5b와 같다
 - 가설: S2는 N≥8에서 S1보다 OOF 이슈 내 AUROC가 높다 `[가정]`. 방향만 쓰고 기대치는 쓰지 않는다
-- 메모 (2026-11-13, 5b 결과): S1 = ② (창 k=3)이라 P5c-D1에 따라 가중 피처의 k 집합은 {3}이다. P5c-D5의 기울기 묶음(5. k=5, 6. k=5·3)은 S1에 없는 k=5 창을 쓰므로, 그대로 둘지 k=3만 쓸지 5c 시작 전에 정한다 `[결정 필요]` (권장: 사전 등록대로 둔다. 기울기는 창 피처와 별개로 정의됐고(P5c-D4), 바꾸면 결과를 본 뒤 설계를 고치는 것이 된다)
+- 메모 (2026-11-13, 5b 결과): S1 = ② (창 k=3)이라 P5c-D1에 따라 가중 피처의 k 집합은 {3}이다. P5c-D5의 기울기 묶음(5. k=5, 6. k=5·3)은 S1에 없는 k=5 창을 쓰므로, 그대로 둘지 k=3만 쓸지 5c 시작 전에 정한다 ~~`[결정 필요]`~~ → **확정 (2026-11-15): 사전 등록대로 둔다** (P5c-D8). 기울기는 창 피처와 별개로 정의됐고(P5c-D4), 바꾸면 결과를 본 뒤 설계를 고치는 것이 된다
 
 **5d 생각 텍스트** (P5d-D1~D12)
 
@@ -807,6 +809,7 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 - 하지 않는 것 (P9-D1 권장): `docs/m1-improve.md`의 E1~E3, 8.2·8.3, P8-D5. test를 이미 봐서 해도 보조 실험이고 일정이 맞지 않는다. 발표의 "향후 과제"로 둔다
   - 메모 (2026-11-12): P9-D1을 "한다"로 확정했다. 범위는 M1 개선 보조 실험 Phase 5b~5e다 ("Phase 5b~5e" 절). E1~E3를 그대로 쓰지 않고 팀이 설계를 따로 정했다. 8.2·8.3·P8-D5는 이 결정에 들어 있지 않다. 위 순서 표에서 5b~5e가 어디에 들어가는지와 중단일은 팀이 정한다
+  - 메모 (2026-11-15): 순서 1(PR #20~#22 머지)은 끝났다. 5b는 PR #23으로 머지됐다 (S1 = 창 k=3). 다음은 5c다 (k 집합은 P5c-D8로 확정). 순서 2(결정 회의)·3(Linux 재실행)·4·5는 아직이다. 5c~5e는 먼저 Mac에서 돌리고, 순서 3의 Linux 전체 재실행에 5b~5e 스크립트도 넣어 한 번에 다시 돌린다 (P9-D2)
 
 ## 7. 일정
 
@@ -819,6 +822,8 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 | 11주차 | Phase 6 (M2) |
 | 12주차 | Phase 7 (M3, 선택), Phase 8.2 (선택), Phase 9 |
 | 13~14주차 | 발표 |
+
+메모 (2026-11-15, 같은 가정이면 11주차 끝): Phase 5·6·7·8.1 보조와 5b가 끝났다. 남은 것은 5c~5e(+`--final`), Linux 재실행, Phase 9(12주차), 발표(13~14주차)다. 5b~5e 중단일은 아직 정하지 않았다 (P9-D1).
 
 M2를 11주차로 미루고 M3를 12주차로 미룬 것은 지연을 반영한 것이다. 10주차 말까지 Phase 5가 끝나지 않으면 M3를 포기하고 M2와 일반화 테스트에 집중한다.
 
@@ -891,7 +896,11 @@ uv run pytest                                        # 파서·지표·누수 �
 | 작업 규칙 (CLAUDE.md) | 손의권 | PR #12 |
 | 5 M1·SHAP | 손의권 | PR #13 (리뷰 차승준 예정, [docs/reviews/phase5-review.md](docs/reviews/phase5-review.md)) |
 | 6 M2 LSTM | 차승준 | 브랜치 `phase/6-m2` (코드·문서 작성 Claude Code, 학습 실행 차승준, P6-D4) |
-| 7 M3, 8 일반화(선택), 9 정리 | `[확인 필요]` | 아직 정하지 않음. 발표는 공동 (제안 당시 계획) |
+| 7 M3 | 차승준 | PR #20 (머지 손의권. #19는 닫힘) |
+| 8.1 보조 (8B·405B 적용) | 차승준 | PR #21 (`phase/7` 브랜치로 머지, main에는 #22로 들어옴) |
+| Phase 8 리뷰 반영 (P8-D1 확정, P9-D1) | 손의권 | PR #22 |
+| 5b~5e 사전 등록, 5b 창 피처 | 차승준 | PR #23 (코드·문서 작성 Claude Code, 학습 실행 차승준, 머지 손의권) |
+| 5c~5e, 9 정리 | `[확인 필요]` | 아직 정하지 않음. 발표는 공동 (제안 당시 계획) |
 | 리뷰 | `[확인 필요]` | GitHub에 기록된 리뷰(approve·comment)는 PR #1~#12 모두 없다. 다른 사람이 머지한 PR은 #6, #10, #11 |
 
 당시 제안 (2026-10-29, 기록으로 남김):
@@ -957,6 +966,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | P8-D4 | 70B 비교 기준 | **확정 (2026-11-10)**: 같은 스크립트가 이 머신의 저장된 M1 예측으로 70B test 행(`test70b`)을 다시 계산하고 그것과 비교한다. 커밋된 Phase 5 결과(Mac)와 XGBoost 운영점이 다르기 때문이다 (P6-D10, smoke에서 `m1_xgb` τ·K 4개 중 0개 일치, `m1_lr` 4개 중 4개 일치 [확인]) |
 | P8-D5 | 8B·405B로 학습·τ·K 재선택하는 추가 보조 실험 | **`[결정 필요]` (2026-11-10 리뷰에서 검토, 실행 안 함)**: 405B는 하지 않는다 (N=20 test 성공 4개). 8B는 한다면 (A) 70B M1 그대로 + τ·K·K\*만 8B train에서 다시 고르기만, 부록용. 선택지와 조건은 [docs/phase8.md](docs/phase8.md) 미결 |
 | P9-D1 | 남은 기간의 범위 | **확정 (2026-11-12): M1 개선 보조 실험 Phase 5b~5e를 한다.** 범위는 PLAN "Phase 5b~5e" 절과 P5b~P5e 행이다. 공식 M1은 바꾸지 않는다. 보고는 P6-D11 형식을 따르고, 공식 M1과는 짝지은 부트스트랩으로 비교한다. `m1-improve.md` E1~E3를 그대로 쓰지 않고 팀이 설계를 따로 정했다. 8.2·8.3·P8-D5는 이 결정에 들어 있지 않다. 중단일은 팀이 정한다. (이전 기록) **~~`[결정 필요]`~~ 권장 (2026-11-10 리뷰)**: 새 실험을 하지 않는다 (`m1-improve.md` E1~E3, 8.2·8.3, P8-D5). Linux 재실행 → Phase 9 → 발표에 집중한다. 근거: test를 이미 봐서 새 실험은 보조 실험이고, 12주차 Phase 9·13~14주차 발표 일정 |
+| P9-D2 | 5c~5e 실행 머신과 Linux 재실행 범위 | **확정 (손의권, 2026-11-15)**: 5c~5e는 먼저 Mac에서 돌리고, 발표 전 Linux 전체 재실행(P6-D10, Phase 9 순서 3)에 5b~5e 스크립트도 넣어 한 번에 다시 돌린다. 근거: 플랫폼 차이는 작을 것으로 본다 `[가정]`. 5e는 아직 한 번도 돌리지 않았다. 지켜야 할 것 (5b 결과에서 나온 조건): (1) 5c는 5b의 묶음별 OOF 점수(`data/processed/phase5b/`, git 밖)가 필요한데 이 Mac에는 없다 [확인]. Mac에서는 reflop으로 cuda 학습을 쓴다 (손의권, 2026-11-15. P5b-D15의 기본값 cuda 그대로). 실행 환경에 5b OOF 점수가 없으면 `04e_m1_window.py`로 5b부터 다시 돌린다. 이때 `results/phase5b/`가 바뀌면 플랫폼 차이만 있는 diff는 커밋하지 않는다 (CLAUDE.md 재현성) (2) 5b의 S1 선택은 ②·④·⑤가 0.002 안에 있어 생긴 동률 판정이었다 (`selection.csv`: ⑤ 0.6142, ④ 0.6135, ② 0.6127). 같은 설정에서도 장치가 바뀌면 이슈 내 AUROC가 이 정도 움직이므로 (5b.2 "해석 주의"), Mac이나 Linux 재실행에서 S1이 ②가 아니게 될 수 있다. 그러면 5c~5e의 출발점이 바뀐다 `[결정 필요]`: (a) 재실행에서 규칙대로 다시 고르고 그 결과를 따른다 (권장: 사전 등록 규칙을 지킴, 5c~5e를 이어서 다시 돌림) (b) 처음 고른 S1(②)을 고정한다 (재실행 사이 일관성. 규칙과 다름) |
 | P5b-D1 | 5b~5e 공통: 범위·test 사용 | **확정 (2026-11-12)**: 보조 실험이고 공식 M1은 바꾸지 않는다. 5b~5e 개발은 모두 train OOF로만 하고, 5e를 마친 뒤 `--final`을 한 번 실행한다. `--final` 결론은 "공식 → S1 → S2 → S3 → S4" 흐름으로만 쓰고, 나머지 묶음은 부록 표에 둔다. 보고는 P6-D11 형식, 공식 M1과는 짝지은 부트스트랩. 문서는 Phase 하나에 하나(`docs/phase5b.md`~`phase5e.md`)이고, 공통 규칙은 5b.0에 쓴다 |
 | P5b-D2 | 5b~5e 공통: 모델·그리드·N | **확정 (2026-11-12)**: `m1_xgb`, `m1_xgb_b1`. 묶음마다 `XGB_GRID` 8개에서 공식과 같은 규칙(GRID_TIE 0.002)으로 다시 고른다. N은 N_GRID (3, 5, 8, 10, 15, 20) 전부. 묶음은 모두 학습하고 보고한다. 운영점 표에 절약 스텝·절약 토큰·K\* 대비 토큰 차이 [95%] |
 | P5b-D3 | 5b~5d 공통: 다음 Phase로 넘길 묶음(S1~S3) 선택 | **확정 (2026-11-12)**: train OOF 이슈 내 AUROC(쌍 가중)의 N∈{8, 10, 15, 20} 평균이 가장 큰 묶음. 0.002 안이면 피처가 적은 묶음. OOF로 고른 후보 수(α·γ·λ·t·K·묶음)를 문서에 적는다. 5e는 P5e-D6 |
@@ -965,7 +975,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | P5b-D6 | 최근성 피처 | **확정 (2026-11-12)**: 3개, 창과 무관해서 N=3에도 넣는다. `steps_since_edit_ok` = N − 마지막 성공 편집 스텝 (없으면 N), `steps_since_new_file` = N − 마지막으로 새 파일을 연 스텝 (없으면 N), `cur_error_run` = 스텝 N에서 끝나는 연속 에러 길이 (에러가 아니면 0) |
 | P5b-D7 | 5b 묶음 | **확정 (2026-11-12)**: ① 공식 ② +창 k=3 ③ +창 k=5 ④ +창 k=3·5 ⑤ ④+최근성 |
 | P5b-D8 | 비례 k 확인 | **`[권장 적용]` (2026-11-12)**: k=⌈N/4⌉ (N=5·8 → 2, 10 → 3, 15 → 4, 20 → 5)를 OOF 비교만 한다. k=1이 되는 창(N=3)은 빼서 고정 k와 조건을 맞춘다. 고정 k와 0.002를 넘게 차이 나면 `[결정 필요]`로 보고하고, 아니면 고정 k를 유지한다 |
-| P5b-D9 | 5b 가설 (사전 등록) | **`[권장 적용]` (2026-11-12)**: S1은 N≥8에서 공식 M1보다 OOF 이슈 내 AUROC가 높다 (선택 규칙의 N 범위와 맞춤). 기대치 +0.01~0.03 `[가정]` |
+| P5b-D9 | 5b 가설 (사전 등록) | **`[권장 적용]` (2026-11-12)**: S1은 N≥8에서 공식 M1보다 OOF 이슈 내 AUROC가 높다 (선택 규칙의 N 범위와 맞춤). 기대치 +0.01~0.03 `[가정]`. **결과 (2026-11-13, train OOF): 크기는 맞지 않았다.** S1 − ① 이슈 내 AUROC는 N≥8 8칸 중 7칸이 +이고 평균 +0.004, 구간 하한 > 0은 2칸, +0.01 이상은 `m1_xgb` N=20 하나 (`results/phase5b/summary.json` `hypothesis_P5b_D9`, docs/phase5b.md 5b.2) |
 | P5b-D10 | 사전 등록 시점 | **확정 (2026-11-12)**: 사전 등록은 5b~5e 설계를 마친 뒤 한 번에 쓴다. 5b OOF 개발은 그 전에 시작해도 된다 |
 | P5b-D11 | P5(관측 내용) 피처 | **확정 (팀 결정, 2026-11-12): 범위에서 뺀다.** 5b 문서에 기각한 안으로 적는다 |
 | P5b-D12 | 5b~5d 다음 묶음을 고르는 모델 | **권장안으로 진행 (2026-11-13), 5b에서는 두 모델이 같은 묶음(②)을 골라 영향 없음**: `m1_xgb` (B1 없음). `m1_xgb_b1`로 고른 결과도 같이 내고 다르면 보고한다. 근거: 선택 지표가 이슈 내 AUROC이고 B1은 이슈 안에서 같은 값이라, B1 없는 모델이 궤적 피처의 몫을 바로 보여 준다. 기각: 두 모델 평균. docs/phase5b.md 5b.1 |
@@ -979,6 +989,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | P5c-D5 | 5c 묶음 | **`[권장 적용]` (2026-11-12)**: 1. S1 2. +(a) 3. +(c) 4. +(b) 5. +기울기 k=5 6. +기울기 k=5·3 7. +((a)와 (c) 중 OOF가 나은 것) + (5와 6 중 OOF가 나은 것, 0.002 안이면 k=5) |
 | P5c-D6 | 5c 선택 횟수 | **확정 (2026-11-12)**: α·γ 선택과 7번 묶음 구성은 2단계 선택이다. (a)·(b)는 후보를 3배 많이 봤다. 문서에 명시한다 |
 | P5c-D7 | 5c 가설 (사전 등록) | **확정 (2026-11-12)**: S2는 N≥8에서 S1보다 OOF 이슈 내 AUROC가 높다 `[가정]`. 방향만 쓰고 기대치는 쓰지 않는다 |
+| P5c-D8 | 5c 기울기 묶음의 k (S1 = 창 k=3일 때) | **확정 (2026-11-15)**: 사전 등록(P5c-D5)대로 둔다. 가중 피처 (a)·(b)·(c)의 k 집합은 P5c-D1에 따라 {3}이고, 기울기 묶음 5(k=5)·6(k=5·3)은 S1에 k=5 창이 없어도 그대로 쓴다. 근거: 기울기는 창 피처와 별개로 정의됐다 (P5c-D4). 5b 결과를 본 뒤 바꾸면 결과를 보고 설계를 고치는 것이 된다. 기각: 기울기도 k=3만 |
 | P5d-D1 | 5d 출발점과 묶음 | **확정 (2026-11-12)**: 출발점은 S2. 묶음 S2 / +길이 / +어휘 / +길이+어휘. 고른 묶음을 S3로 5e에 넘긴다 |
 | P5d-D2 | 생각 텍스트 정의 | **확정 (2026-11-12)**: `action_text`에서 코드 펜스(백틱 3개) 블록을 모두 지운 나머지. 닫히지 않은 펜스는 그 뒤를 전부 지운다. M3 정의(첫 펜스 앞, P7-D4)와 다르다는 점을 문서에 적는다 |
 | P5d-D3 | 토큰화 | **확정 (2026-11-12)**: 소문자, 단어 단위, 1~2-gram. 숫자와 경로 토큰(`/` 또는 `.확장자` 포함)은 지운다 |
@@ -1022,6 +1033,7 @@ uv run pytest                                        # 파서·지표·누수 �
 | M3 stacking 누수 (`m3_bert_b1`의 M3 OOF 점수를 낸 fold j 모델이 fold k를 포함해 학습) | `m3_bert_b1` train OOF가 약간 낙관적 | P4-D7과 같은 수준으로 기록만 한다 |
 | Phase 5b~5e의 OOF 선택 횟수가 많음 (묶음·α·γ·t·K·λ, 여러 단계에 걸친 선택) | S1~S4의 train OOF 지표가 낙관적 | 선택 횟수를 문서에 적고(P5b-D3), test는 5e 뒤 `--final` 한 번만 본다. 결론은 N 전체의 경향으로 쓴다 |
 | 5b~5e XGBoost를 cuda로 학습 (P5b-D15) | 공식 M1(CPU)과 점수가 다르다. 같은 설정에서도 고른 그리드 설정이 바뀔 수 있다 (5b ①: N=8 등에서 `balance` 변경) | 5b~5e 안 비교는 모두 같은 장치의 ① 대비로 한다. `--final`의 공식 M1 짝지은 비교는 장치 차이를 포함한다고 명시하고, 필요하면 ①(cuda)과의 비교를 같이 낸다 |
+| 5c~5e를 Mac에서 먼저 돌리고 Linux에서 다시 돌림 (P9-D2) | 장치가 바뀌면 동률 근처의 묶음 선택(S1~S3)이 바뀔 수 있다 (5b S1은 ②·④·⑤가 0.002 안). 그러면 Mac 결과와 Linux 최종 결과의 흐름이 다르다 | 재실행할 때 각 Phase의 선택이 Mac과 같은지 먼저 확인하고, 다르면 P9-D2 `[결정 필요]`에 따른다. 최종 보고 수치는 Linux 재실행본 하나로 쓴다 |
 | 5e 가중치가 N 이후 정보(n_steps)로 만들어짐 | 가중치가 OOF·test 행에 들어가면 누수 | fit fold 행에만 쓰고, 테스트로 강제한다 (P5e-D7) |
 | 5d 어휘가 특정 저장소·이슈 단어에 묶임 | 이슈 내 구분이 아니라 저장소 구분을 배움, 해석 왜곡 | 연관 점수는 이슈 안 잔차로 계산(P5d-D9), 최소 빈도 t를 이슈 수로 둠(P5d-D11), 5d.1 진단으로 저장소 집중 비율을 본다. 해석은 fold 사이 겹침이 큰 n-gram에만 한다 |
 | M3 fold 모델 사이 차이가 큼 (test AUROC 폭 0.06~0.07, 2026-11-10 실측) | 평균 점수 판별(P4-D2)이 운영점(P4-D6)보다 좋아 보임 | 판별과 운영점을 같이 보고하고 `fold_spread.csv`로 평균 효과를 밝힌다. 결과를 본 뒤라 설정은 바꾸지 않는다 (P7-D3) |
