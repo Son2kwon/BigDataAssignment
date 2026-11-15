@@ -1,0 +1,340 @@
+{
+  "mode": "train OOF only (test not read)",
+  "device": "cpu",
+  "s1": {
+    "phase5b_S1": "w3",
+    "phase5b_device": "cuda",
+    "definition": "official 73 + window k=3 (7)",
+    "reproduce_5b_oof": {
+      "m1_xgb": null,
+      "m1_xgb_b1": null
+    }
+  },
+  "variants": {
+    "s1": {
+      "n_features_by_N": {
+        "3": 73,
+        "5": 80,
+        "8": 80,
+        "10": 80,
+        "15": 80,
+        "20": 80
+      }
+    },
+    "a2": {
+      "n_features_by_N": {
+        "3": 73,
+        "5": 87,
+        "8": 87,
+        "10": 87,
+        "15": 87,
+        "20": 87
+      }
+    },
+    "a4": {
+      "n_features_by_N": {
+        "3": 73,
+        "5": 87,
+        "8": 87,
+        "10": 87,
+        "15": 87,
+        "20": 87
+      }
+    },
+    "a8": {
+      "n_features_by_N": {
+        "3": 73,
+        "5": 87,
+        "8": 87,
+        "10": 87,
+        "15": 87,
+        "20": 87
+      }
+    },
+    "chg": {
+      "n_features_by_N": {
+        "3": 73,
+        "5": 87,
+        "8": 87,
+        "10": 87,
+        "15": 87,
+        "20": 87
+      }
+    },
+    "g05": {
+      "n_features_by_N": {
+        "3": 80,
+        "5": 87,
+        "8": 87,
+        "10": 87,
+        "15": 87,
+        "20": 87
+      }
+    },
+    "g07": {
+      "n_features_by_N": {
+        "3": 80,
+        "5": 87,
+        "8": 87,
+        "10": 87,
+        "15": 87,
+        "20": 87
+      }
+    },
+    "g09": {
+      "n_features_by_N": {
+        "3": 80,
+        "5": 87,
+        "8": 87,
+        "10": 87,
+        "15": 87,
+        "20": 87
+      }
+    },
+    "sl5": {
+      "n_features_by_N": {
+        "3": 73,
+        "5": 80,
+        "8": 81,
+        "10": 81,
+        "15": 81,
+        "20": 81
+      }
+    },
+    "sl35": {
+      "n_features_by_N": {
+        "3": 73,
+        "5": 81,
+        "8": 82,
+        "10": 82,
+        "15": 82,
+        "20": 82
+      }
+    },
+    "combo": {
+      "n_features_by_N": {
+        "3": 73,
+        "5": 87,
+        "8": 88,
+        "10": 88,
+        "15": 88,
+        "20": 88
+      }
+    }
+  },
+  "final_bundles": {
+    "s1": "1",
+    "a2": "2",
+    "chg": "3",
+    "g05": "4",
+    "sl5": "5",
+    "sl35": "6",
+    "combo": "7"
+  },
+  "combo": [
+    "a2",
+    "sl5"
+  ],
+  "models": [
+    "m1_xgb",
+    "m1_xgb_b1"
+  ],
+  "grid": [
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": true
+    }
+  ],
+  "xgb_fixed": {
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 1.0,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "n_jobs": 1,
+    "random_state": 42,
+    "eval_metric": "logloss"
+  },
+  "grid_tie": 0.002,
+  "k_star": 40,
+  "features": {
+    "official_matches_04_m1_cache": true,
+    "rows_per_N": {
+      "3": 61786,
+      "5": 59232,
+      "8": 52207,
+      "10": 46167,
+      "15": 33367,
+      "20": 25864
+    }
+  },
+  "unique_designs": 114,
+  "grid_fits": 912,
+  "selection": {
+    "rule": "P5b-D3, P5c-D5·D9",
+    "model": "m1_xgb",
+    "N": [
+      8,
+      10,
+      15,
+      20
+    ],
+    "tie": 0.002,
+    "alpha": "a2",
+    "gamma": "g05",
+    "combo": [
+      "a2",
+      "sl5"
+    ],
+    "S2": "chg",
+    "S2_label": "3",
+    "pick_by_model": {
+      "m1_xgb": {
+        "alpha": "a2",
+        "gamma": "g05",
+        "a_or_c": "a2",
+        "slope": "sl5",
+        "S2": "chg"
+      },
+      "m1_xgb_b1": {
+        "alpha": "a2",
+        "gamma": "g05",
+        "a_or_c": "chg",
+        "slope": "sl5",
+        "S2": "g05"
+      }
+    },
+    "S2_scores": {
+      "s1": 0.6121176565,
+      "a2": 0.6143004153,
+      "chg": 0.6157511643,
+      "g05": 0.61683359,
+      "sl5": 0.6129290812,
+      "sl35": 0.613347993,
+      "combo": 0.6134060666
+    }
+  },
+  "candidates_seen": {
+    "alpha": 3,
+    "gamma": 3,
+    "combo_parts": 4,
+    "final_bundles": 7,
+    "grid_configs_per_design": 8
+  },
+  "hypothesis_P5c_D7": {
+    "rows": [
+      {
+        "model": "m1_xgb",
+        "N": 8,
+        "d_within_pair": 0.0032786488,
+        "d_within_pair_lo": 0.0003714057,
+        "d_within_pair_hi": 0.0064329634
+      },
+      {
+        "model": "m1_xgb",
+        "N": 10,
+        "d_within_pair": 0.0005486644,
+        "d_within_pair_lo": -0.0022427002,
+        "d_within_pair_hi": 0.0032923038
+      },
+      {
+        "model": "m1_xgb",
+        "N": 15,
+        "d_within_pair": 0.0054230513,
+        "d_within_pair_lo": 0.001465205,
+        "d_within_pair_hi": 0.0092258842
+      },
+      {
+        "model": "m1_xgb",
+        "N": 20,
+        "d_within_pair": 0.0052836669,
+        "d_within_pair_lo": -0.0026368401,
+        "d_within_pair_hi": 0.0130490278
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 8,
+        "d_within_pair": 0.0001980935,
+        "d_within_pair_lo": -0.0025167226,
+        "d_within_pair_hi": 0.0029441189
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 10,
+        "d_within_pair": -0.0015975816,
+        "d_within_pair_lo": -0.0045851553,
+        "d_within_pair_hi": 0.0011576763
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 15,
+        "d_within_pair": 0.0052631579,
+        "d_within_pair_lo": 0.0012183144,
+        "d_within_pair_hi": 0.0093736837
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 20,
+        "d_within_pair": 0.000396275,
+        "d_within_pair_lo": -0.0086482989,
+        "d_within_pair_hi": 0.0088774899
+      }
+    ],
+    "n_positive": 7,
+    "n_ci_lo_positive": 3,
+    "n": 8
+  },
+  "bootstrap": {
+    "n_boot": 1000,
+    "seed": 42,
+    "unit": "train issue",
+    "base": "s1",
+    "note": "운영점 선택은 다시 하지 않는다 (선택 불확실성 미포함, P5b-D13)"
+  },
+  "criteria": {
+    "C1_features_finite_and_official_same_as_04_m1": true,
+    "C2_no_seen_issue_scores": true,
+    "C3_s1_reproduces_5b": true,
+    "C4_k_star": true,
+    "C5_tables_complete": true,
+    "C6_bootstrap_ci": true
+  },
+  "criteria_note": "pytest 전체 통과와 재실행 시 results/phase5c/ 바이트 동일은 스크립트 밖에서 확인한다. 실행 시간은 표준 출력에만 남긴다"
+}
