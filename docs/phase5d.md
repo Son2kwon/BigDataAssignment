@@ -3,7 +3,7 @@
 - 담당: 차승준. 브랜치 `phase/5d`.
 - 기준: [PLAN.md](../PLAN.md) 「Phase 5b~5e」와 11절 P5d-D1~D12, 공통 규칙은 [5b.0](phase5b.md), 확정 S2는 [5c.2](phase5c.md)와 P5c-D13.
 - 구현 계획: [PHASE5D_PLAN.md](../PHASE5D_PLAN.md).
-- **상태 (2026-11-16): 코드·테스트 파일·문서 작성, 전체 pytest 239개 통과. 제한 CUDA smoke 점검 중. 정식 학습 결과 없음.** 아래 5d.1~5d.4의 미실행 표기는 구현 당시 기록이며, 이후 검증은 5d.5에 추가한다.
+- **상태 (2026-11-16): 코드 검증 ✓ — 전체 pytest 239개 통과, 제한 CUDA smoke 2회 C1~C6 통과·200개 파일 바이트 동일. 정식 학습은 사용자 실행 대기.** 아래 5d.1~5d.4의 미실행 표기는 구현 당시 기록이며, 이후 검증은 5d.5에 추가한다. Draft PR: [#26](https://github.com/Son2kwon/BigDataAssignment/pull/26).
 
 ## 실행 권한과 순서 (사용자 지시, 2026-11-16)
 
@@ -186,11 +186,14 @@ CPU에서 사용자가 실행할 경우 `--device cpu --jobs <수>`를 쓴다. �
 
 - `[확인]` 새 테스트 세 파일: **39개 통과** (16.05초, 첫 focused 실행 표준 출력).
 - `[확인]` 전체 `uv run --no-sync pytest`: **239개 통과** (최종 코드 버전 53.08초, `/tmp/phase5d-pytest-final.log`). CUDA 기본값 변경 뒤 driver 테스트 9개도 별도 통과했다 (15.32초, 표준 출력).
-- CUDA smoke·재실행 바이트 비교는 진행 중이다. 정식 1,000회 bootstrap·전체 학습·정식 재현성은 검사하지 않았다.
+- `[확인]` 제한 CUDA smoke 2회 **C1~C6 모두 통과**. 첫 실행은 `--device cuda --gpu-jobs 1 --jobs 4 --smoke` (264.1초), 둘째는 `--gpu-jobs 1 --jobs 4 --smoke` (259.2초)로 **device 기본 cuda**도 실제 확인했다. 출처: `/tmp/phase5d-smoke-first.log`, `/tmp/phase5d-smoke-second.log`.
+- `[확인]` 두 실행의 **200개 산출물 모두 SHA-256 동일** (OOF parquet·어휘 행렬·표·요약·인계 포함). 기존 `results/`·예측 **323개 파일도 변경 0개**. `results/phase5d/`와 `data/processed/phase5d/`는 생성되지 않았다. 출처: `/tmp/phase5d-verification.json`, 해시 명부 `/tmp/phase5d-smoke-first-hashes.json`, `/tmp/phase5d-existing-artifacts-before.json`.
+- `[확인]` 기본 `gpu_jobs=4` 실제 병렬 경로도 **합성 100행·4피처·설정 4개·5-fold**로 통과했다. 프로젝트 데이터를 읽지 않는 별도 미니 점검이며 전체 학습 스크립트는 호출하지 않았다. 출처: `/tmp/phase5d-cuda-workers-check.py`, `/tmp/phase5d-cuda-workers-check.log`.
+- 정식 1,000회 bootstrap·전체 학습·정식 재현성·5c와의 정식 OOF 점수 일치는 검사하지 않았다. smoke에서 선택된 S3는 정식 인계로 쓰지 않는다.
 
 ### 산출물
 
-- 테스트 로그는 로컬 `/tmp/phase5d-pytest-final.log`, smoke 로그는 `/tmp/phase5d-smoke-first.log`.
+- 테스트 로그는 로컬 `/tmp/phase5d-pytest-final.log`, smoke 로그·해시 비교·병렬 CUDA 미니 점검은 위 파일들이다.
 - smoke 산출물은 `data/processed/phase5d_smoke/` (git 밖)에만 둔다. 정식 결과를 생성하지 않는다.
 
 ### 계획과 다른 점
@@ -199,4 +202,5 @@ CPU에서 사용자가 실행할 경우 `--device cpu --jobs <수>`를 쓴다. �
 
 ### 미결
 
-- 제한 smoke 완료·바이트 재현·기존 결과 보존 확인 뒤 기록을 갱신한다. 정식 전체 학습·S3 선택·5e 진행은 사용자 실행 뒤다.
+- 코드 테스트·제한 smoke·smoke 재현 확인은 끝났다. 정식 전체 학습·S3 선택·5e 진행은 사용자 실행 뒤다.
+- P5d-D13~D19 구현 권장안의 팀 확인은 여전히 남아 있다. 테스트 통과는 정식 학습 결과나 이 결정의 팀 확정을 뜻하지 않는다.
