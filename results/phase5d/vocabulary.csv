@@ -1,0 +1,2701 @@
+N,fold,t,vocab_k,n_selected,padded,ngram,score,n_trajectories,n_issues,rank,direction
+3,0,10,10,10,false,after line,-1.224191,16,11,0,success
+3,0,10,10,10,false,the typical,-1.218182,19,16,1,success
+3,0,10,10,10,false,output as,1.145701,2644,789,2,failure
+3,0,10,10,10,false,we see,1.122438,3125,930,3,failure
+3,0,10,10,10,false,same output,1.119906,2689,793,4,failure
+3,0,10,10,10,false,to comply,-1.102428,22,11,5,success
+3,0,10,10,10,false,called,1.042590,19872,1823,6,failure
+3,0,10,10,10,false,to separate,1.032792,14,12,7,failure
+3,0,10,10,10,false,output,0.988241,4752,1282,8,failure
+3,0,10,10,10,false,us navigate,-0.987222,80,52,9,success
+3,0,10,20,20,false,after line,-1.224191,16,11,0,success
+3,0,10,20,20,false,the typical,-1.218182,19,16,1,success
+3,0,10,20,20,false,output as,1.145701,2644,789,2,failure
+3,0,10,20,20,false,we see,1.122438,3125,930,3,failure
+3,0,10,20,20,false,same output,1.119906,2689,793,4,failure
+3,0,10,20,20,false,to comply,-1.102428,22,11,5,success
+3,0,10,20,20,false,called,1.042590,19872,1823,6,failure
+3,0,10,20,20,false,to separate,1.032792,14,12,7,failure
+3,0,10,20,20,false,output,0.988241,4752,1282,8,failure
+3,0,10,20,20,false,us navigate,-0.987222,80,52,9,success
+3,0,10,20,20,false,necessary change,-0.982555,30,23,10,success
+3,0,10,20,20,false,file called,0.976310,18767,1688,11,failure
+3,0,10,20,20,false,a script,0.949873,4770,1180,12,failure
+3,0,10,20,20,false,contain this,0.946902,295,221,13,failure
+3,0,10,20,20,false,section directly,-0.938576,40,35,14,success
+3,0,10,20,20,false,efficient,-0.933709,276,167,15,success
+3,0,10,20,20,false,new file,0.930674,19078,1672,16,failure
+3,0,10,20,20,false,rule is,-0.928155,38,12,17,success
+3,0,10,20,20,false,results of,0.926200,2152,815,18,failure
+3,0,10,20,20,false,of paths,0.923606,25,10,19,failure
+3,0,30,10,10,false,output as,1.145701,2644,789,0,failure
+3,0,30,10,10,false,we see,1.122438,3125,930,1,failure
+3,0,30,10,10,false,same output,1.119906,2689,793,2,failure
+3,0,30,10,10,false,called,1.042590,19872,1823,3,failure
+3,0,30,10,10,false,output,0.988241,4752,1282,4,failure
+3,0,30,10,10,false,us navigate,-0.987222,80,52,5,success
+3,0,30,10,10,false,file called,0.976310,18767,1688,6,failure
+3,0,30,10,10,false,a script,0.949873,4770,1180,7,failure
+3,0,30,10,10,false,contain this,0.946902,295,221,8,failure
+3,0,30,10,10,false,section directly,-0.938576,40,35,9,success
+3,0,30,20,20,false,output as,1.145701,2644,789,0,failure
+3,0,30,20,20,false,we see,1.122438,3125,930,1,failure
+3,0,30,20,20,false,same output,1.119906,2689,793,2,failure
+3,0,30,20,20,false,called,1.042590,19872,1823,3,failure
+3,0,30,20,20,false,output,0.988241,4752,1282,4,failure
+3,0,30,20,20,false,us navigate,-0.987222,80,52,5,success
+3,0,30,20,20,false,file called,0.976310,18767,1688,6,failure
+3,0,30,20,20,false,a script,0.949873,4770,1180,7,failure
+3,0,30,20,20,false,contain this,0.946902,295,221,8,failure
+3,0,30,20,20,false,section directly,-0.938576,40,35,9,success
+3,0,30,20,20,false,efficient,-0.933709,276,167,10,success
+3,0,30,20,20,false,new file,0.930674,19078,1672,11,failure
+3,0,30,20,20,false,results of,0.926200,2152,815,12,failure
+3,0,30,20,20,false,within this,-0.919235,3370,725,13,success
+3,0,30,20,20,false,as the,0.919041,4105,1343,14,failure
+3,0,30,20,20,false,exact,-0.912848,1886,711,15,success
+3,0,30,20,20,false,more efficient,-0.883103,254,154,16,success
+3,0,30,20,20,false,the case,-0.881715,508,176,17,success
+3,0,30,20,20,false,indentation,0.876464,642,308,18,failure
+3,0,30,20,20,false,new python,-0.872419,1762,600,19,success
+3,0,100,10,10,false,output as,1.145701,2644,789,0,failure
+3,0,100,10,10,false,we see,1.122438,3125,930,1,failure
+3,0,100,10,10,false,same output,1.119906,2689,793,2,failure
+3,0,100,10,10,false,called,1.042590,19872,1823,3,failure
+3,0,100,10,10,false,output,0.988241,4752,1282,4,failure
+3,0,100,10,10,false,file called,0.976310,18767,1688,5,failure
+3,0,100,10,10,false,a script,0.949873,4770,1180,6,failure
+3,0,100,10,10,false,contain this,0.946902,295,221,7,failure
+3,0,100,10,10,false,efficient,-0.933709,276,167,8,success
+3,0,100,10,10,false,new file,0.930674,19078,1672,9,failure
+3,0,100,20,20,false,output as,1.145701,2644,789,0,failure
+3,0,100,20,20,false,we see,1.122438,3125,930,1,failure
+3,0,100,20,20,false,same output,1.119906,2689,793,2,failure
+3,0,100,20,20,false,called,1.042590,19872,1823,3,failure
+3,0,100,20,20,false,output,0.988241,4752,1282,4,failure
+3,0,100,20,20,false,file called,0.976310,18767,1688,5,failure
+3,0,100,20,20,false,a script,0.949873,4770,1180,6,failure
+3,0,100,20,20,false,contain this,0.946902,295,221,7,failure
+3,0,100,20,20,false,efficient,-0.933709,276,167,8,success
+3,0,100,20,20,false,new file,0.930674,19078,1672,9,failure
+3,0,100,20,20,false,results of,0.926200,2152,815,10,failure
+3,0,100,20,20,false,within this,-0.919235,3370,725,11,success
+3,0,100,20,20,false,as the,0.919041,4105,1343,12,failure
+3,0,100,20,20,false,exact,-0.912848,1886,711,13,success
+3,0,100,20,20,false,more efficient,-0.883103,254,154,14,success
+3,0,100,20,20,false,the case,-0.881715,508,176,15,success
+3,0,100,20,20,false,indentation,0.876464,642,308,16,failure
+3,0,100,20,20,false,new python,-0.872419,1762,600,17,success
+3,0,100,20,20,false,the results,0.869418,2445,955,18,failure
+3,0,100,20,20,false,efficient to,-0.859255,202,135,19,success
+3,1,10,10,10,false,we see,1.384593,3087,926,0,failure
+3,1,10,10,10,false,output as,1.357124,2645,791,1,failure
+3,1,10,10,10,false,same output,1.293165,2693,795,2,failure
+3,1,10,10,10,false,as the,1.206235,4108,1324,3,failure
+3,1,10,10,10,false,called,1.130122,20195,1842,4,failure
+3,1,10,10,10,false,output,1.067360,4784,1303,5,failure
+3,1,10,10,10,false,within this,-1.059286,3178,698,6,success
+3,1,10,10,10,false,reproduction,1.045539,7335,1312,7,failure
+3,1,10,10,10,false,results of,1.039869,2143,812,8,failure
+3,1,10,10,10,false,long,-1.030841,1466,533,9,success
+3,1,10,20,20,false,we see,1.384593,3087,926,0,failure
+3,1,10,20,20,false,output as,1.357124,2645,791,1,failure
+3,1,10,20,20,false,same output,1.293165,2693,795,2,failure
+3,1,10,20,20,false,as the,1.206235,4108,1324,3,failure
+3,1,10,20,20,false,called,1.130122,20195,1842,4,failure
+3,1,10,20,20,false,output,1.067360,4784,1303,5,failure
+3,1,10,20,20,false,within this,-1.059286,3178,698,6,success
+3,1,10,20,20,false,reproduction,1.045539,7335,1312,7,failure
+3,1,10,20,20,false,results of,1.039869,2143,812,8,failure
+3,1,10,20,20,false,long,-1.030841,1466,533,9,success
+3,1,10,20,20,false,file called,1.016487,19130,1713,10,failure
+3,1,10,20,20,false,contain this,1.008921,297,222,11,failure
+3,1,10,20,20,false,investigate its,-0.999775,16,15,12,success
+3,1,10,20,20,false,the results,0.999597,2405,950,13,failure
+3,1,10,20,20,false,now paste,0.984541,32,31,14,failure
+3,1,10,20,20,false,us navigate,-0.980208,79,54,15,success
+3,1,10,20,20,false,access it,-0.972491,89,29,16,success
+3,1,10,20,20,false,frontend,-0.968167,13,10,17,success
+3,1,10,20,20,false,a multiple,0.963165,39,11,18,failure
+3,1,10,20,20,false,from being,-0.958037,217,65,19,success
+3,1,30,10,10,false,we see,1.384593,3087,926,0,failure
+3,1,30,10,10,false,output as,1.357124,2645,791,1,failure
+3,1,30,10,10,false,same output,1.293165,2693,795,2,failure
+3,1,30,10,10,false,as the,1.206235,4108,1324,3,failure
+3,1,30,10,10,false,called,1.130122,20195,1842,4,failure
+3,1,30,10,10,false,output,1.067360,4784,1303,5,failure
+3,1,30,10,10,false,within this,-1.059286,3178,698,6,success
+3,1,30,10,10,false,reproduction,1.045539,7335,1312,7,failure
+3,1,30,10,10,false,results of,1.039869,2143,812,8,failure
+3,1,30,10,10,false,long,-1.030841,1466,533,9,success
+3,1,30,20,20,false,we see,1.384593,3087,926,0,failure
+3,1,30,20,20,false,output as,1.357124,2645,791,1,failure
+3,1,30,20,20,false,same output,1.293165,2693,795,2,failure
+3,1,30,20,20,false,as the,1.206235,4108,1324,3,failure
+3,1,30,20,20,false,called,1.130122,20195,1842,4,failure
+3,1,30,20,20,false,output,1.067360,4784,1303,5,failure
+3,1,30,20,20,false,within this,-1.059286,3178,698,6,success
+3,1,30,20,20,false,reproduction,1.045539,7335,1312,7,failure
+3,1,30,20,20,false,results of,1.039869,2143,812,8,failure
+3,1,30,20,20,false,long,-1.030841,1466,533,9,success
+3,1,30,20,20,false,file called,1.016487,19130,1713,10,failure
+3,1,30,20,20,false,contain this,1.008921,297,222,11,failure
+3,1,30,20,20,false,the results,0.999597,2405,950,12,failure
+3,1,30,20,20,false,now paste,0.984541,32,31,13,failure
+3,1,30,20,20,false,us navigate,-0.980208,79,54,14,success
+3,1,30,20,20,false,from being,-0.958037,217,65,15,success
+3,1,30,20,20,false,new file,0.954500,19469,1690,16,failure
+3,1,30,20,20,false,by reproducing,0.953551,5129,1078,17,failure
+3,1,30,20,20,false,a script,0.950774,4792,1198,18,failure
+3,1,30,20,20,false,the specific,-0.931236,2222,730,19,success
+3,1,100,10,10,false,we see,1.384593,3087,926,0,failure
+3,1,100,10,10,false,output as,1.357124,2645,791,1,failure
+3,1,100,10,10,false,same output,1.293165,2693,795,2,failure
+3,1,100,10,10,false,as the,1.206235,4108,1324,3,failure
+3,1,100,10,10,false,called,1.130122,20195,1842,4,failure
+3,1,100,10,10,false,output,1.067360,4784,1303,5,failure
+3,1,100,10,10,false,within this,-1.059286,3178,698,6,success
+3,1,100,10,10,false,reproduction,1.045539,7335,1312,7,failure
+3,1,100,10,10,false,results of,1.039869,2143,812,8,failure
+3,1,100,10,10,false,long,-1.030841,1466,533,9,success
+3,1,100,20,20,false,we see,1.384593,3087,926,0,failure
+3,1,100,20,20,false,output as,1.357124,2645,791,1,failure
+3,1,100,20,20,false,same output,1.293165,2693,795,2,failure
+3,1,100,20,20,false,as the,1.206235,4108,1324,3,failure
+3,1,100,20,20,false,called,1.130122,20195,1842,4,failure
+3,1,100,20,20,false,output,1.067360,4784,1303,5,failure
+3,1,100,20,20,false,within this,-1.059286,3178,698,6,success
+3,1,100,20,20,false,reproduction,1.045539,7335,1312,7,failure
+3,1,100,20,20,false,results of,1.039869,2143,812,8,failure
+3,1,100,20,20,false,long,-1.030841,1466,533,9,success
+3,1,100,20,20,false,file called,1.016487,19130,1713,10,failure
+3,1,100,20,20,false,contain this,1.008921,297,222,11,failure
+3,1,100,20,20,false,the results,0.999597,2405,950,12,failure
+3,1,100,20,20,false,new file,0.954500,19469,1690,13,failure
+3,1,100,20,20,false,by reproducing,0.953551,5129,1078,14,failure
+3,1,100,20,20,false,a script,0.950774,4792,1198,15,failure
+3,1,100,20,20,false,the specific,-0.931236,2222,730,16,success
+3,1,100,20,20,false,exact,-0.924454,1817,690,17,success
+3,1,100,20,20,false,by searching,-0.922010,8003,1153,18,success
+3,1,100,20,20,false,reproducing,0.921534,5431,1137,19,failure
+3,2,10,10,10,false,we see,1.436893,3271,949,0,failure
+3,2,10,10,10,false,output as,1.400592,2788,803,1,failure
+3,2,10,10,10,false,same output,1.353986,2836,808,2,failure
+3,2,10,10,10,false,as the,1.228117,4273,1364,3,failure
+3,2,10,10,10,false,after line,-1.169551,18,12,4,success
+3,2,10,10,10,false,results of,1.157498,2206,822,5,failure
+3,2,10,10,10,false,will raise,1.113445,25,16,6,failure
+3,2,10,10,10,false,output,1.107935,4988,1313,7,failure
+3,2,10,10,10,false,the results,1.079140,2510,967,8,failure
+3,2,10,10,10,false,within this,-1.016182,3237,699,9,success
+3,2,10,20,20,false,we see,1.436893,3271,949,0,failure
+3,2,10,20,20,false,output as,1.400592,2788,803,1,failure
+3,2,10,20,20,false,same output,1.353986,2836,808,2,failure
+3,2,10,20,20,false,as the,1.228117,4273,1364,3,failure
+3,2,10,20,20,false,after line,-1.169551,18,12,4,success
+3,2,10,20,20,false,results of,1.157498,2206,822,5,failure
+3,2,10,20,20,false,will raise,1.113445,25,16,6,failure
+3,2,10,20,20,false,output,1.107935,4988,1313,7,failure
+3,2,10,20,20,false,the results,1.079140,2510,967,8,failure
+3,2,10,20,20,false,within this,-1.016182,3237,699,9,success
+3,2,10,20,20,false,issue also,-0.988587,708,265,10,success
+3,2,10,20,20,false,object with,0.981586,70,41,11,failure
+3,2,10,20,20,false,length of,0.969661,60,23,12,failure
+3,2,10,20,20,false,called,0.968816,20186,1863,13,failure
+3,2,10,20,20,false,us navigate,-0.964118,66,45,14,success
+3,2,10,20,20,false,file suggests,-0.963763,11,10,15,success
+3,2,10,20,20,false,also points,-0.962832,655,225,16,success
+3,2,10,20,20,false,this change,-0.962733,447,227,17,success
+3,2,10,20,20,false,very long,-0.937906,142,90,18,success
+3,2,10,20,20,false,executed to,-0.929792,13,11,19,success
+3,2,30,10,10,false,we see,1.436893,3271,949,0,failure
+3,2,30,10,10,false,output as,1.400592,2788,803,1,failure
+3,2,30,10,10,false,same output,1.353986,2836,808,2,failure
+3,2,30,10,10,false,as the,1.228117,4273,1364,3,failure
+3,2,30,10,10,false,results of,1.157498,2206,822,4,failure
+3,2,30,10,10,false,output,1.107935,4988,1313,5,failure
+3,2,30,10,10,false,the results,1.079140,2510,967,6,failure
+3,2,30,10,10,false,within this,-1.016182,3237,699,7,success
+3,2,30,10,10,false,issue also,-0.988587,708,265,8,success
+3,2,30,10,10,false,object with,0.981586,70,41,9,failure
+3,2,30,20,20,false,we see,1.436893,3271,949,0,failure
+3,2,30,20,20,false,output as,1.400592,2788,803,1,failure
+3,2,30,20,20,false,same output,1.353986,2836,808,2,failure
+3,2,30,20,20,false,as the,1.228117,4273,1364,3,failure
+3,2,30,20,20,false,results of,1.157498,2206,822,4,failure
+3,2,30,20,20,false,output,1.107935,4988,1313,5,failure
+3,2,30,20,20,false,the results,1.079140,2510,967,6,failure
+3,2,30,20,20,false,within this,-1.016182,3237,699,7,success
+3,2,30,20,20,false,issue also,-0.988587,708,265,8,success
+3,2,30,20,20,false,object with,0.981586,70,41,9,failure
+3,2,30,20,20,false,called,0.968816,20186,1863,10,failure
+3,2,30,20,20,false,us navigate,-0.964118,66,45,11,success
+3,2,30,20,20,false,also points,-0.962832,655,225,12,success
+3,2,30,20,20,false,this change,-0.962733,447,227,13,success
+3,2,30,20,20,false,very long,-0.937906,142,90,14,success
+3,2,30,20,20,false,not very,-0.916403,147,95,15,success
+3,2,30,20,20,false,a script,0.903585,4718,1181,16,failure
+3,2,30,20,20,false,specific,-0.892975,6142,1285,17,success
+3,2,30,20,20,false,includes example,0.888686,1192,391,18,failure
+3,2,30,20,20,false,see the,0.882714,9015,1818,19,failure
+3,2,100,10,10,false,we see,1.436893,3271,949,0,failure
+3,2,100,10,10,false,output as,1.400592,2788,803,1,failure
+3,2,100,10,10,false,same output,1.353986,2836,808,2,failure
+3,2,100,10,10,false,as the,1.228117,4273,1364,3,failure
+3,2,100,10,10,false,results of,1.157498,2206,822,4,failure
+3,2,100,10,10,false,output,1.107935,4988,1313,5,failure
+3,2,100,10,10,false,the results,1.079140,2510,967,6,failure
+3,2,100,10,10,false,within this,-1.016182,3237,699,7,success
+3,2,100,10,10,false,issue also,-0.988587,708,265,8,success
+3,2,100,10,10,false,called,0.968816,20186,1863,9,failure
+3,2,100,20,20,false,we see,1.436893,3271,949,0,failure
+3,2,100,20,20,false,output as,1.400592,2788,803,1,failure
+3,2,100,20,20,false,same output,1.353986,2836,808,2,failure
+3,2,100,20,20,false,as the,1.228117,4273,1364,3,failure
+3,2,100,20,20,false,results of,1.157498,2206,822,4,failure
+3,2,100,20,20,false,output,1.107935,4988,1313,5,failure
+3,2,100,20,20,false,the results,1.079140,2510,967,6,failure
+3,2,100,20,20,false,within this,-1.016182,3237,699,7,success
+3,2,100,20,20,false,issue also,-0.988587,708,265,8,success
+3,2,100,20,20,false,called,0.968816,20186,1863,9,failure
+3,2,100,20,20,false,also points,-0.962832,655,225,10,success
+3,2,100,20,20,false,this change,-0.962733,447,227,11,success
+3,2,100,20,20,false,a script,0.903585,4718,1181,12,failure
+3,2,100,20,20,false,specific,-0.892975,6142,1285,13,success
+3,2,100,20,20,false,includes example,0.888686,1192,391,14,failure
+3,2,100,20,20,false,see the,0.882714,9015,1818,15,failure
+3,2,100,20,20,false,very,-0.877978,201,130,16,success
+3,2,100,20,20,false,reproduction,0.873208,7321,1320,17,failure
+3,2,100,20,20,false,visible,-0.853689,406,206,18,success
+3,2,100,20,20,false,file called,0.851957,19205,1718,19,failure
+3,3,10,10,10,false,we see,1.102533,3151,910,0,failure
+3,3,10,10,10,false,as the,1.084095,4145,1337,1,failure
+3,3,10,10,10,false,from being,-1.069463,217,68,2,success
+3,3,10,10,10,false,called,1.043518,19954,1826,3,failure
+3,3,10,10,10,false,access it,-1.039449,84,25,4,success
+3,3,10,10,10,false,output as,1.020075,2692,769,5,failure
+3,3,10,10,10,false,a script,1.018282,4679,1167,6,failure
+3,3,10,10,10,false,to comply,-1.013154,21,12,7,success
+3,3,10,10,10,false,the codebase,-1.000368,5723,1053,8,success
+3,3,10,10,10,false,same output,0.973888,2733,772,9,failure
+3,3,10,20,20,false,we see,1.102533,3151,910,0,failure
+3,3,10,20,20,false,as the,1.084095,4145,1337,1,failure
+3,3,10,20,20,false,from being,-1.069463,217,68,2,success
+3,3,10,20,20,false,called,1.043518,19954,1826,3,failure
+3,3,10,20,20,false,access it,-1.039449,84,25,4,success
+3,3,10,20,20,false,output as,1.020075,2692,769,5,failure
+3,3,10,20,20,false,a script,1.018282,4679,1167,6,failure
+3,3,10,20,20,false,to comply,-1.013154,21,12,7,success
+3,3,10,20,20,false,the codebase,-1.000368,5723,1053,8,success
+3,3,10,20,20,false,same output,0.973888,2733,772,9,failure
+3,3,10,20,20,false,after line,-0.968094,16,12,10,success
+3,3,10,20,20,false,visible,-0.965960,401,216,11,success
+3,3,10,20,20,false,consistency,-0.957274,69,25,12,success
+3,3,10,20,20,false,exact,-0.951561,1838,707,13,success
+3,3,10,20,20,false,sure that,0.948094,244,164,14,failure
+3,3,10,20,20,false,by searching,-0.942839,8294,1179,15,success
+3,3,10,20,20,false,file called,0.936719,18908,1690,16,failure
+3,3,10,20,20,false,to simulate,0.921506,1031,464,17,failure
+3,3,10,20,20,false,script that,0.912184,2378,861,18,failure
+3,3,10,20,20,false,necessary change,-0.904522,32,26,19,success
+3,3,30,10,10,false,we see,1.102533,3151,910,0,failure
+3,3,30,10,10,false,as the,1.084095,4145,1337,1,failure
+3,3,30,10,10,false,from being,-1.069463,217,68,2,success
+3,3,30,10,10,false,called,1.043518,19954,1826,3,failure
+3,3,30,10,10,false,output as,1.020075,2692,769,4,failure
+3,3,30,10,10,false,a script,1.018282,4679,1167,5,failure
+3,3,30,10,10,false,the codebase,-1.000368,5723,1053,6,success
+3,3,30,10,10,false,same output,0.973888,2733,772,7,failure
+3,3,30,10,10,false,visible,-0.965960,401,216,8,success
+3,3,30,10,10,false,exact,-0.951561,1838,707,9,success
+3,3,30,20,20,false,we see,1.102533,3151,910,0,failure
+3,3,30,20,20,false,as the,1.084095,4145,1337,1,failure
+3,3,30,20,20,false,from being,-1.069463,217,68,2,success
+3,3,30,20,20,false,called,1.043518,19954,1826,3,failure
+3,3,30,20,20,false,output as,1.020075,2692,769,4,failure
+3,3,30,20,20,false,a script,1.018282,4679,1167,5,failure
+3,3,30,20,20,false,the codebase,-1.000368,5723,1053,6,success
+3,3,30,20,20,false,same output,0.973888,2733,772,7,failure
+3,3,30,20,20,false,visible,-0.965960,401,216,8,success
+3,3,30,20,20,false,exact,-0.951561,1838,707,9,success
+3,3,30,20,20,false,sure that,0.948094,244,164,10,failure
+3,3,30,20,20,false,by searching,-0.942839,8294,1179,11,success
+3,3,30,20,20,false,file called,0.936719,18908,1690,12,failure
+3,3,30,20,20,false,to simulate,0.921506,1031,464,13,failure
+3,3,30,20,20,false,script that,0.912184,2378,861,14,failure
+3,3,30,20,20,false,simulate,0.900818,1490,560,15,failure
+3,3,30,20,20,false,codebase,-0.891330,6021,1090,16,success
+3,3,30,20,20,false,now paste,0.890464,31,30,17,failure
+3,3,30,20,20,false,new file,0.887208,19278,1670,18,failure
+3,3,30,20,20,false,searching,-0.874270,9012,1238,19,success
+3,3,100,10,10,false,we see,1.102533,3151,910,0,failure
+3,3,100,10,10,false,as the,1.084095,4145,1337,1,failure
+3,3,100,10,10,false,called,1.043518,19954,1826,2,failure
+3,3,100,10,10,false,output as,1.020075,2692,769,3,failure
+3,3,100,10,10,false,a script,1.018282,4679,1167,4,failure
+3,3,100,10,10,false,the codebase,-1.000368,5723,1053,5,success
+3,3,100,10,10,false,same output,0.973888,2733,772,6,failure
+3,3,100,10,10,false,visible,-0.965960,401,216,7,success
+3,3,100,10,10,false,exact,-0.951561,1838,707,8,success
+3,3,100,10,10,false,sure that,0.948094,244,164,9,failure
+3,3,100,20,20,false,we see,1.102533,3151,910,0,failure
+3,3,100,20,20,false,as the,1.084095,4145,1337,1,failure
+3,3,100,20,20,false,called,1.043518,19954,1826,2,failure
+3,3,100,20,20,false,output as,1.020075,2692,769,3,failure
+3,3,100,20,20,false,a script,1.018282,4679,1167,4,failure
+3,3,100,20,20,false,the codebase,-1.000368,5723,1053,5,success
+3,3,100,20,20,false,same output,0.973888,2733,772,6,failure
+3,3,100,20,20,false,visible,-0.965960,401,216,7,success
+3,3,100,20,20,false,exact,-0.951561,1838,707,8,success
+3,3,100,20,20,false,sure that,0.948094,244,164,9,failure
+3,3,100,20,20,false,by searching,-0.942839,8294,1179,10,success
+3,3,100,20,20,false,file called,0.936719,18908,1690,11,failure
+3,3,100,20,20,false,to simulate,0.921506,1031,464,12,failure
+3,3,100,20,20,false,script that,0.912184,2378,861,13,failure
+3,3,100,20,20,false,simulate,0.900818,1490,560,14,failure
+3,3,100,20,20,false,codebase,-0.891330,6021,1090,15,success
+3,3,100,20,20,false,new file,0.887208,19278,1670,16,failure
+3,3,100,20,20,false,searching,-0.874270,9012,1238,17,success
+3,3,100,20,20,false,searching for,-0.864618,8680,1222,18,success
+3,3,100,20,20,false,to locate,-0.840608,12701,1496,19,success
+3,4,10,10,10,false,we see,1.336996,3206,937,0,failure
+3,4,10,10,10,false,output as,1.219315,2747,796,1,failure
+3,4,10,10,10,false,same output,1.193453,2781,796,2,failure
+3,4,10,10,10,false,as the,1.169393,4277,1360,3,failure
+3,4,10,10,10,false,the results,1.159718,2417,965,4,failure
+3,4,10,10,10,false,now paste,1.133423,31,30,5,failure
+3,4,10,10,10,false,results of,1.112722,2143,822,6,failure
+3,4,10,10,10,false,to comply,-1.066024,21,11,7,success
+3,4,10,10,10,false,exact,-1.058343,1735,686,8,success
+3,4,10,10,10,false,necessary change,-1.052576,34,26,9,success
+3,4,10,20,20,false,we see,1.336996,3206,937,0,failure
+3,4,10,20,20,false,output as,1.219315,2747,796,1,failure
+3,4,10,20,20,false,same output,1.193453,2781,796,2,failure
+3,4,10,20,20,false,as the,1.169393,4277,1360,3,failure
+3,4,10,20,20,false,the results,1.159718,2417,965,4,failure
+3,4,10,20,20,false,now paste,1.133423,31,30,5,failure
+3,4,10,20,20,false,results of,1.112722,2143,822,6,failure
+3,4,10,20,20,false,to comply,-1.066024,21,11,7,success
+3,4,10,20,20,false,exact,-1.058343,1735,686,8,success
+3,4,10,20,20,false,necessary change,-1.052576,34,26,9,success
+3,4,10,20,20,false,from being,-1.021349,194,67,10,success
+3,4,10,20,20,false,contain this,0.983322,304,227,11,failure
+3,4,10,20,20,false,called,0.982098,20057,1834,12,failure
+3,4,10,20,20,false,accepts a,0.970188,53,19,13,failure
+3,4,10,20,20,false,a script,0.963998,4601,1170,14,failure
+3,4,10,20,20,false,file suggests,-0.963763,11,10,15,success
+3,4,10,20,20,false,the exact,-0.954897,1397,607,16,success
+3,4,10,20,20,false,section directly,-0.952852,33,28,17,success
+3,4,10,20,20,false,output,0.951503,4780,1291,18,failure
+3,4,10,20,20,false,the typical,-0.950081,22,18,19,success
+3,4,30,10,10,false,we see,1.336996,3206,937,0,failure
+3,4,30,10,10,false,output as,1.219315,2747,796,1,failure
+3,4,30,10,10,false,same output,1.193453,2781,796,2,failure
+3,4,30,10,10,false,as the,1.169393,4277,1360,3,failure
+3,4,30,10,10,false,the results,1.159718,2417,965,4,failure
+3,4,30,10,10,false,now paste,1.133423,31,30,5,failure
+3,4,30,10,10,false,results of,1.112722,2143,822,6,failure
+3,4,30,10,10,false,exact,-1.058343,1735,686,7,success
+3,4,30,10,10,false,from being,-1.021349,194,67,8,success
+3,4,30,10,10,false,contain this,0.983322,304,227,9,failure
+3,4,30,20,20,false,we see,1.336996,3206,937,0,failure
+3,4,30,20,20,false,output as,1.219315,2747,796,1,failure
+3,4,30,20,20,false,same output,1.193453,2781,796,2,failure
+3,4,30,20,20,false,as the,1.169393,4277,1360,3,failure
+3,4,30,20,20,false,the results,1.159718,2417,965,4,failure
+3,4,30,20,20,false,now paste,1.133423,31,30,5,failure
+3,4,30,20,20,false,results of,1.112722,2143,822,6,failure
+3,4,30,20,20,false,exact,-1.058343,1735,686,7,success
+3,4,30,20,20,false,from being,-1.021349,194,67,8,success
+3,4,30,20,20,false,contain this,0.983322,304,227,9,failure
+3,4,30,20,20,false,called,0.982098,20057,1834,10,failure
+3,4,30,20,20,false,a script,0.963998,4601,1170,11,failure
+3,4,30,20,20,false,the exact,-0.954897,1397,607,12,success
+3,4,30,20,20,false,output,0.951503,4780,1291,13,failure
+3,4,30,20,20,false,file called,0.928129,18974,1695,14,failure
+3,4,30,20,20,false,but we,-0.926244,3064,906,15,success
+3,4,30,20,20,false,specific implementation,-0.900490,132,77,16,success
+3,4,30,20,20,false,code to,0.894342,14104,1933,17,failure
+3,4,30,20,20,false,the specific,-0.867302,2228,738,18,success
+3,4,30,20,20,false,location of,-0.862355,549,348,19,success
+3,4,100,10,10,false,we see,1.336996,3206,937,0,failure
+3,4,100,10,10,false,output as,1.219315,2747,796,1,failure
+3,4,100,10,10,false,same output,1.193453,2781,796,2,failure
+3,4,100,10,10,false,as the,1.169393,4277,1360,3,failure
+3,4,100,10,10,false,the results,1.159718,2417,965,4,failure
+3,4,100,10,10,false,results of,1.112722,2143,822,5,failure
+3,4,100,10,10,false,exact,-1.058343,1735,686,6,success
+3,4,100,10,10,false,contain this,0.983322,304,227,7,failure
+3,4,100,10,10,false,called,0.982098,20057,1834,8,failure
+3,4,100,10,10,false,a script,0.963998,4601,1170,9,failure
+3,4,100,20,20,false,we see,1.336996,3206,937,0,failure
+3,4,100,20,20,false,output as,1.219315,2747,796,1,failure
+3,4,100,20,20,false,same output,1.193453,2781,796,2,failure
+3,4,100,20,20,false,as the,1.169393,4277,1360,3,failure
+3,4,100,20,20,false,the results,1.159718,2417,965,4,failure
+3,4,100,20,20,false,results of,1.112722,2143,822,5,failure
+3,4,100,20,20,false,exact,-1.058343,1735,686,6,success
+3,4,100,20,20,false,contain this,0.983322,304,227,7,failure
+3,4,100,20,20,false,called,0.982098,20057,1834,8,failure
+3,4,100,20,20,false,a script,0.963998,4601,1170,9,failure
+3,4,100,20,20,false,the exact,-0.954897,1397,607,10,success
+3,4,100,20,20,false,output,0.951503,4780,1291,11,failure
+3,4,100,20,20,false,file called,0.928129,18974,1695,12,failure
+3,4,100,20,20,false,but we,-0.926244,3064,906,13,success
+3,4,100,20,20,false,code to,0.894342,14104,1933,14,failure
+3,4,100,20,20,false,the specific,-0.867302,2228,738,15,success
+3,4,100,20,20,false,location of,-0.862355,549,348,16,success
+3,4,100,20,20,false,new file,0.842425,19366,1674,17,failure
+3,4,100,20,20,false,within this,-0.840600,3183,688,18,success
+3,4,100,20,20,false,the same,0.816116,6701,1374,19,failure
+5,0,10,10,10,false,we see,1.173338,3320,1018,0,failure
+5,0,10,10,10,false,output as,1.169065,2725,819,1,failure
+5,0,10,10,10,false,same output,1.140990,2767,820,2,failure
+5,0,10,10,10,false,verify that,-1.125138,2676,853,3,success
+5,0,10,10,10,false,passed a,-1.117613,21,13,4,success
+5,0,10,10,10,false,let's make,-1.071026,5098,1125,5,success
+5,0,10,10,10,false,the codebase,-1.063333,8440,1486,6,success
+5,0,10,10,10,false,identified and,1.060896,16,11,7,failure
+5,0,10,10,10,false,efficient to,-1.046056,403,232,8,success
+5,0,10,10,10,false,let's open,-1.040980,27216,2187,9,success
+5,0,10,20,20,false,we see,1.173338,3320,1018,0,failure
+5,0,10,20,20,false,output as,1.169065,2725,819,1,failure
+5,0,10,20,20,false,same output,1.140990,2767,820,2,failure
+5,0,10,20,20,false,verify that,-1.125138,2676,853,3,success
+5,0,10,20,20,false,passed a,-1.117613,21,13,4,success
+5,0,10,20,20,false,let's make,-1.071026,5098,1125,5,success
+5,0,10,20,20,false,the codebase,-1.063333,8440,1486,6,success
+5,0,10,20,20,false,identified and,1.060896,16,11,7,failure
+5,0,10,20,20,false,efficient to,-1.046056,403,232,8,success
+5,0,10,20,20,false,let's open,-1.040980,27216,2187,9,success
+5,0,10,20,20,false,value before,-1.027752,29,18,10,success
+5,0,10,20,20,false,that line,-1.021312,4278,947,11,success
+5,0,10,20,20,false,format for,-1.010687,69,45,12,success
+5,0,10,20,20,false,open,-1.009761,29836,2253,13,success
+5,0,10,20,20,false,consistently,-1.009562,78,42,14,success
+5,0,10,20,20,false,code after,-0.996809,32,21,15,success
+5,0,10,20,20,false,the typical,-0.978644,38,33,16,success
+5,0,10,20,20,false,codebase,-0.973051,9399,1595,17,success
+5,0,10,20,20,false,again,0.967997,6468,1646,18,failure
+5,0,10,20,20,false,necessary edit,-0.966553,2182,597,19,success
+5,0,30,10,10,false,we see,1.173338,3320,1018,0,failure
+5,0,30,10,10,false,output as,1.169065,2725,819,1,failure
+5,0,30,10,10,false,same output,1.140990,2767,820,2,failure
+5,0,30,10,10,false,verify that,-1.125138,2676,853,3,success
+5,0,30,10,10,false,let's make,-1.071026,5098,1125,4,success
+5,0,30,10,10,false,the codebase,-1.063333,8440,1486,5,success
+5,0,30,10,10,false,efficient to,-1.046056,403,232,6,success
+5,0,30,10,10,false,let's open,-1.040980,27216,2187,7,success
+5,0,30,10,10,false,that line,-1.021312,4278,947,8,success
+5,0,30,10,10,false,format for,-1.010687,69,45,9,success
+5,0,30,20,20,false,we see,1.173338,3320,1018,0,failure
+5,0,30,20,20,false,output as,1.169065,2725,819,1,failure
+5,0,30,20,20,false,same output,1.140990,2767,820,2,failure
+5,0,30,20,20,false,verify that,-1.125138,2676,853,3,success
+5,0,30,20,20,false,let's make,-1.071026,5098,1125,4,success
+5,0,30,20,20,false,the codebase,-1.063333,8440,1486,5,success
+5,0,30,20,20,false,efficient to,-1.046056,403,232,6,success
+5,0,30,20,20,false,let's open,-1.040980,27216,2187,7,success
+5,0,30,20,20,false,that line,-1.021312,4278,947,8,success
+5,0,30,20,20,false,format for,-1.010687,69,45,9,success
+5,0,30,20,20,false,open,-1.009761,29836,2253,10,success
+5,0,30,20,20,false,consistently,-1.009562,78,42,11,success
+5,0,30,20,20,false,the typical,-0.978644,38,33,12,success
+5,0,30,20,20,false,codebase,-0.973051,9399,1595,13,success
+5,0,30,20,20,false,again,0.967997,6468,1646,14,failure
+5,0,30,20,20,false,necessary edit,-0.966553,2182,597,15,success
+5,0,30,20,20,false,have found,-0.959770,3611,1155,16,success
+5,0,30,20,20,false,results of,0.942102,2158,818,17,failure
+5,0,30,20,20,false,navigate to,-0.940496,12620,1706,18,success
+5,0,30,20,20,false,haven't seen,-0.935517,37,32,19,success
+5,0,100,10,10,false,we see,1.173338,3320,1018,0,failure
+5,0,100,10,10,false,output as,1.169065,2725,819,1,failure
+5,0,100,10,10,false,same output,1.140990,2767,820,2,failure
+5,0,100,10,10,false,verify that,-1.125138,2676,853,3,success
+5,0,100,10,10,false,let's make,-1.071026,5098,1125,4,success
+5,0,100,10,10,false,the codebase,-1.063333,8440,1486,5,success
+5,0,100,10,10,false,efficient to,-1.046056,403,232,6,success
+5,0,100,10,10,false,let's open,-1.040980,27216,2187,7,success
+5,0,100,10,10,false,that line,-1.021312,4278,947,8,success
+5,0,100,10,10,false,open,-1.009761,29836,2253,9,success
+5,0,100,20,20,false,we see,1.173338,3320,1018,0,failure
+5,0,100,20,20,false,output as,1.169065,2725,819,1,failure
+5,0,100,20,20,false,same output,1.140990,2767,820,2,failure
+5,0,100,20,20,false,verify that,-1.125138,2676,853,3,success
+5,0,100,20,20,false,let's make,-1.071026,5098,1125,4,success
+5,0,100,20,20,false,the codebase,-1.063333,8440,1486,5,success
+5,0,100,20,20,false,efficient to,-1.046056,403,232,6,success
+5,0,100,20,20,false,let's open,-1.040980,27216,2187,7,success
+5,0,100,20,20,false,that line,-1.021312,4278,947,8,success
+5,0,100,20,20,false,open,-1.009761,29836,2253,9,success
+5,0,100,20,20,false,codebase,-0.973051,9399,1595,10,success
+5,0,100,20,20,false,again,0.967997,6468,1646,11,failure
+5,0,100,20,20,false,necessary edit,-0.966553,2182,597,12,success
+5,0,100,20,20,false,have found,-0.959770,3611,1155,13,success
+5,0,100,20,20,false,results of,0.942102,2158,818,14,failure
+5,0,100,20,20,false,navigate to,-0.940496,12620,1706,15,success
+5,0,100,20,20,false,correct,0.923688,8583,1965,16,failure
+5,0,100,20,20,false,we've scrolled,-0.912302,199,149,17,success
+5,0,100,20,20,false,the results,0.910381,2600,1010,18,failure
+5,0,100,20,20,false,this file,-0.906569,16679,2062,19,success
+5,1,10,10,10,false,we see,1.433002,3296,1017,0,failure
+5,1,10,10,10,false,output as,1.387276,2736,820,1,failure
+5,1,10,10,10,false,same output,1.338400,2780,820,2,failure
+5,1,10,10,10,false,correctly because,-1.240494,49,22,3,success
+5,1,10,10,10,false,it seems,1.206205,16512,2265,4,failure
+5,1,10,10,10,false,again,1.178074,6550,1661,5,failure
+5,1,10,10,10,false,correct,1.171934,8822,2001,6,failure
+5,1,10,10,10,false,that line,-1.149828,4238,920,7,success
+5,1,10,10,10,false,as the,1.117257,5712,1630,8,failure
+5,1,10,10,10,false,open,-1.084878,29542,2246,9,success
+5,1,10,20,20,false,we see,1.433002,3296,1017,0,failure
+5,1,10,20,20,false,output as,1.387276,2736,820,1,failure
+5,1,10,20,20,false,same output,1.338400,2780,820,2,failure
+5,1,10,20,20,false,correctly because,-1.240494,49,22,3,success
+5,1,10,20,20,false,it seems,1.206205,16512,2265,4,failure
+5,1,10,20,20,false,again,1.178074,6550,1661,5,failure
+5,1,10,20,20,false,correct,1.171934,8822,2001,6,failure
+5,1,10,20,20,false,that line,-1.149828,4238,920,7,success
+5,1,10,20,20,false,as the,1.117257,5712,1630,8,failure
+5,1,10,20,20,false,open,-1.084878,29542,2246,9,success
+5,1,10,20,20,false,to that,-1.082096,4300,974,10,success
+5,1,10,20,20,false,seems,1.079195,19890,2294,11,failure
+5,1,10,20,20,false,seems that,1.074872,10531,2056,12,failure
+5,1,10,20,20,false,verify that,-1.060683,2651,865,13,success
+5,1,10,20,20,false,missing and,-1.051148,33,20,14,success
+5,1,10,20,20,false,results of,1.037600,2159,821,15,failure
+5,1,10,20,20,false,let's open,-1.025985,26944,2176,16,success
+5,1,10,20,20,false,defined at,-1.021092,766,274,17,success
+5,1,10,20,20,false,passed a,-0.999078,20,12,18,success
+5,1,10,20,20,false,now paste,0.987117,32,31,19,failure
+5,1,30,10,10,false,we see,1.433002,3296,1017,0,failure
+5,1,30,10,10,false,output as,1.387276,2736,820,1,failure
+5,1,30,10,10,false,same output,1.338400,2780,820,2,failure
+5,1,30,10,10,false,it seems,1.206205,16512,2265,3,failure
+5,1,30,10,10,false,again,1.178074,6550,1661,4,failure
+5,1,30,10,10,false,correct,1.171934,8822,2001,5,failure
+5,1,30,10,10,false,that line,-1.149828,4238,920,6,success
+5,1,30,10,10,false,as the,1.117257,5712,1630,7,failure
+5,1,30,10,10,false,open,-1.084878,29542,2246,8,success
+5,1,30,10,10,false,to that,-1.082096,4300,974,9,success
+5,1,30,20,20,false,we see,1.433002,3296,1017,0,failure
+5,1,30,20,20,false,output as,1.387276,2736,820,1,failure
+5,1,30,20,20,false,same output,1.338400,2780,820,2,failure
+5,1,30,20,20,false,it seems,1.206205,16512,2265,3,failure
+5,1,30,20,20,false,again,1.178074,6550,1661,4,failure
+5,1,30,20,20,false,correct,1.171934,8822,2001,5,failure
+5,1,30,20,20,false,that line,-1.149828,4238,920,6,success
+5,1,30,20,20,false,as the,1.117257,5712,1630,7,failure
+5,1,30,20,20,false,open,-1.084878,29542,2246,8,success
+5,1,30,20,20,false,to that,-1.082096,4300,974,9,success
+5,1,30,20,20,false,seems,1.079195,19890,2294,10,failure
+5,1,30,20,20,false,seems that,1.074872,10531,2056,11,failure
+5,1,30,20,20,false,verify that,-1.060683,2651,865,12,success
+5,1,30,20,20,false,results of,1.037600,2159,821,13,failure
+5,1,30,20,20,false,let's open,-1.025985,26944,2176,14,success
+5,1,30,20,20,false,defined at,-1.021092,766,274,15,success
+5,1,30,20,20,false,now paste,0.987117,32,31,16,failure
+5,1,30,20,20,false,location of,-0.985715,1005,624,17,success
+5,1,30,20,20,false,to locate,-0.982393,17385,2082,18,success
+5,1,30,20,20,false,reproducing the,0.980513,5520,1149,19,failure
+5,1,100,10,10,false,we see,1.433002,3296,1017,0,failure
+5,1,100,10,10,false,output as,1.387276,2736,820,1,failure
+5,1,100,10,10,false,same output,1.338400,2780,820,2,failure
+5,1,100,10,10,false,it seems,1.206205,16512,2265,3,failure
+5,1,100,10,10,false,again,1.178074,6550,1661,4,failure
+5,1,100,10,10,false,correct,1.171934,8822,2001,5,failure
+5,1,100,10,10,false,that line,-1.149828,4238,920,6,success
+5,1,100,10,10,false,as the,1.117257,5712,1630,7,failure
+5,1,100,10,10,false,open,-1.084878,29542,2246,8,success
+5,1,100,10,10,false,to that,-1.082096,4300,974,9,success
+5,1,100,20,20,false,we see,1.433002,3296,1017,0,failure
+5,1,100,20,20,false,output as,1.387276,2736,820,1,failure
+5,1,100,20,20,false,same output,1.338400,2780,820,2,failure
+5,1,100,20,20,false,it seems,1.206205,16512,2265,3,failure
+5,1,100,20,20,false,again,1.178074,6550,1661,4,failure
+5,1,100,20,20,false,correct,1.171934,8822,2001,5,failure
+5,1,100,20,20,false,that line,-1.149828,4238,920,6,success
+5,1,100,20,20,false,as the,1.117257,5712,1630,7,failure
+5,1,100,20,20,false,open,-1.084878,29542,2246,8,success
+5,1,100,20,20,false,to that,-1.082096,4300,974,9,success
+5,1,100,20,20,false,seems,1.079195,19890,2294,10,failure
+5,1,100,20,20,false,seems that,1.074872,10531,2056,11,failure
+5,1,100,20,20,false,verify that,-1.060683,2651,865,12,success
+5,1,100,20,20,false,results of,1.037600,2159,821,13,failure
+5,1,100,20,20,false,let's open,-1.025985,26944,2176,14,success
+5,1,100,20,20,false,defined at,-1.021092,766,274,15,success
+5,1,100,20,20,false,location of,-0.985715,1005,624,16,success
+5,1,100,20,20,false,to locate,-0.982393,17385,2082,17,success
+5,1,100,20,20,false,reproducing the,0.980513,5520,1149,18,failure
+5,1,100,20,20,false,for its,-0.980043,313,237,19,success
+5,2,10,10,10,false,we see,1.487216,3485,1036,0,failure
+5,2,10,10,10,false,output as,1.446292,2886,831,1,failure
+5,2,10,10,10,false,same output,1.411451,2928,832,2,failure
+5,2,10,10,10,false,it requires,-1.245659,52,33,3,success
+5,2,10,10,10,false,correctly because,-1.232052,47,20,4,success
+5,2,10,10,10,false,results of,1.183323,2222,826,5,failure
+5,2,10,10,10,false,let's make,-1.177135,5304,1121,6,success
+5,2,10,10,10,false,consistency,-1.149943,164,58,7,success
+5,2,10,10,10,false,again,1.082073,6581,1668,8,failure
+5,2,10,10,10,false,the results,1.074416,2704,1031,9,failure
+5,2,10,20,20,false,we see,1.487216,3485,1036,0,failure
+5,2,10,20,20,false,output as,1.446292,2886,831,1,failure
+5,2,10,20,20,false,same output,1.411451,2928,832,2,failure
+5,2,10,20,20,false,it requires,-1.245659,52,33,3,success
+5,2,10,20,20,false,correctly because,-1.232052,47,20,4,success
+5,2,10,20,20,false,results of,1.183323,2222,826,5,failure
+5,2,10,20,20,false,let's make,-1.177135,5304,1121,6,success
+5,2,10,20,20,false,consistency,-1.149943,164,58,7,success
+5,2,10,20,20,false,again,1.082073,6581,1668,8,failure
+5,2,10,20,20,false,the results,1.074416,2704,1031,9,failure
+5,2,10,20,20,false,and skip,-1.066394,67,30,10,success
+5,2,10,20,20,false,missing and,-1.048012,41,25,11,success
+5,2,10,20,20,false,values with,-1.046601,16,11,12,success
+5,2,10,20,20,false,verify that,-1.014627,2677,860,13,success
+5,2,10,20,20,false,that line,-1.012714,4203,938,14,success
+5,2,10,20,20,false,the codebase,-1.009915,8124,1468,15,success
+5,2,10,20,20,false,before setting,-1.000423,35,15,16,success
+5,2,10,20,20,false,value before,-0.997849,29,17,17,success
+5,2,10,20,20,false,stripping the,-0.990792,16,10,18,success
+5,2,10,20,20,false,make the,-0.975179,9629,1636,19,success
+5,2,30,10,10,false,we see,1.487216,3485,1036,0,failure
+5,2,30,10,10,false,output as,1.446292,2886,831,1,failure
+5,2,30,10,10,false,same output,1.411451,2928,832,2,failure
+5,2,30,10,10,false,it requires,-1.245659,52,33,3,success
+5,2,30,10,10,false,results of,1.183323,2222,826,4,failure
+5,2,30,10,10,false,let's make,-1.177135,5304,1121,5,success
+5,2,30,10,10,false,consistency,-1.149943,164,58,6,success
+5,2,30,10,10,false,again,1.082073,6581,1668,7,failure
+5,2,30,10,10,false,the results,1.074416,2704,1031,8,failure
+5,2,30,10,10,false,and skip,-1.066394,67,30,9,success
+5,2,30,20,20,false,we see,1.487216,3485,1036,0,failure
+5,2,30,20,20,false,output as,1.446292,2886,831,1,failure
+5,2,30,20,20,false,same output,1.411451,2928,832,2,failure
+5,2,30,20,20,false,it requires,-1.245659,52,33,3,success
+5,2,30,20,20,false,results of,1.183323,2222,826,4,failure
+5,2,30,20,20,false,let's make,-1.177135,5304,1121,5,success
+5,2,30,20,20,false,consistency,-1.149943,164,58,6,success
+5,2,30,20,20,false,again,1.082073,6581,1668,7,failure
+5,2,30,20,20,false,the results,1.074416,2704,1031,8,failure
+5,2,30,20,20,false,and skip,-1.066394,67,30,9,success
+5,2,30,20,20,false,verify that,-1.014627,2677,860,10,success
+5,2,30,20,20,false,that line,-1.012714,4203,938,11,success
+5,2,30,20,20,false,the codebase,-1.009915,8124,1468,12,success
+5,2,30,20,20,false,make the,-0.975179,9629,1636,13,success
+5,2,30,20,20,false,specific,-0.969376,8687,1700,14,success
+5,2,30,20,20,false,codebase,-0.968010,9089,1582,15,success
+5,2,30,20,20,false,case when,-0.966258,258,116,16,success
+5,2,30,20,20,false,will prevent,-0.958861,310,133,17,success
+5,2,30,20,20,false,as the,0.956254,5875,1645,18,failure
+5,2,30,20,20,false,root of,0.951297,59,54,19,failure
+5,2,100,10,10,false,we see,1.487216,3485,1036,0,failure
+5,2,100,10,10,false,output as,1.446292,2886,831,1,failure
+5,2,100,10,10,false,same output,1.411451,2928,832,2,failure
+5,2,100,10,10,false,results of,1.183323,2222,826,3,failure
+5,2,100,10,10,false,let's make,-1.177135,5304,1121,4,success
+5,2,100,10,10,false,again,1.082073,6581,1668,5,failure
+5,2,100,10,10,false,the results,1.074416,2704,1031,6,failure
+5,2,100,10,10,false,verify that,-1.014627,2677,860,7,success
+5,2,100,10,10,false,that line,-1.012714,4203,938,8,success
+5,2,100,10,10,false,the codebase,-1.009915,8124,1468,9,success
+5,2,100,20,20,false,we see,1.487216,3485,1036,0,failure
+5,2,100,20,20,false,output as,1.446292,2886,831,1,failure
+5,2,100,20,20,false,same output,1.411451,2928,832,2,failure
+5,2,100,20,20,false,results of,1.183323,2222,826,3,failure
+5,2,100,20,20,false,let's make,-1.177135,5304,1121,4,success
+5,2,100,20,20,false,again,1.082073,6581,1668,5,failure
+5,2,100,20,20,false,the results,1.074416,2704,1031,6,failure
+5,2,100,20,20,false,verify that,-1.014627,2677,860,7,success
+5,2,100,20,20,false,that line,-1.012714,4203,938,8,success
+5,2,100,20,20,false,the codebase,-1.009915,8124,1468,9,success
+5,2,100,20,20,false,make the,-0.975179,9629,1636,10,success
+5,2,100,20,20,false,specific,-0.969376,8687,1700,11,success
+5,2,100,20,20,false,codebase,-0.968010,9089,1582,12,success
+5,2,100,20,20,false,case when,-0.966258,258,116,13,success
+5,2,100,20,20,false,will prevent,-0.958861,310,133,14,success
+5,2,100,20,20,false,as the,0.956254,5875,1645,15,failure
+5,2,100,20,20,false,to that,-0.928380,4268,992,16,success
+5,2,100,20,20,false,default,-0.928170,2304,495,17,success
+5,2,100,20,20,false,open,-0.926856,29544,2255,18,success
+5,2,100,20,20,false,necessary edit,-0.917138,2270,600,19,success
+5,3,10,10,10,false,constructors,-1.371204,27,10,0,success
+5,3,10,10,10,false,again,1.340406,6597,1680,1,failure
+5,3,10,10,10,false,be instantiated,-1.337593,27,12,2,success
+5,3,10,10,10,false,correctly because,-1.323603,33,18,3,success
+5,3,10,10,10,false,the codebase,-1.160766,8402,1484,4,success
+5,3,10,10,10,false,verify that,-1.158253,2657,874,5,success
+5,3,10,10,10,false,correct,1.155362,8722,1991,6,failure
+5,3,10,10,10,false,we see,1.140743,3355,1003,7,failure
+5,3,10,10,10,false,codebase,-1.123141,9365,1594,8,success
+5,3,10,10,10,false,except block,-1.101602,164,81,9,success
+5,3,10,20,20,false,constructors,-1.371204,27,10,0,success
+5,3,10,20,20,false,again,1.340406,6597,1680,1,failure
+5,3,10,20,20,false,be instantiated,-1.337593,27,12,2,success
+5,3,10,20,20,false,correctly because,-1.323603,33,18,3,success
+5,3,10,20,20,false,the codebase,-1.160766,8402,1484,4,success
+5,3,10,20,20,false,verify that,-1.158253,2657,874,5,success
+5,3,10,20,20,false,correct,1.155362,8722,1991,6,failure
+5,3,10,20,20,false,we see,1.140743,3355,1003,7,failure
+5,3,10,20,20,false,codebase,-1.123141,9365,1594,8,success
+5,3,10,20,20,false,except block,-1.101602,164,81,9,success
+5,3,10,20,20,false,that line,-1.101257,4165,940,10,success
+5,3,10,20,20,false,let's make,-1.081104,5308,1130,11,success
+5,3,10,20,20,false,output as,1.053050,2787,804,12,failure
+5,3,10,20,20,false,exact,-1.046614,2941,1108,13,success
+5,3,10,20,20,false,a relative,-1.038017,57,27,14,success
+5,3,10,20,20,false,path correctly,-1.036682,25,16,15,success
+5,3,10,20,20,false,a try,-1.033302,161,78,16,success
+5,3,10,20,20,false,same output,1.021025,2819,801,17,failure
+5,3,10,20,20,false,from being,-1.016761,352,139,18,success
+5,3,10,20,20,false,will prevent,-1.011061,288,126,19,success
+5,3,30,10,10,false,again,1.340406,6597,1680,0,failure
+5,3,30,10,10,false,the codebase,-1.160766,8402,1484,1,success
+5,3,30,10,10,false,verify that,-1.158253,2657,874,2,success
+5,3,30,10,10,false,correct,1.155362,8722,1991,3,failure
+5,3,30,10,10,false,we see,1.140743,3355,1003,4,failure
+5,3,30,10,10,false,codebase,-1.123141,9365,1594,5,success
+5,3,30,10,10,false,except block,-1.101602,164,81,6,success
+5,3,30,10,10,false,that line,-1.101257,4165,940,7,success
+5,3,30,10,10,false,let's make,-1.081104,5308,1130,8,success
+5,3,30,10,10,false,output as,1.053050,2787,804,9,failure
+5,3,30,20,20,false,again,1.340406,6597,1680,0,failure
+5,3,30,20,20,false,the codebase,-1.160766,8402,1484,1,success
+5,3,30,20,20,false,verify that,-1.158253,2657,874,2,success
+5,3,30,20,20,false,correct,1.155362,8722,1991,3,failure
+5,3,30,20,20,false,we see,1.140743,3355,1003,4,failure
+5,3,30,20,20,false,codebase,-1.123141,9365,1594,5,success
+5,3,30,20,20,false,except block,-1.101602,164,81,6,success
+5,3,30,20,20,false,that line,-1.101257,4165,940,7,success
+5,3,30,20,20,false,let's make,-1.081104,5308,1130,8,success
+5,3,30,20,20,false,output as,1.053050,2787,804,9,failure
+5,3,30,20,20,false,exact,-1.046614,2941,1108,10,success
+5,3,30,20,20,false,a try,-1.033302,161,78,11,success
+5,3,30,20,20,false,same output,1.021025,2819,801,12,failure
+5,3,30,20,20,false,from being,-1.016761,352,139,13,success
+5,3,30,20,20,false,will prevent,-1.011061,288,126,14,success
+5,3,30,20,20,false,open,-1.006166,29840,2252,15,success
+5,3,30,20,20,false,location of,-0.981361,988,617,16,success
+5,3,30,20,20,false,to that,-0.978046,4200,995,17,success
+5,3,30,20,20,false,handles,-0.974135,10509,1686,18,success
+5,3,30,20,20,false,have found,-0.971376,3605,1167,19,success
+5,3,100,10,10,false,again,1.340406,6597,1680,0,failure
+5,3,100,10,10,false,the codebase,-1.160766,8402,1484,1,success
+5,3,100,10,10,false,verify that,-1.158253,2657,874,2,success
+5,3,100,10,10,false,correct,1.155362,8722,1991,3,failure
+5,3,100,10,10,false,we see,1.140743,3355,1003,4,failure
+5,3,100,10,10,false,codebase,-1.123141,9365,1594,5,success
+5,3,100,10,10,false,that line,-1.101257,4165,940,6,success
+5,3,100,10,10,false,let's make,-1.081104,5308,1130,7,success
+5,3,100,10,10,false,output as,1.053050,2787,804,8,failure
+5,3,100,10,10,false,exact,-1.046614,2941,1108,9,success
+5,3,100,20,20,false,again,1.340406,6597,1680,0,failure
+5,3,100,20,20,false,the codebase,-1.160766,8402,1484,1,success
+5,3,100,20,20,false,verify that,-1.158253,2657,874,2,success
+5,3,100,20,20,false,correct,1.155362,8722,1991,3,failure
+5,3,100,20,20,false,we see,1.140743,3355,1003,4,failure
+5,3,100,20,20,false,codebase,-1.123141,9365,1594,5,success
+5,3,100,20,20,false,that line,-1.101257,4165,940,6,success
+5,3,100,20,20,false,let's make,-1.081104,5308,1130,7,success
+5,3,100,20,20,false,output as,1.053050,2787,804,8,failure
+5,3,100,20,20,false,exact,-1.046614,2941,1108,9,success
+5,3,100,20,20,false,same output,1.021025,2819,801,10,failure
+5,3,100,20,20,false,from being,-1.016761,352,139,11,success
+5,3,100,20,20,false,will prevent,-1.011061,288,126,12,success
+5,3,100,20,20,false,open,-1.006166,29840,2252,13,success
+5,3,100,20,20,false,location of,-0.981361,988,617,14,success
+5,3,100,20,20,false,to that,-0.978046,4200,995,15,success
+5,3,100,20,20,false,handles,-0.974135,10509,1686,16,success
+5,3,100,20,20,false,have found,-0.971376,3605,1167,17,success
+5,3,100,20,20,false,let's open,-0.963052,27199,2186,18,success
+5,3,100,20,20,false,to locate,-0.951103,17821,2096,19,success
+5,4,10,10,10,false,constructors,-1.371204,27,10,0,success
+5,4,10,10,10,false,we see,1.332094,3416,1030,1,failure
+5,4,10,10,10,false,correctly because,-1.286461,47,20,2,success
+5,4,10,10,10,false,output as,1.246074,2834,822,3,failure
+5,4,10,10,10,false,same output,1.238821,2866,819,4,failure
+5,4,10,10,10,false,haven't seen,-1.221628,34,31,5,success
+5,4,10,10,10,false,now paste,1.118149,32,31,6,failure
+5,4,10,10,10,false,results of,1.117941,2164,827,7,failure
+5,4,10,10,10,false,that line,-1.117903,4096,923,8,success
+5,4,10,10,10,false,the results,1.107810,2596,1019,9,failure
+5,4,10,20,20,false,constructors,-1.371204,27,10,0,success
+5,4,10,20,20,false,we see,1.332094,3416,1030,1,failure
+5,4,10,20,20,false,correctly because,-1.286461,47,20,2,success
+5,4,10,20,20,false,output as,1.246074,2834,822,3,failure
+5,4,10,20,20,false,same output,1.238821,2866,819,4,failure
+5,4,10,20,20,false,haven't seen,-1.221628,34,31,5,success
+5,4,10,20,20,false,now paste,1.118149,32,31,6,failure
+5,4,10,20,20,false,results of,1.117941,2164,827,7,failure
+5,4,10,20,20,false,that line,-1.117903,4096,923,8,success
+5,4,10,20,20,false,the results,1.107810,2596,1019,9,failure
+5,4,10,20,20,false,it takes,1.095793,92,61,10,failure
+5,4,10,20,20,false,to that,-1.062549,4178,977,11,success
+5,4,10,20,20,false,from being,-1.049453,336,126,12,success
+5,4,10,20,20,false,and skip,-1.045083,77,29,13,success
+5,4,10,20,20,false,identified and,1.029616,13,11,14,failure
+5,4,10,20,20,false,correctly identified,1.023139,43,28,15,failure
+5,4,10,20,20,false,exact,-1.019526,2893,1107,16,success
+5,4,10,20,20,false,without affecting,1.018979,13,12,17,failure
+5,4,10,20,20,false,pointer,1.014145,39,10,18,failure
+5,4,10,20,20,false,object with,1.005642,163,98,19,failure
+5,4,30,10,10,false,we see,1.332094,3416,1030,0,failure
+5,4,30,10,10,false,output as,1.246074,2834,822,1,failure
+5,4,30,10,10,false,same output,1.238821,2866,819,2,failure
+5,4,30,10,10,false,haven't seen,-1.221628,34,31,3,success
+5,4,30,10,10,false,now paste,1.118149,32,31,4,failure
+5,4,30,10,10,false,results of,1.117941,2164,827,5,failure
+5,4,30,10,10,false,that line,-1.117903,4096,923,6,success
+5,4,30,10,10,false,the results,1.107810,2596,1019,7,failure
+5,4,30,10,10,false,it takes,1.095793,92,61,8,failure
+5,4,30,10,10,false,to that,-1.062549,4178,977,9,success
+5,4,30,20,20,false,we see,1.332094,3416,1030,0,failure
+5,4,30,20,20,false,output as,1.246074,2834,822,1,failure
+5,4,30,20,20,false,same output,1.238821,2866,819,2,failure
+5,4,30,20,20,false,haven't seen,-1.221628,34,31,3,success
+5,4,30,20,20,false,now paste,1.118149,32,31,4,failure
+5,4,30,20,20,false,results of,1.117941,2164,827,5,failure
+5,4,30,20,20,false,that line,-1.117903,4096,923,6,success
+5,4,30,20,20,false,the results,1.107810,2596,1019,7,failure
+5,4,30,20,20,false,it takes,1.095793,92,61,8,failure
+5,4,30,20,20,false,to that,-1.062549,4178,977,9,success
+5,4,30,20,20,false,from being,-1.049453,336,126,10,success
+5,4,30,20,20,false,exact,-1.019526,2893,1107,11,success
+5,4,30,20,20,false,object with,1.005642,163,98,12,failure
+5,4,30,20,20,false,will prevent,-0.971748,297,126,13,success
+5,4,30,20,20,false,it requires,-0.957531,68,37,14,success
+5,4,30,20,20,false,correctly recognized,-0.935253,81,59,15,success
+5,4,30,20,20,false,location of,-0.930775,980,608,16,success
+5,4,30,20,20,false,the codebase,-0.929732,8488,1504,17,success
+5,4,30,20,20,false,as the,0.921891,5868,1634,18,failure
+5,4,30,20,20,false,again,0.920589,6500,1657,19,failure
+5,4,100,10,10,false,we see,1.332094,3416,1030,0,failure
+5,4,100,10,10,false,output as,1.246074,2834,822,1,failure
+5,4,100,10,10,false,same output,1.238821,2866,819,2,failure
+5,4,100,10,10,false,results of,1.117941,2164,827,3,failure
+5,4,100,10,10,false,that line,-1.117903,4096,923,4,success
+5,4,100,10,10,false,the results,1.107810,2596,1019,5,failure
+5,4,100,10,10,false,to that,-1.062549,4178,977,6,success
+5,4,100,10,10,false,from being,-1.049453,336,126,7,success
+5,4,100,10,10,false,exact,-1.019526,2893,1107,8,success
+5,4,100,10,10,false,will prevent,-0.971748,297,126,9,success
+5,4,100,20,20,false,we see,1.332094,3416,1030,0,failure
+5,4,100,20,20,false,output as,1.246074,2834,822,1,failure
+5,4,100,20,20,false,same output,1.238821,2866,819,2,failure
+5,4,100,20,20,false,results of,1.117941,2164,827,3,failure
+5,4,100,20,20,false,that line,-1.117903,4096,923,4,success
+5,4,100,20,20,false,the results,1.107810,2596,1019,5,failure
+5,4,100,20,20,false,to that,-1.062549,4178,977,6,success
+5,4,100,20,20,false,from being,-1.049453,336,126,7,success
+5,4,100,20,20,false,exact,-1.019526,2893,1107,8,success
+5,4,100,20,20,false,will prevent,-0.971748,297,126,9,success
+5,4,100,20,20,false,location of,-0.930775,980,608,10,success
+5,4,100,20,20,false,the codebase,-0.929732,8488,1504,11,success
+5,4,100,20,20,false,as the,0.921891,5868,1634,12,failure
+5,4,100,20,20,false,again,0.920589,6500,1657,13,failure
+5,4,100,20,20,false,codebase,-0.913523,9481,1621,14,success
+5,4,100,20,20,false,verify that,-0.905765,2743,864,15,success
+5,4,100,20,20,false,dealing,-0.884735,1175,553,16,success
+5,4,100,20,20,false,dealing with,-0.884735,1175,553,17,success
+5,4,100,20,20,false,correct,0.883554,8824,1989,18,failure
+5,4,100,20,20,false,open,-0.881207,29898,2242,19,success
+8,0,10,10,10,false,updated to,-1.432198,11547,1873,0,success
+8,0,10,10,10,false,no longer,-1.253471,1330,602,1,success
+8,0,10,10,10,false,been updated,-1.242638,14384,2077,2,success
+8,0,10,10,10,false,code has,-1.241659,11940,1719,3,success
+8,0,10,10,10,false,file since,-1.221873,900,488,4,success
+8,0,10,10,10,false,verify that,-1.211287,5638,1352,5,success
+8,0,10,10,10,false,should fix,-1.205400,522,275,6,success
+8,0,10,10,10,false,change has,-1.204366,1081,498,7,success
+8,0,10,10,10,false,longer,-1.195438,1424,640,8,success
+8,0,10,10,10,false,let's make,-1.171154,7324,1525,9,success
+8,0,10,20,20,false,updated to,-1.432198,11547,1873,0,success
+8,0,10,20,20,false,no longer,-1.253471,1330,602,1,success
+8,0,10,20,20,false,been updated,-1.242638,14384,2077,2,success
+8,0,10,20,20,false,code has,-1.241659,11940,1719,3,success
+8,0,10,20,20,false,file since,-1.221873,900,488,4,success
+8,0,10,20,20,false,verify that,-1.211287,5638,1352,5,success
+8,0,10,20,20,false,should fix,-1.205400,522,275,6,success
+8,0,10,20,20,false,change has,-1.204366,1081,498,7,success
+8,0,10,20,20,false,longer,-1.195438,1424,640,8,success
+8,0,10,20,20,false,let's make,-1.171154,7324,1525,9,success
+8,0,10,20,20,false,value before,-1.160174,74,43,10,success
+8,0,10,20,20,false,navigate to,-1.157415,16682,2055,11,success
+8,0,10,20,20,false,to verify,-1.152025,6048,1516,12,success
+8,0,10,20,20,false,adheres,1.143082,27,18,13,failure
+8,0,10,20,20,false,adheres to,1.143082,27,18,14,failure
+8,0,10,20,20,false,this change,-1.109652,3625,1147,15,success
+8,0,10,20,20,false,us directly,-1.096026,11,10,16,success
+8,0,10,20,20,false,set for,-1.080322,66,43,17,success
+8,0,10,20,20,false,currently does,-1.060338,180,117,18,success
+8,0,10,20,20,false,change,-1.055533,6535,1520,19,success
+8,0,30,10,10,false,updated to,-1.432198,11547,1873,0,success
+8,0,30,10,10,false,no longer,-1.253471,1330,602,1,success
+8,0,30,10,10,false,been updated,-1.242638,14384,2077,2,success
+8,0,30,10,10,false,code has,-1.241659,11940,1719,3,success
+8,0,30,10,10,false,file since,-1.221873,900,488,4,success
+8,0,30,10,10,false,verify that,-1.211287,5638,1352,5,success
+8,0,30,10,10,false,should fix,-1.205400,522,275,6,success
+8,0,30,10,10,false,change has,-1.204366,1081,498,7,success
+8,0,30,10,10,false,longer,-1.195438,1424,640,8,success
+8,0,30,10,10,false,let's make,-1.171154,7324,1525,9,success
+8,0,30,20,20,false,updated to,-1.432198,11547,1873,0,success
+8,0,30,20,20,false,no longer,-1.253471,1330,602,1,success
+8,0,30,20,20,false,been updated,-1.242638,14384,2077,2,success
+8,0,30,20,20,false,code has,-1.241659,11940,1719,3,success
+8,0,30,20,20,false,file since,-1.221873,900,488,4,success
+8,0,30,20,20,false,verify that,-1.211287,5638,1352,5,success
+8,0,30,20,20,false,should fix,-1.205400,522,275,6,success
+8,0,30,20,20,false,change has,-1.204366,1081,498,7,success
+8,0,30,20,20,false,longer,-1.195438,1424,640,8,success
+8,0,30,20,20,false,let's make,-1.171154,7324,1525,9,success
+8,0,30,20,20,false,value before,-1.160174,74,43,10,success
+8,0,30,20,20,false,navigate to,-1.157415,16682,2055,11,success
+8,0,30,20,20,false,to verify,-1.152025,6048,1516,12,success
+8,0,30,20,20,false,this change,-1.109652,3625,1147,13,success
+8,0,30,20,20,false,set for,-1.080322,66,43,14,success
+8,0,30,20,20,false,currently does,-1.060338,180,117,15,success
+8,0,30,20,20,false,change,-1.055533,6535,1520,16,success
+8,0,30,20,20,false,has resolved,-1.048565,86,76,17,success
+8,0,30,20,20,false,not expect,-1.042704,65,35,18,success
+8,0,30,20,20,false,output as,1.042489,2576,775,19,failure
+8,0,100,10,10,false,updated to,-1.432198,11547,1873,0,success
+8,0,100,10,10,false,no longer,-1.253471,1330,602,1,success
+8,0,100,10,10,false,been updated,-1.242638,14384,2077,2,success
+8,0,100,10,10,false,code has,-1.241659,11940,1719,3,success
+8,0,100,10,10,false,file since,-1.221873,900,488,4,success
+8,0,100,10,10,false,verify that,-1.211287,5638,1352,5,success
+8,0,100,10,10,false,should fix,-1.205400,522,275,6,success
+8,0,100,10,10,false,change has,-1.204366,1081,498,7,success
+8,0,100,10,10,false,longer,-1.195438,1424,640,8,success
+8,0,100,10,10,false,let's make,-1.171154,7324,1525,9,success
+8,0,100,20,20,false,updated to,-1.432198,11547,1873,0,success
+8,0,100,20,20,false,no longer,-1.253471,1330,602,1,success
+8,0,100,20,20,false,been updated,-1.242638,14384,2077,2,success
+8,0,100,20,20,false,code has,-1.241659,11940,1719,3,success
+8,0,100,20,20,false,file since,-1.221873,900,488,4,success
+8,0,100,20,20,false,verify that,-1.211287,5638,1352,5,success
+8,0,100,20,20,false,should fix,-1.205400,522,275,6,success
+8,0,100,20,20,false,change has,-1.204366,1081,498,7,success
+8,0,100,20,20,false,longer,-1.195438,1424,640,8,success
+8,0,100,20,20,false,let's make,-1.171154,7324,1525,9,success
+8,0,100,20,20,false,navigate to,-1.157415,16682,2055,10,success
+8,0,100,20,20,false,to verify,-1.152025,6048,1516,11,success
+8,0,100,20,20,false,this change,-1.109652,3625,1147,12,success
+8,0,100,20,20,false,currently does,-1.060338,180,117,13,success
+8,0,100,20,20,false,change,-1.055533,6535,1520,14,success
+8,0,100,20,20,false,output as,1.042489,2576,775,15,failure
+8,0,100,20,20,false,correct,1.024438,14301,2238,16,failure
+8,0,100,20,20,false,longer needed,-1.014358,847,427,17,success
+8,0,100,20,20,false,a test,-1.012532,5655,1231,18,success
+8,0,100,20,20,false,updated,-1.011489,16265,2162,19,success
+8,1,10,10,10,false,file since,-1.466017,859,483,0,success
+8,1,10,10,10,false,that line,-1.391886,7479,1403,1,success
+8,1,10,10,10,false,updated to,-1.352458,11513,1858,2,success
+8,1,10,10,10,false,to that,-1.343739,7600,1449,3,success
+8,1,10,10,10,false,we see,1.327546,3279,1034,4,failure
+8,1,10,10,10,false,output as,1.312470,2584,766,5,failure
+8,1,10,10,10,false,correct,1.302739,14550,2260,6,failure
+8,1,10,10,10,false,verify that,-1.296850,5573,1364,7,success
+8,1,10,10,10,false,navigate to,-1.290783,16562,2050,8,success
+8,1,10,10,10,false,constructors,-1.289997,30,12,9,success
+8,1,10,20,20,false,file since,-1.466017,859,483,0,success
+8,1,10,20,20,false,that line,-1.391886,7479,1403,1,success
+8,1,10,20,20,false,updated to,-1.352458,11513,1858,2,success
+8,1,10,20,20,false,to that,-1.343739,7600,1449,3,success
+8,1,10,20,20,false,we see,1.327546,3279,1034,4,failure
+8,1,10,20,20,false,output as,1.312470,2584,766,5,failure
+8,1,10,20,20,false,correct,1.302739,14550,2260,6,failure
+8,1,10,20,20,false,verify that,-1.296850,5573,1364,7,success
+8,1,10,20,20,false,navigate to,-1.290783,16562,2050,8,success
+8,1,10,20,20,false,constructors,-1.289997,30,12,9,success
+8,1,10,20,20,false,to verify,-1.287669,6030,1531,10,success
+8,1,10,20,20,false,longer,-1.272055,1430,619,11,success
+8,1,10,20,20,false,it seems,1.270600,23786,2342,12,failure
+8,1,10,20,20,false,longer needed,-1.262287,809,412,13,success
+8,1,10,20,20,false,seems that,1.244778,16248,2252,14,failure
+8,1,10,20,20,false,no longer,-1.242078,1337,580,15,success
+8,1,10,20,20,false,same output,1.235603,2622,764,16,failure
+8,1,10,20,20,false,test script,-1.225792,5122,1127,17,success
+8,1,10,20,20,false,a test,-1.198812,5610,1226,18,success
+8,1,10,20,20,false,defined at,-1.185116,1742,635,19,success
+8,1,30,10,10,false,file since,-1.466017,859,483,0,success
+8,1,30,10,10,false,that line,-1.391886,7479,1403,1,success
+8,1,30,10,10,false,updated to,-1.352458,11513,1858,2,success
+8,1,30,10,10,false,to that,-1.343739,7600,1449,3,success
+8,1,30,10,10,false,we see,1.327546,3279,1034,4,failure
+8,1,30,10,10,false,output as,1.312470,2584,766,5,failure
+8,1,30,10,10,false,correct,1.302739,14550,2260,6,failure
+8,1,30,10,10,false,verify that,-1.296850,5573,1364,7,success
+8,1,30,10,10,false,navigate to,-1.290783,16562,2050,8,success
+8,1,30,10,10,false,to verify,-1.287669,6030,1531,9,success
+8,1,30,20,20,false,file since,-1.466017,859,483,0,success
+8,1,30,20,20,false,that line,-1.391886,7479,1403,1,success
+8,1,30,20,20,false,updated to,-1.352458,11513,1858,2,success
+8,1,30,20,20,false,to that,-1.343739,7600,1449,3,success
+8,1,30,20,20,false,we see,1.327546,3279,1034,4,failure
+8,1,30,20,20,false,output as,1.312470,2584,766,5,failure
+8,1,30,20,20,false,correct,1.302739,14550,2260,6,failure
+8,1,30,20,20,false,verify that,-1.296850,5573,1364,7,success
+8,1,30,20,20,false,navigate to,-1.290783,16562,2050,8,success
+8,1,30,20,20,false,to verify,-1.287669,6030,1531,9,success
+8,1,30,20,20,false,longer,-1.272055,1430,619,10,success
+8,1,30,20,20,false,it seems,1.270600,23786,2342,11,failure
+8,1,30,20,20,false,longer needed,-1.262287,809,412,12,success
+8,1,30,20,20,false,seems that,1.244778,16248,2252,13,failure
+8,1,30,20,20,false,no longer,-1.242078,1337,580,14,success
+8,1,30,20,20,false,same output,1.235603,2622,764,15,failure
+8,1,30,20,20,false,test script,-1.225792,5122,1127,16,success
+8,1,30,20,20,false,a test,-1.198812,5610,1226,17,success
+8,1,30,20,20,false,defined at,-1.185116,1742,635,18,success
+8,1,30,20,20,false,the correct,1.184080,8523,2063,19,failure
+8,1,100,10,10,false,file since,-1.466017,859,483,0,success
+8,1,100,10,10,false,that line,-1.391886,7479,1403,1,success
+8,1,100,10,10,false,updated to,-1.352458,11513,1858,2,success
+8,1,100,10,10,false,to that,-1.343739,7600,1449,3,success
+8,1,100,10,10,false,we see,1.327546,3279,1034,4,failure
+8,1,100,10,10,false,output as,1.312470,2584,766,5,failure
+8,1,100,10,10,false,correct,1.302739,14550,2260,6,failure
+8,1,100,10,10,false,verify that,-1.296850,5573,1364,7,success
+8,1,100,10,10,false,navigate to,-1.290783,16562,2050,8,success
+8,1,100,10,10,false,to verify,-1.287669,6030,1531,9,success
+8,1,100,20,20,false,file since,-1.466017,859,483,0,success
+8,1,100,20,20,false,that line,-1.391886,7479,1403,1,success
+8,1,100,20,20,false,updated to,-1.352458,11513,1858,2,success
+8,1,100,20,20,false,to that,-1.343739,7600,1449,3,success
+8,1,100,20,20,false,we see,1.327546,3279,1034,4,failure
+8,1,100,20,20,false,output as,1.312470,2584,766,5,failure
+8,1,100,20,20,false,correct,1.302739,14550,2260,6,failure
+8,1,100,20,20,false,verify that,-1.296850,5573,1364,7,success
+8,1,100,20,20,false,navigate to,-1.290783,16562,2050,8,success
+8,1,100,20,20,false,to verify,-1.287669,6030,1531,9,success
+8,1,100,20,20,false,longer,-1.272055,1430,619,10,success
+8,1,100,20,20,false,it seems,1.270600,23786,2342,11,failure
+8,1,100,20,20,false,longer needed,-1.262287,809,412,12,success
+8,1,100,20,20,false,seems that,1.244778,16248,2252,13,failure
+8,1,100,20,20,false,no longer,-1.242078,1337,580,14,success
+8,1,100,20,20,false,same output,1.235603,2622,764,15,failure
+8,1,100,20,20,false,test script,-1.225792,5122,1127,16,success
+8,1,100,20,20,false,a test,-1.198812,5610,1226,17,success
+8,1,100,20,20,false,defined at,-1.185116,1742,635,18,success
+8,1,100,20,20,false,the correct,1.184080,8523,2063,19,failure
+8,2,10,10,10,false,updated to,-1.498199,11557,1876,0,success
+8,2,10,10,10,false,constructors,-1.403314,31,12,1,success
+8,2,10,10,10,false,we see,1.322266,3484,1065,2,failure
+8,2,10,10,10,false,output as,1.305752,2735,780,3,failure
+8,2,10,10,10,false,let's make,-1.296033,7439,1516,4,success
+8,2,10,10,10,false,been updated,-1.268380,14403,2088,5,success
+8,2,10,10,10,false,same output,1.263314,2770,779,6,failure
+8,2,10,10,10,false,that line,-1.250208,7636,1413,7,success
+8,2,10,10,10,false,should create,-1.215943,3687,1007,8,success
+8,2,10,10,10,false,verify that,-1.209190,5629,1348,9,success
+8,2,10,20,20,false,updated to,-1.498199,11557,1876,0,success
+8,2,10,20,20,false,constructors,-1.403314,31,12,1,success
+8,2,10,20,20,false,we see,1.322266,3484,1065,2,failure
+8,2,10,20,20,false,output as,1.305752,2735,780,3,failure
+8,2,10,20,20,false,let's make,-1.296033,7439,1516,4,success
+8,2,10,20,20,false,been updated,-1.268380,14403,2088,5,success
+8,2,10,20,20,false,same output,1.263314,2770,779,6,failure
+8,2,10,20,20,false,that line,-1.250208,7636,1413,7,success
+8,2,10,20,20,false,should create,-1.215943,3687,1007,8,success
+8,2,10,20,20,false,verify that,-1.209190,5629,1348,9,success
+8,2,10,20,20,false,longer,-1.160485,1416,627,10,success
+8,2,10,20,20,false,to verify,-1.157855,6091,1510,11,success
+8,2,10,20,20,false,arises because,-1.153767,226,143,12,success
+8,2,10,20,20,false,to that,-1.150907,7726,1459,13,success
+8,2,10,20,20,false,which should,-1.143272,1971,902,14,success
+8,2,10,20,20,false,no longer,-1.132967,1335,591,15,success
+8,2,10,20,20,false,results of,1.130039,2163,820,16,failure
+8,2,10,20,20,false,correctly because,-1.122086,54,27,17,success
+8,2,10,20,20,false,value before,-1.106321,69,39,18,success
+8,2,10,20,20,false,another python,-1.104140,12,12,19,success
+8,2,30,10,10,false,updated to,-1.498199,11557,1876,0,success
+8,2,30,10,10,false,we see,1.322266,3484,1065,1,failure
+8,2,30,10,10,false,output as,1.305752,2735,780,2,failure
+8,2,30,10,10,false,let's make,-1.296033,7439,1516,3,success
+8,2,30,10,10,false,been updated,-1.268380,14403,2088,4,success
+8,2,30,10,10,false,same output,1.263314,2770,779,5,failure
+8,2,30,10,10,false,that line,-1.250208,7636,1413,6,success
+8,2,30,10,10,false,should create,-1.215943,3687,1007,7,success
+8,2,30,10,10,false,verify that,-1.209190,5629,1348,8,success
+8,2,30,10,10,false,longer,-1.160485,1416,627,9,success
+8,2,30,20,20,false,updated to,-1.498199,11557,1876,0,success
+8,2,30,20,20,false,we see,1.322266,3484,1065,1,failure
+8,2,30,20,20,false,output as,1.305752,2735,780,2,failure
+8,2,30,20,20,false,let's make,-1.296033,7439,1516,3,success
+8,2,30,20,20,false,been updated,-1.268380,14403,2088,4,success
+8,2,30,20,20,false,same output,1.263314,2770,779,5,failure
+8,2,30,20,20,false,that line,-1.250208,7636,1413,6,success
+8,2,30,20,20,false,should create,-1.215943,3687,1007,7,success
+8,2,30,20,20,false,verify that,-1.209190,5629,1348,8,success
+8,2,30,20,20,false,longer,-1.160485,1416,627,9,success
+8,2,30,20,20,false,to verify,-1.157855,6091,1510,10,success
+8,2,30,20,20,false,arises because,-1.153767,226,143,11,success
+8,2,30,20,20,false,to that,-1.150907,7726,1459,12,success
+8,2,30,20,20,false,which should,-1.143272,1971,902,13,success
+8,2,30,20,20,false,no longer,-1.132967,1335,591,14,success
+8,2,30,20,20,false,results of,1.130039,2163,820,15,failure
+8,2,30,20,20,false,value before,-1.106321,69,39,16,success
+8,2,30,20,20,false,it seems,1.100473,23655,2349,17,failure
+8,2,30,20,20,false,code has,-1.068228,12145,1732,18,success
+8,2,30,20,20,false,test script,-1.065831,5168,1123,19,success
+8,2,100,10,10,false,updated to,-1.498199,11557,1876,0,success
+8,2,100,10,10,false,we see,1.322266,3484,1065,1,failure
+8,2,100,10,10,false,output as,1.305752,2735,780,2,failure
+8,2,100,10,10,false,let's make,-1.296033,7439,1516,3,success
+8,2,100,10,10,false,been updated,-1.268380,14403,2088,4,success
+8,2,100,10,10,false,same output,1.263314,2770,779,5,failure
+8,2,100,10,10,false,that line,-1.250208,7636,1413,6,success
+8,2,100,10,10,false,should create,-1.215943,3687,1007,7,success
+8,2,100,10,10,false,verify that,-1.209190,5629,1348,8,success
+8,2,100,10,10,false,longer,-1.160485,1416,627,9,success
+8,2,100,20,20,false,updated to,-1.498199,11557,1876,0,success
+8,2,100,20,20,false,we see,1.322266,3484,1065,1,failure
+8,2,100,20,20,false,output as,1.305752,2735,780,2,failure
+8,2,100,20,20,false,let's make,-1.296033,7439,1516,3,success
+8,2,100,20,20,false,been updated,-1.268380,14403,2088,4,success
+8,2,100,20,20,false,same output,1.263314,2770,779,5,failure
+8,2,100,20,20,false,that line,-1.250208,7636,1413,6,success
+8,2,100,20,20,false,should create,-1.215943,3687,1007,7,success
+8,2,100,20,20,false,verify that,-1.209190,5629,1348,8,success
+8,2,100,20,20,false,longer,-1.160485,1416,627,9,success
+8,2,100,20,20,false,to verify,-1.157855,6091,1510,10,success
+8,2,100,20,20,false,arises because,-1.153767,226,143,11,success
+8,2,100,20,20,false,to that,-1.150907,7726,1459,12,success
+8,2,100,20,20,false,which should,-1.143272,1971,902,13,success
+8,2,100,20,20,false,no longer,-1.132967,1335,591,14,success
+8,2,100,20,20,false,results of,1.130039,2163,820,15,failure
+8,2,100,20,20,false,it seems,1.100473,23655,2349,16,failure
+8,2,100,20,20,false,code has,-1.068228,12145,1732,17,success
+8,2,100,20,20,false,test script,-1.065831,5168,1123,18,success
+8,2,100,20,20,false,navigate to,-1.050892,16787,2058,19,success
+8,3,10,10,10,false,updated to,-1.389023,11660,1885,0,success
+8,3,10,10,10,false,constructors,-1.333424,34,16,1,success
+8,3,10,10,10,false,file since,-1.311069,888,494,2,success
+8,3,10,10,10,false,correct,1.310540,14599,2257,3,failure
+8,3,10,10,10,false,that line,-1.285989,7575,1408,4,success
+8,3,10,10,10,false,to that,-1.283925,7661,1457,5,success
+8,3,10,10,10,false,the correct,1.202880,8495,2065,6,failure
+8,3,10,10,10,false,let's make,-1.200691,7427,1522,7,success
+8,3,10,10,10,false,defined at,-1.193109,1740,647,8,success
+8,3,10,10,10,false,no longer,-1.192915,1368,607,9,success
+8,3,10,20,20,false,updated to,-1.389023,11660,1885,0,success
+8,3,10,20,20,false,constructors,-1.333424,34,16,1,success
+8,3,10,20,20,false,file since,-1.311069,888,494,2,success
+8,3,10,20,20,false,correct,1.310540,14599,2257,3,failure
+8,3,10,20,20,false,that line,-1.285989,7575,1408,4,success
+8,3,10,20,20,false,to that,-1.283925,7661,1457,5,success
+8,3,10,20,20,false,the correct,1.202880,8495,2065,6,failure
+8,3,10,20,20,false,let's make,-1.200691,7427,1522,7,success
+8,3,10,20,20,false,defined at,-1.193109,1740,647,8,success
+8,3,10,20,20,false,no longer,-1.192915,1368,607,9,success
+8,3,10,20,20,false,verify that,-1.178542,5691,1373,10,success
+8,3,10,20,20,false,longer,-1.176618,1437,641,11,success
+8,3,10,20,20,false,navigate to,-1.173599,16554,2052,12,success
+8,3,10,20,20,false,it seems,1.170344,23401,2349,13,failure
+8,3,10,20,20,false,calling it,1.163048,78,54,14,failure
+8,3,10,20,20,false,us directly,-1.149521,10,10,15,success
+8,3,10,20,20,false,should create,-1.148518,3643,1010,16,success
+8,3,10,20,20,false,function's implementation,-1.143605,609,260,17,success
+8,3,10,20,20,false,code has,-1.138206,12106,1726,18,success
+8,3,10,20,20,false,to verify,-1.126135,6161,1546,19,success
+8,3,30,10,10,false,updated to,-1.389023,11660,1885,0,success
+8,3,30,10,10,false,file since,-1.311069,888,494,1,success
+8,3,30,10,10,false,correct,1.310540,14599,2257,2,failure
+8,3,30,10,10,false,that line,-1.285989,7575,1408,3,success
+8,3,30,10,10,false,to that,-1.283925,7661,1457,4,success
+8,3,30,10,10,false,the correct,1.202880,8495,2065,5,failure
+8,3,30,10,10,false,let's make,-1.200691,7427,1522,6,success
+8,3,30,10,10,false,defined at,-1.193109,1740,647,7,success
+8,3,30,10,10,false,no longer,-1.192915,1368,607,8,success
+8,3,30,10,10,false,verify that,-1.178542,5691,1373,9,success
+8,3,30,20,20,false,updated to,-1.389023,11660,1885,0,success
+8,3,30,20,20,false,file since,-1.311069,888,494,1,success
+8,3,30,20,20,false,correct,1.310540,14599,2257,2,failure
+8,3,30,20,20,false,that line,-1.285989,7575,1408,3,success
+8,3,30,20,20,false,to that,-1.283925,7661,1457,4,success
+8,3,30,20,20,false,the correct,1.202880,8495,2065,5,failure
+8,3,30,20,20,false,let's make,-1.200691,7427,1522,6,success
+8,3,30,20,20,false,defined at,-1.193109,1740,647,7,success
+8,3,30,20,20,false,no longer,-1.192915,1368,607,8,success
+8,3,30,20,20,false,verify that,-1.178542,5691,1373,9,success
+8,3,30,20,20,false,longer,-1.176618,1437,641,10,success
+8,3,30,20,20,false,navigate to,-1.173599,16554,2052,11,success
+8,3,30,20,20,false,it seems,1.170344,23401,2349,12,failure
+8,3,30,20,20,false,calling it,1.163048,78,54,13,failure
+8,3,30,20,20,false,should create,-1.148518,3643,1010,14,success
+8,3,30,20,20,false,function's implementation,-1.143605,609,260,15,success
+8,3,30,20,20,false,code has,-1.138206,12106,1726,16,success
+8,3,30,20,20,false,to verify,-1.126135,6161,1546,17,success
+8,3,30,20,20,false,let's clean,-1.123958,754,431,18,success
+8,3,30,20,20,false,a test,-1.116668,5755,1232,19,success
+8,3,100,10,10,false,updated to,-1.389023,11660,1885,0,success
+8,3,100,10,10,false,file since,-1.311069,888,494,1,success
+8,3,100,10,10,false,correct,1.310540,14599,2257,2,failure
+8,3,100,10,10,false,that line,-1.285989,7575,1408,3,success
+8,3,100,10,10,false,to that,-1.283925,7661,1457,4,success
+8,3,100,10,10,false,the correct,1.202880,8495,2065,5,failure
+8,3,100,10,10,false,let's make,-1.200691,7427,1522,6,success
+8,3,100,10,10,false,defined at,-1.193109,1740,647,7,success
+8,3,100,10,10,false,no longer,-1.192915,1368,607,8,success
+8,3,100,10,10,false,verify that,-1.178542,5691,1373,9,success
+8,3,100,20,20,false,updated to,-1.389023,11660,1885,0,success
+8,3,100,20,20,false,file since,-1.311069,888,494,1,success
+8,3,100,20,20,false,correct,1.310540,14599,2257,2,failure
+8,3,100,20,20,false,that line,-1.285989,7575,1408,3,success
+8,3,100,20,20,false,to that,-1.283925,7661,1457,4,success
+8,3,100,20,20,false,the correct,1.202880,8495,2065,5,failure
+8,3,100,20,20,false,let's make,-1.200691,7427,1522,6,success
+8,3,100,20,20,false,defined at,-1.193109,1740,647,7,success
+8,3,100,20,20,false,no longer,-1.192915,1368,607,8,success
+8,3,100,20,20,false,verify that,-1.178542,5691,1373,9,success
+8,3,100,20,20,false,longer,-1.176618,1437,641,10,success
+8,3,100,20,20,false,navigate to,-1.173599,16554,2052,11,success
+8,3,100,20,20,false,it seems,1.170344,23401,2349,12,failure
+8,3,100,20,20,false,should create,-1.148518,3643,1010,13,success
+8,3,100,20,20,false,function's implementation,-1.143605,609,260,14,success
+8,3,100,20,20,false,code has,-1.138206,12106,1726,15,success
+8,3,100,20,20,false,to verify,-1.126135,6161,1546,16,success
+8,3,100,20,20,false,let's clean,-1.123958,754,431,17,success
+8,3,100,20,20,false,a test,-1.116668,5755,1232,18,success
+8,3,100,20,20,false,seems that,1.100356,15825,2259,19,failure
+8,4,10,10,10,false,constructors,-1.390590,34,16,0,success
+8,4,10,10,10,false,updated to,-1.231607,11295,1864,1,success
+8,4,10,10,10,false,correctly because,-1.196607,56,28,2,success
+8,4,10,10,10,false,output as,1.146427,2672,768,3,failure
+8,4,10,10,10,false,been updated,-1.145308,14091,2063,4,success
+8,4,10,10,10,false,relevant part,-1.132011,472,317,5,success
+8,4,10,10,10,false,we see,1.130900,3417,1053,6,failure
+8,4,10,10,10,false,same output,1.114861,2703,767,7,failure
+8,4,10,10,10,false,should fix,-1.110610,525,283,8,success
+8,4,10,10,10,false,calling it,1.087775,76,53,9,failure
+8,4,10,20,20,false,constructors,-1.390590,34,16,0,success
+8,4,10,20,20,false,updated to,-1.231607,11295,1864,1,success
+8,4,10,20,20,false,correctly because,-1.196607,56,28,2,success
+8,4,10,20,20,false,output as,1.146427,2672,768,3,failure
+8,4,10,20,20,false,been updated,-1.145308,14091,2063,4,success
+8,4,10,20,20,false,relevant part,-1.132011,472,317,5,success
+8,4,10,20,20,false,we see,1.130900,3417,1053,6,failure
+8,4,10,20,20,false,same output,1.114861,2703,767,7,failure
+8,4,10,20,20,false,should fix,-1.110610,525,283,8,success
+8,4,10,20,20,false,calling it,1.087775,76,53,9,failure
+8,4,10,20,20,false,let's make,-1.083973,7334,1504,10,success
+8,4,10,20,20,false,results of,1.078326,2103,822,11,failure
+8,4,10,20,20,false,now paste,1.067339,30,29,12,failure
+8,4,10,20,20,false,navigate to,-1.065684,16687,2041,13,success
+8,4,10,20,20,false,this change,-1.065518,3595,1143,14,success
+8,4,10,20,20,false,defined at,-1.057652,1779,656,15,success
+8,4,10,20,20,false,before setting,-1.034805,56,25,16,success
+8,4,10,20,20,false,syntax,1.024365,3888,1310,17,failure
+8,4,10,20,20,false,code has,-1.021707,11903,1717,18,success
+8,4,10,20,20,false,let's clean,-1.007378,725,417,19,success
+8,4,30,10,10,false,updated to,-1.231607,11295,1864,0,success
+8,4,30,10,10,false,output as,1.146427,2672,768,1,failure
+8,4,30,10,10,false,been updated,-1.145308,14091,2063,2,success
+8,4,30,10,10,false,relevant part,-1.132011,472,317,3,success
+8,4,30,10,10,false,we see,1.130900,3417,1053,4,failure
+8,4,30,10,10,false,same output,1.114861,2703,767,5,failure
+8,4,30,10,10,false,should fix,-1.110610,525,283,6,success
+8,4,30,10,10,false,calling it,1.087775,76,53,7,failure
+8,4,30,10,10,false,let's make,-1.083973,7334,1504,8,success
+8,4,30,10,10,false,results of,1.078326,2103,822,9,failure
+8,4,30,20,20,false,updated to,-1.231607,11295,1864,0,success
+8,4,30,20,20,false,output as,1.146427,2672,768,1,failure
+8,4,30,20,20,false,been updated,-1.145308,14091,2063,2,success
+8,4,30,20,20,false,relevant part,-1.132011,472,317,3,success
+8,4,30,20,20,false,we see,1.130900,3417,1053,4,failure
+8,4,30,20,20,false,same output,1.114861,2703,767,5,failure
+8,4,30,20,20,false,should fix,-1.110610,525,283,6,success
+8,4,30,20,20,false,calling it,1.087775,76,53,7,failure
+8,4,30,20,20,false,let's make,-1.083973,7334,1504,8,success
+8,4,30,20,20,false,results of,1.078326,2103,822,9,failure
+8,4,30,20,20,false,navigate to,-1.065684,16687,2041,10,success
+8,4,30,20,20,false,this change,-1.065518,3595,1143,11,success
+8,4,30,20,20,false,defined at,-1.057652,1779,656,12,success
+8,4,30,20,20,false,syntax,1.024365,3888,1310,13,failure
+8,4,30,20,20,false,code has,-1.021707,11903,1717,14,success
+8,4,30,20,20,false,let's clean,-1.007378,725,417,15,success
+8,4,30,20,20,false,script file,-1.000179,1652,825,16,success
+8,4,30,20,20,false,to verify,-0.999096,6078,1505,17,success
+8,4,30,20,20,false,the changes,-0.997833,5194,1513,18,success
+8,4,30,20,20,false,that line,-0.990948,7507,1400,19,success
+8,4,100,10,10,false,updated to,-1.231607,11295,1864,0,success
+8,4,100,10,10,false,output as,1.146427,2672,768,1,failure
+8,4,100,10,10,false,been updated,-1.145308,14091,2063,2,success
+8,4,100,10,10,false,relevant part,-1.132011,472,317,3,success
+8,4,100,10,10,false,we see,1.130900,3417,1053,4,failure
+8,4,100,10,10,false,same output,1.114861,2703,767,5,failure
+8,4,100,10,10,false,should fix,-1.110610,525,283,6,success
+8,4,100,10,10,false,let's make,-1.083973,7334,1504,7,success
+8,4,100,10,10,false,results of,1.078326,2103,822,8,failure
+8,4,100,10,10,false,navigate to,-1.065684,16687,2041,9,success
+8,4,100,20,20,false,updated to,-1.231607,11295,1864,0,success
+8,4,100,20,20,false,output as,1.146427,2672,768,1,failure
+8,4,100,20,20,false,been updated,-1.145308,14091,2063,2,success
+8,4,100,20,20,false,relevant part,-1.132011,472,317,3,success
+8,4,100,20,20,false,we see,1.130900,3417,1053,4,failure
+8,4,100,20,20,false,same output,1.114861,2703,767,5,failure
+8,4,100,20,20,false,should fix,-1.110610,525,283,6,success
+8,4,100,20,20,false,let's make,-1.083973,7334,1504,7,success
+8,4,100,20,20,false,results of,1.078326,2103,822,8,failure
+8,4,100,20,20,false,navigate to,-1.065684,16687,2041,9,success
+8,4,100,20,20,false,this change,-1.065518,3595,1143,10,success
+8,4,100,20,20,false,defined at,-1.057652,1779,656,11,success
+8,4,100,20,20,false,syntax,1.024365,3888,1310,12,failure
+8,4,100,20,20,false,code has,-1.021707,11903,1717,13,success
+8,4,100,20,20,false,let's clean,-1.007378,725,417,14,success
+8,4,100,20,20,false,script file,-1.000179,1652,825,15,success
+8,4,100,20,20,false,to verify,-0.999096,6078,1505,16,success
+8,4,100,20,20,false,the changes,-0.997833,5194,1513,17,success
+8,4,100,20,20,false,that line,-0.990948,7507,1400,18,success
+8,4,100,20,20,false,the results,0.983271,2689,1061,19,failure
+10,0,10,10,10,false,up by,-2.065753,1048,611,0,success
+10,0,10,10,10,false,no longer,-1.998300,1612,727,1,success
+10,0,10,10,10,false,file since,-1.982740,1086,579,2,success
+10,0,10,10,10,false,longer,-1.914281,1704,761,3,success
+10,0,10,10,10,false,longer needed,-1.893034,1100,546,4,success
+10,0,10,10,10,false,clean up,-1.729779,1433,773,5,success
+10,0,10,10,10,false,updated to,-1.660040,13029,2030,6,success
+10,0,10,10,10,false,clean,-1.539762,1641,818,7,success
+10,0,10,10,10,false,been resolved,-1.448897,2201,736,8,success
+10,0,10,10,10,false,let's clean,-1.409813,917,546,9,success
+10,0,10,20,20,false,up by,-2.065753,1048,611,0,success
+10,0,10,20,20,false,no longer,-1.998300,1612,727,1,success
+10,0,10,20,20,false,file since,-1.982740,1086,579,2,success
+10,0,10,20,20,false,longer,-1.914281,1704,761,3,success
+10,0,10,20,20,false,longer needed,-1.893034,1100,546,4,success
+10,0,10,20,20,false,clean up,-1.729779,1433,773,5,success
+10,0,10,20,20,false,updated to,-1.660040,13029,2030,6,success
+10,0,10,20,20,false,clean,-1.539762,1641,818,7,success
+10,0,10,20,20,false,been resolved,-1.448897,2201,736,8,success
+10,0,10,20,20,false,let's clean,-1.409813,917,546,9,success
+10,0,10,20,20,false,by removing,-1.357571,2314,1073,10,success
+10,0,10,20,20,false,been updated,-1.339293,15655,2146,11,success
+10,0,10,20,20,false,removing,-1.247370,2816,1194,12,success
+10,0,10,20,20,false,verify that,-1.245971,6255,1529,13,success
+10,0,10,20,20,false,issue has,-1.240891,2711,843,14,success
+10,0,10,20,20,false,code has,-1.220572,11812,1781,15,success
+10,0,10,20,20,false,to verify,-1.211130,6806,1681,16,success
+10,0,10,20,20,false,the changes,-1.194826,6138,1669,17,success
+10,0,10,20,20,false,removing the,-1.175662,2534,1122,18,success
+10,0,10,20,20,false,since it,-1.173328,1606,861,19,success
+10,0,30,10,10,false,up by,-2.065753,1048,611,0,success
+10,0,30,10,10,false,no longer,-1.998300,1612,727,1,success
+10,0,30,10,10,false,file since,-1.982740,1086,579,2,success
+10,0,30,10,10,false,longer,-1.914281,1704,761,3,success
+10,0,30,10,10,false,longer needed,-1.893034,1100,546,4,success
+10,0,30,10,10,false,clean up,-1.729779,1433,773,5,success
+10,0,30,10,10,false,updated to,-1.660040,13029,2030,6,success
+10,0,30,10,10,false,clean,-1.539762,1641,818,7,success
+10,0,30,10,10,false,been resolved,-1.448897,2201,736,8,success
+10,0,30,10,10,false,let's clean,-1.409813,917,546,9,success
+10,0,30,20,20,false,up by,-2.065753,1048,611,0,success
+10,0,30,20,20,false,no longer,-1.998300,1612,727,1,success
+10,0,30,20,20,false,file since,-1.982740,1086,579,2,success
+10,0,30,20,20,false,longer,-1.914281,1704,761,3,success
+10,0,30,20,20,false,longer needed,-1.893034,1100,546,4,success
+10,0,30,20,20,false,clean up,-1.729779,1433,773,5,success
+10,0,30,20,20,false,updated to,-1.660040,13029,2030,6,success
+10,0,30,20,20,false,clean,-1.539762,1641,818,7,success
+10,0,30,20,20,false,been resolved,-1.448897,2201,736,8,success
+10,0,30,20,20,false,let's clean,-1.409813,917,546,9,success
+10,0,30,20,20,false,by removing,-1.357571,2314,1073,10,success
+10,0,30,20,20,false,been updated,-1.339293,15655,2146,11,success
+10,0,30,20,20,false,removing,-1.247370,2816,1194,12,success
+10,0,30,20,20,false,verify that,-1.245971,6255,1529,13,success
+10,0,30,20,20,false,issue has,-1.240891,2711,843,14,success
+10,0,30,20,20,false,code has,-1.220572,11812,1781,15,success
+10,0,30,20,20,false,to verify,-1.211130,6806,1681,16,success
+10,0,30,20,20,false,the changes,-1.194826,6138,1669,17,success
+10,0,30,20,20,false,removing the,-1.175662,2534,1122,18,success
+10,0,30,20,20,false,since it,-1.173328,1606,861,19,success
+10,0,100,10,10,false,up by,-2.065753,1048,611,0,success
+10,0,100,10,10,false,no longer,-1.998300,1612,727,1,success
+10,0,100,10,10,false,file since,-1.982740,1086,579,2,success
+10,0,100,10,10,false,longer,-1.914281,1704,761,3,success
+10,0,100,10,10,false,longer needed,-1.893034,1100,546,4,success
+10,0,100,10,10,false,clean up,-1.729779,1433,773,5,success
+10,0,100,10,10,false,updated to,-1.660040,13029,2030,6,success
+10,0,100,10,10,false,clean,-1.539762,1641,818,7,success
+10,0,100,10,10,false,been resolved,-1.448897,2201,736,8,success
+10,0,100,10,10,false,let's clean,-1.409813,917,546,9,success
+10,0,100,20,20,false,up by,-2.065753,1048,611,0,success
+10,0,100,20,20,false,no longer,-1.998300,1612,727,1,success
+10,0,100,20,20,false,file since,-1.982740,1086,579,2,success
+10,0,100,20,20,false,longer,-1.914281,1704,761,3,success
+10,0,100,20,20,false,longer needed,-1.893034,1100,546,4,success
+10,0,100,20,20,false,clean up,-1.729779,1433,773,5,success
+10,0,100,20,20,false,updated to,-1.660040,13029,2030,6,success
+10,0,100,20,20,false,clean,-1.539762,1641,818,7,success
+10,0,100,20,20,false,been resolved,-1.448897,2201,736,8,success
+10,0,100,20,20,false,let's clean,-1.409813,917,546,9,success
+10,0,100,20,20,false,by removing,-1.357571,2314,1073,10,success
+10,0,100,20,20,false,been updated,-1.339293,15655,2146,11,success
+10,0,100,20,20,false,removing,-1.247370,2816,1194,12,success
+10,0,100,20,20,false,verify that,-1.245971,6255,1529,13,success
+10,0,100,20,20,false,issue has,-1.240891,2711,843,14,success
+10,0,100,20,20,false,code has,-1.220572,11812,1781,15,success
+10,0,100,20,20,false,to verify,-1.211130,6806,1681,16,success
+10,0,100,20,20,false,the changes,-1.194826,6138,1669,17,success
+10,0,100,20,20,false,removing the,-1.175662,2534,1122,18,success
+10,0,100,20,20,false,since it,-1.173328,1606,861,19,success
+10,1,10,10,10,false,up by,-2.183671,1056,611,0,success
+10,1,10,10,10,false,clean up,-1.990657,1448,780,1,success
+10,1,10,10,10,false,file since,-1.970590,1110,591,2,success
+10,1,10,10,10,false,longer needed,-1.917049,1137,558,3,success
+10,1,10,10,10,false,clean,-1.820529,1609,822,4,success
+10,1,10,10,10,false,no longer,-1.817895,1692,738,5,success
+10,1,10,10,10,false,let's clean,-1.815980,922,545,6,success
+10,1,10,10,10,false,updated to,-1.772822,13207,2022,7,success
+10,1,10,10,10,false,longer,-1.772090,1792,773,8,success
+10,1,10,10,10,false,to that,-1.553164,8307,1554,9,success
+10,1,10,20,20,false,up by,-2.183671,1056,611,0,success
+10,1,10,20,20,false,clean up,-1.990657,1448,780,1,success
+10,1,10,20,20,false,file since,-1.970590,1110,591,2,success
+10,1,10,20,20,false,longer needed,-1.917049,1137,558,3,success
+10,1,10,20,20,false,clean,-1.820529,1609,822,4,success
+10,1,10,20,20,false,no longer,-1.817895,1692,738,5,success
+10,1,10,20,20,false,let's clean,-1.815980,922,545,6,success
+10,1,10,20,20,false,updated to,-1.772822,13207,2022,7,success
+10,1,10,20,20,false,longer,-1.772090,1792,773,8,success
+10,1,10,20,20,false,to that,-1.553164,8307,1554,9,success
+10,1,10,20,20,false,by removing,-1.513848,2358,1067,10,success
+10,1,10,20,20,false,that line,-1.500519,8178,1505,11,success
+10,1,10,20,20,false,been resolved,-1.473666,2230,747,12,success
+10,1,10,20,20,false,verify that,-1.466181,6237,1554,13,success
+10,1,10,20,20,false,to verify,-1.427726,6795,1687,14,success
+10,1,10,20,20,false,been updated,-1.396877,15878,2142,15,success
+10,1,10,20,20,false,removing the,-1.330203,2623,1133,16,success
+10,1,10,20,20,false,since it,-1.315673,1638,877,17,success
+10,1,10,20,20,false,navigate to,-1.313870,16690,2107,18,success
+10,1,10,20,20,false,we see,1.298260,3125,1023,19,failure
+10,1,30,10,10,false,up by,-2.183671,1056,611,0,success
+10,1,30,10,10,false,clean up,-1.990657,1448,780,1,success
+10,1,30,10,10,false,file since,-1.970590,1110,591,2,success
+10,1,30,10,10,false,longer needed,-1.917049,1137,558,3,success
+10,1,30,10,10,false,clean,-1.820529,1609,822,4,success
+10,1,30,10,10,false,no longer,-1.817895,1692,738,5,success
+10,1,30,10,10,false,let's clean,-1.815980,922,545,6,success
+10,1,30,10,10,false,updated to,-1.772822,13207,2022,7,success
+10,1,30,10,10,false,longer,-1.772090,1792,773,8,success
+10,1,30,10,10,false,to that,-1.553164,8307,1554,9,success
+10,1,30,20,20,false,up by,-2.183671,1056,611,0,success
+10,1,30,20,20,false,clean up,-1.990657,1448,780,1,success
+10,1,30,20,20,false,file since,-1.970590,1110,591,2,success
+10,1,30,20,20,false,longer needed,-1.917049,1137,558,3,success
+10,1,30,20,20,false,clean,-1.820529,1609,822,4,success
+10,1,30,20,20,false,no longer,-1.817895,1692,738,5,success
+10,1,30,20,20,false,let's clean,-1.815980,922,545,6,success
+10,1,30,20,20,false,updated to,-1.772822,13207,2022,7,success
+10,1,30,20,20,false,longer,-1.772090,1792,773,8,success
+10,1,30,20,20,false,to that,-1.553164,8307,1554,9,success
+10,1,30,20,20,false,by removing,-1.513848,2358,1067,10,success
+10,1,30,20,20,false,that line,-1.500519,8178,1505,11,success
+10,1,30,20,20,false,been resolved,-1.473666,2230,747,12,success
+10,1,30,20,20,false,verify that,-1.466181,6237,1554,13,success
+10,1,30,20,20,false,to verify,-1.427726,6795,1687,14,success
+10,1,30,20,20,false,been updated,-1.396877,15878,2142,15,success
+10,1,30,20,20,false,removing the,-1.330203,2623,1133,16,success
+10,1,30,20,20,false,since it,-1.315673,1638,877,17,success
+10,1,30,20,20,false,navigate to,-1.313870,16690,2107,18,success
+10,1,30,20,20,false,we see,1.298260,3125,1023,19,failure
+10,1,100,10,10,false,up by,-2.183671,1056,611,0,success
+10,1,100,10,10,false,clean up,-1.990657,1448,780,1,success
+10,1,100,10,10,false,file since,-1.970590,1110,591,2,success
+10,1,100,10,10,false,longer needed,-1.917049,1137,558,3,success
+10,1,100,10,10,false,clean,-1.820529,1609,822,4,success
+10,1,100,10,10,false,no longer,-1.817895,1692,738,5,success
+10,1,100,10,10,false,let's clean,-1.815980,922,545,6,success
+10,1,100,10,10,false,updated to,-1.772822,13207,2022,7,success
+10,1,100,10,10,false,longer,-1.772090,1792,773,8,success
+10,1,100,10,10,false,to that,-1.553164,8307,1554,9,success
+10,1,100,20,20,false,up by,-2.183671,1056,611,0,success
+10,1,100,20,20,false,clean up,-1.990657,1448,780,1,success
+10,1,100,20,20,false,file since,-1.970590,1110,591,2,success
+10,1,100,20,20,false,longer needed,-1.917049,1137,558,3,success
+10,1,100,20,20,false,clean,-1.820529,1609,822,4,success
+10,1,100,20,20,false,no longer,-1.817895,1692,738,5,success
+10,1,100,20,20,false,let's clean,-1.815980,922,545,6,success
+10,1,100,20,20,false,updated to,-1.772822,13207,2022,7,success
+10,1,100,20,20,false,longer,-1.772090,1792,773,8,success
+10,1,100,20,20,false,to that,-1.553164,8307,1554,9,success
+10,1,100,20,20,false,by removing,-1.513848,2358,1067,10,success
+10,1,100,20,20,false,that line,-1.500519,8178,1505,11,success
+10,1,100,20,20,false,been resolved,-1.473666,2230,747,12,success
+10,1,100,20,20,false,verify that,-1.466181,6237,1554,13,success
+10,1,100,20,20,false,to verify,-1.427726,6795,1687,14,success
+10,1,100,20,20,false,been updated,-1.396877,15878,2142,15,success
+10,1,100,20,20,false,removing the,-1.330203,2623,1133,16,success
+10,1,100,20,20,false,since it,-1.315673,1638,877,17,success
+10,1,100,20,20,false,navigate to,-1.313870,16690,2107,18,success
+10,1,100,20,20,false,we see,1.298260,3125,1023,19,failure
+10,2,10,10,10,false,up by,-2.055450,1013,594,0,success
+10,2,10,10,10,false,longer needed,-1.922640,1088,560,1,success
+10,2,10,10,10,false,no longer,-1.833815,1638,752,2,success
+10,2,10,10,10,false,longer,-1.823936,1718,783,3,success
+10,2,10,10,10,false,updated to,-1.823250,12987,2035,4,success
+10,2,10,10,10,false,clean up,-1.810135,1396,766,5,success
+10,2,10,10,10,false,file since,-1.758107,1059,591,6,success
+10,2,10,10,10,false,clean,-1.658578,1628,818,7,success
+10,2,10,10,10,false,let's clean,-1.504449,906,544,8,success
+10,2,10,10,10,false,been updated,-1.498889,15652,2159,9,success
+10,2,10,20,20,false,up by,-2.055450,1013,594,0,success
+10,2,10,20,20,false,longer needed,-1.922640,1088,560,1,success
+10,2,10,20,20,false,no longer,-1.833815,1638,752,2,success
+10,2,10,20,20,false,longer,-1.823936,1718,783,3,success
+10,2,10,20,20,false,updated to,-1.823250,12987,2035,4,success
+10,2,10,20,20,false,clean up,-1.810135,1396,766,5,success
+10,2,10,20,20,false,file since,-1.758107,1059,591,6,success
+10,2,10,20,20,false,clean,-1.658578,1628,818,7,success
+10,2,10,20,20,false,let's clean,-1.504449,906,544,8,success
+10,2,10,20,20,false,been updated,-1.498889,15652,2159,9,success
+10,2,10,20,20,false,code base,-1.411524,232,204,10,success
+10,2,10,20,20,false,been resolved,-1.402243,2182,746,11,success
+10,2,10,20,20,false,to verify,-1.393202,6778,1678,12,success
+10,2,10,20,20,false,verify that,-1.387988,6192,1523,13,success
+10,2,10,20,20,false,we see,1.321887,3310,1047,14,failure
+10,2,10,20,20,false,since it,-1.318891,1606,898,15,success
+10,2,10,20,20,false,constructors,-1.308925,32,15,16,success
+10,2,10,20,20,false,that line,-1.288779,8380,1528,17,success
+10,2,10,20,20,false,issue has,-1.284492,2665,851,18,success
+10,2,10,20,20,false,to that,-1.274573,8488,1568,19,success
+10,2,30,10,10,false,up by,-2.055450,1013,594,0,success
+10,2,30,10,10,false,longer needed,-1.922640,1088,560,1,success
+10,2,30,10,10,false,no longer,-1.833815,1638,752,2,success
+10,2,30,10,10,false,longer,-1.823936,1718,783,3,success
+10,2,30,10,10,false,updated to,-1.823250,12987,2035,4,success
+10,2,30,10,10,false,clean up,-1.810135,1396,766,5,success
+10,2,30,10,10,false,file since,-1.758107,1059,591,6,success
+10,2,30,10,10,false,clean,-1.658578,1628,818,7,success
+10,2,30,10,10,false,let's clean,-1.504449,906,544,8,success
+10,2,30,10,10,false,been updated,-1.498889,15652,2159,9,success
+10,2,30,20,20,false,up by,-2.055450,1013,594,0,success
+10,2,30,20,20,false,longer needed,-1.922640,1088,560,1,success
+10,2,30,20,20,false,no longer,-1.833815,1638,752,2,success
+10,2,30,20,20,false,longer,-1.823936,1718,783,3,success
+10,2,30,20,20,false,updated to,-1.823250,12987,2035,4,success
+10,2,30,20,20,false,clean up,-1.810135,1396,766,5,success
+10,2,30,20,20,false,file since,-1.758107,1059,591,6,success
+10,2,30,20,20,false,clean,-1.658578,1628,818,7,success
+10,2,30,20,20,false,let's clean,-1.504449,906,544,8,success
+10,2,30,20,20,false,been updated,-1.498889,15652,2159,9,success
+10,2,30,20,20,false,code base,-1.411524,232,204,10,success
+10,2,30,20,20,false,been resolved,-1.402243,2182,746,11,success
+10,2,30,20,20,false,to verify,-1.393202,6778,1678,12,success
+10,2,30,20,20,false,verify that,-1.387988,6192,1523,13,success
+10,2,30,20,20,false,we see,1.321887,3310,1047,14,failure
+10,2,30,20,20,false,since it,-1.318891,1606,898,15,success
+10,2,30,20,20,false,that line,-1.288779,8380,1528,16,success
+10,2,30,20,20,false,issue has,-1.284492,2665,851,17,success
+10,2,30,20,20,false,to that,-1.274573,8488,1568,18,success
+10,2,30,20,20,false,output now,-1.264425,237,124,19,success
+10,2,100,10,10,false,up by,-2.055450,1013,594,0,success
+10,2,100,10,10,false,longer needed,-1.922640,1088,560,1,success
+10,2,100,10,10,false,no longer,-1.833815,1638,752,2,success
+10,2,100,10,10,false,longer,-1.823936,1718,783,3,success
+10,2,100,10,10,false,updated to,-1.823250,12987,2035,4,success
+10,2,100,10,10,false,clean up,-1.810135,1396,766,5,success
+10,2,100,10,10,false,file since,-1.758107,1059,591,6,success
+10,2,100,10,10,false,clean,-1.658578,1628,818,7,success
+10,2,100,10,10,false,let's clean,-1.504449,906,544,8,success
+10,2,100,10,10,false,been updated,-1.498889,15652,2159,9,success
+10,2,100,20,20,false,up by,-2.055450,1013,594,0,success
+10,2,100,20,20,false,longer needed,-1.922640,1088,560,1,success
+10,2,100,20,20,false,no longer,-1.833815,1638,752,2,success
+10,2,100,20,20,false,longer,-1.823936,1718,783,3,success
+10,2,100,20,20,false,updated to,-1.823250,12987,2035,4,success
+10,2,100,20,20,false,clean up,-1.810135,1396,766,5,success
+10,2,100,20,20,false,file since,-1.758107,1059,591,6,success
+10,2,100,20,20,false,clean,-1.658578,1628,818,7,success
+10,2,100,20,20,false,let's clean,-1.504449,906,544,8,success
+10,2,100,20,20,false,been updated,-1.498889,15652,2159,9,success
+10,2,100,20,20,false,code base,-1.411524,232,204,10,success
+10,2,100,20,20,false,been resolved,-1.402243,2182,746,11,success
+10,2,100,20,20,false,to verify,-1.393202,6778,1678,12,success
+10,2,100,20,20,false,verify that,-1.387988,6192,1523,13,success
+10,2,100,20,20,false,we see,1.321887,3310,1047,14,failure
+10,2,100,20,20,false,since it,-1.318891,1606,898,15,success
+10,2,100,20,20,false,that line,-1.288779,8380,1528,16,success
+10,2,100,20,20,false,issue has,-1.284492,2665,851,17,success
+10,2,100,20,20,false,to that,-1.274573,8488,1568,18,success
+10,2,100,20,20,false,output now,-1.264425,237,124,19,success
+10,3,10,10,10,false,up by,-2.043790,1086,635,0,success
+10,3,10,10,10,false,clean up,-1.891382,1465,801,1,success
+10,3,10,10,10,false,file since,-1.870400,1121,600,2,success
+10,3,10,10,10,false,clean,-1.734343,1654,841,3,success
+10,3,10,10,10,false,let's clean,-1.725072,922,549,4,success
+10,3,10,10,10,false,no longer,-1.656166,1690,746,5,success
+10,3,10,10,10,false,longer needed,-1.652863,1158,579,6,success
+10,3,10,10,10,false,updated to,-1.631028,13178,2040,7,success
+10,3,10,10,10,false,longer,-1.563623,1764,777,8,success
+10,3,10,10,10,false,to that,-1.350046,8408,1574,9,success
+10,3,10,20,20,false,up by,-2.043790,1086,635,0,success
+10,3,10,20,20,false,clean up,-1.891382,1465,801,1,success
+10,3,10,20,20,false,file since,-1.870400,1121,600,2,success
+10,3,10,20,20,false,clean,-1.734343,1654,841,3,success
+10,3,10,20,20,false,let's clean,-1.725072,922,549,4,success
+10,3,10,20,20,false,no longer,-1.656166,1690,746,5,success
+10,3,10,20,20,false,longer needed,-1.652863,1158,579,6,success
+10,3,10,20,20,false,updated to,-1.631028,13178,2040,7,success
+10,3,10,20,20,false,longer,-1.563623,1764,777,8,success
+10,3,10,20,20,false,to that,-1.350046,8408,1574,9,success
+10,3,10,20,20,false,verify that,-1.340203,6323,1553,10,success
+10,3,10,20,20,false,been resolved,-1.328923,2122,751,11,success
+10,3,10,20,20,false,that line,-1.290227,8294,1517,12,success
+10,3,10,20,20,false,constructors,-1.249440,36,19,13,success
+10,3,10,20,20,false,the changes,-1.224028,6212,1694,14,success
+10,3,10,20,20,false,since it,-1.218774,1638,897,15,success
+10,3,10,20,20,false,to verify,-1.213909,6909,1702,16,success
+10,3,10,20,20,false,resolved,-1.211866,3673,1096,17,success
+10,3,10,20,20,false,by removing,-1.207898,2398,1077,18,success
+10,3,10,20,20,false,been updated,-1.197291,15754,2159,19,success
+10,3,30,10,10,false,up by,-2.043790,1086,635,0,success
+10,3,30,10,10,false,clean up,-1.891382,1465,801,1,success
+10,3,30,10,10,false,file since,-1.870400,1121,600,2,success
+10,3,30,10,10,false,clean,-1.734343,1654,841,3,success
+10,3,30,10,10,false,let's clean,-1.725072,922,549,4,success
+10,3,30,10,10,false,no longer,-1.656166,1690,746,5,success
+10,3,30,10,10,false,longer needed,-1.652863,1158,579,6,success
+10,3,30,10,10,false,updated to,-1.631028,13178,2040,7,success
+10,3,30,10,10,false,longer,-1.563623,1764,777,8,success
+10,3,30,10,10,false,to that,-1.350046,8408,1574,9,success
+10,3,30,20,20,false,up by,-2.043790,1086,635,0,success
+10,3,30,20,20,false,clean up,-1.891382,1465,801,1,success
+10,3,30,20,20,false,file since,-1.870400,1121,600,2,success
+10,3,30,20,20,false,clean,-1.734343,1654,841,3,success
+10,3,30,20,20,false,let's clean,-1.725072,922,549,4,success
+10,3,30,20,20,false,no longer,-1.656166,1690,746,5,success
+10,3,30,20,20,false,longer needed,-1.652863,1158,579,6,success
+10,3,30,20,20,false,updated to,-1.631028,13178,2040,7,success
+10,3,30,20,20,false,longer,-1.563623,1764,777,8,success
+10,3,30,20,20,false,to that,-1.350046,8408,1574,9,success
+10,3,30,20,20,false,verify that,-1.340203,6323,1553,10,success
+10,3,30,20,20,false,been resolved,-1.328923,2122,751,11,success
+10,3,30,20,20,false,that line,-1.290227,8294,1517,12,success
+10,3,30,20,20,false,the changes,-1.224028,6212,1694,13,success
+10,3,30,20,20,false,since it,-1.218774,1638,897,14,success
+10,3,30,20,20,false,to verify,-1.213909,6909,1702,15,success
+10,3,30,20,20,false,resolved,-1.211866,3673,1096,16,success
+10,3,30,20,20,false,by removing,-1.207898,2398,1077,17,success
+10,3,30,20,20,false,been updated,-1.197291,15754,2159,18,success
+10,3,30,20,20,false,code has,-1.189475,11975,1777,19,success
+10,3,100,10,10,false,up by,-2.043790,1086,635,0,success
+10,3,100,10,10,false,clean up,-1.891382,1465,801,1,success
+10,3,100,10,10,false,file since,-1.870400,1121,600,2,success
+10,3,100,10,10,false,clean,-1.734343,1654,841,3,success
+10,3,100,10,10,false,let's clean,-1.725072,922,549,4,success
+10,3,100,10,10,false,no longer,-1.656166,1690,746,5,success
+10,3,100,10,10,false,longer needed,-1.652863,1158,579,6,success
+10,3,100,10,10,false,updated to,-1.631028,13178,2040,7,success
+10,3,100,10,10,false,longer,-1.563623,1764,777,8,success
+10,3,100,10,10,false,to that,-1.350046,8408,1574,9,success
+10,3,100,20,20,false,up by,-2.043790,1086,635,0,success
+10,3,100,20,20,false,clean up,-1.891382,1465,801,1,success
+10,3,100,20,20,false,file since,-1.870400,1121,600,2,success
+10,3,100,20,20,false,clean,-1.734343,1654,841,3,success
+10,3,100,20,20,false,let's clean,-1.725072,922,549,4,success
+10,3,100,20,20,false,no longer,-1.656166,1690,746,5,success
+10,3,100,20,20,false,longer needed,-1.652863,1158,579,6,success
+10,3,100,20,20,false,updated to,-1.631028,13178,2040,7,success
+10,3,100,20,20,false,longer,-1.563623,1764,777,8,success
+10,3,100,20,20,false,to that,-1.350046,8408,1574,9,success
+10,3,100,20,20,false,verify that,-1.340203,6323,1553,10,success
+10,3,100,20,20,false,been resolved,-1.328923,2122,751,11,success
+10,3,100,20,20,false,that line,-1.290227,8294,1517,12,success
+10,3,100,20,20,false,the changes,-1.224028,6212,1694,13,success
+10,3,100,20,20,false,since it,-1.218774,1638,897,14,success
+10,3,100,20,20,false,to verify,-1.213909,6909,1702,15,success
+10,3,100,20,20,false,resolved,-1.211866,3673,1096,16,success
+10,3,100,20,20,false,by removing,-1.207898,2398,1077,17,success
+10,3,100,20,20,false,been updated,-1.197291,15754,2159,18,success
+10,3,100,20,20,false,code has,-1.189475,11975,1777,19,success
+10,4,10,10,10,false,up by,-2.047251,1033,589,0,success
+10,4,10,10,10,false,clean up,-1.909841,1410,752,1,success
+10,4,10,10,10,false,no longer,-1.726346,1676,741,2,success
+10,4,10,10,10,false,longer needed,-1.696728,1113,553,3,success
+10,4,10,10,10,false,clean,-1.674061,1616,801,4,success
+10,4,10,10,10,false,let's clean,-1.669860,905,524,5,success
+10,4,10,10,10,false,longer,-1.666095,1774,778,6,success
+10,4,10,10,10,false,file since,-1.656799,1092,571,7,success
+10,4,10,10,10,false,updated to,-1.631133,12931,2033,8,success
+10,4,10,10,10,false,by removing,-1.476332,2305,1053,9,success
+10,4,10,20,20,false,up by,-2.047251,1033,589,0,success
+10,4,10,20,20,false,clean up,-1.909841,1410,752,1,success
+10,4,10,20,20,false,no longer,-1.726346,1676,741,2,success
+10,4,10,20,20,false,longer needed,-1.696728,1113,553,3,success
+10,4,10,20,20,false,clean,-1.674061,1616,801,4,success
+10,4,10,20,20,false,let's clean,-1.669860,905,524,5,success
+10,4,10,20,20,false,longer,-1.666095,1774,778,6,success
+10,4,10,20,20,false,file since,-1.656799,1092,571,7,success
+10,4,10,20,20,false,updated to,-1.631133,12931,2033,8,success
+10,4,10,20,20,false,by removing,-1.476332,2305,1053,9,success
+10,4,10,20,20,false,been resolved,-1.455914,2137,744,10,success
+10,4,10,20,20,false,removing,-1.407060,2808,1168,11,success
+10,4,10,20,20,false,been updated,-1.393298,15521,2142,12,success
+10,4,10,20,20,false,removing the,-1.347267,2539,1098,13,success
+10,4,10,20,20,false,the changes,-1.262630,6183,1680,14,success
+10,4,10,20,20,false,constructors,-1.221719,37,19,15,success
+10,4,10,20,20,false,issue has,-1.205132,2630,859,16,success
+10,4,10,20,20,false,code has,-1.154448,11885,1780,17,success
+10,4,10,20,20,false,resolved,-1.148464,3725,1077,18,success
+10,4,10,20,20,false,code base,-1.144471,239,208,19,success
+10,4,30,10,10,false,up by,-2.047251,1033,589,0,success
+10,4,30,10,10,false,clean up,-1.909841,1410,752,1,success
+10,4,30,10,10,false,no longer,-1.726346,1676,741,2,success
+10,4,30,10,10,false,longer needed,-1.696728,1113,553,3,success
+10,4,30,10,10,false,clean,-1.674061,1616,801,4,success
+10,4,30,10,10,false,let's clean,-1.669860,905,524,5,success
+10,4,30,10,10,false,longer,-1.666095,1774,778,6,success
+10,4,30,10,10,false,file since,-1.656799,1092,571,7,success
+10,4,30,10,10,false,updated to,-1.631133,12931,2033,8,success
+10,4,30,10,10,false,by removing,-1.476332,2305,1053,9,success
+10,4,30,20,20,false,up by,-2.047251,1033,589,0,success
+10,4,30,20,20,false,clean up,-1.909841,1410,752,1,success
+10,4,30,20,20,false,no longer,-1.726346,1676,741,2,success
+10,4,30,20,20,false,longer needed,-1.696728,1113,553,3,success
+10,4,30,20,20,false,clean,-1.674061,1616,801,4,success
+10,4,30,20,20,false,let's clean,-1.669860,905,524,5,success
+10,4,30,20,20,false,longer,-1.666095,1774,778,6,success
+10,4,30,20,20,false,file since,-1.656799,1092,571,7,success
+10,4,30,20,20,false,updated to,-1.631133,12931,2033,8,success
+10,4,30,20,20,false,by removing,-1.476332,2305,1053,9,success
+10,4,30,20,20,false,been resolved,-1.455914,2137,744,10,success
+10,4,30,20,20,false,removing,-1.407060,2808,1168,11,success
+10,4,30,20,20,false,been updated,-1.393298,15521,2142,12,success
+10,4,30,20,20,false,removing the,-1.347267,2539,1098,13,success
+10,4,30,20,20,false,the changes,-1.262630,6183,1680,14,success
+10,4,30,20,20,false,issue has,-1.205132,2630,859,15,success
+10,4,30,20,20,false,code has,-1.154448,11885,1780,16,success
+10,4,30,20,20,false,resolved,-1.148464,3725,1077,17,success
+10,4,30,20,20,false,code base,-1.144471,239,208,18,success
+10,4,30,20,20,false,verify that,-1.128220,6241,1517,19,success
+10,4,100,10,10,false,up by,-2.047251,1033,589,0,success
+10,4,100,10,10,false,clean up,-1.909841,1410,752,1,success
+10,4,100,10,10,false,no longer,-1.726346,1676,741,2,success
+10,4,100,10,10,false,longer needed,-1.696728,1113,553,3,success
+10,4,100,10,10,false,clean,-1.674061,1616,801,4,success
+10,4,100,10,10,false,let's clean,-1.669860,905,524,5,success
+10,4,100,10,10,false,longer,-1.666095,1774,778,6,success
+10,4,100,10,10,false,file since,-1.656799,1092,571,7,success
+10,4,100,10,10,false,updated to,-1.631133,12931,2033,8,success
+10,4,100,10,10,false,by removing,-1.476332,2305,1053,9,success
+10,4,100,20,20,false,up by,-2.047251,1033,589,0,success
+10,4,100,20,20,false,clean up,-1.909841,1410,752,1,success
+10,4,100,20,20,false,no longer,-1.726346,1676,741,2,success
+10,4,100,20,20,false,longer needed,-1.696728,1113,553,3,success
+10,4,100,20,20,false,clean,-1.674061,1616,801,4,success
+10,4,100,20,20,false,let's clean,-1.669860,905,524,5,success
+10,4,100,20,20,false,longer,-1.666095,1774,778,6,success
+10,4,100,20,20,false,file since,-1.656799,1092,571,7,success
+10,4,100,20,20,false,updated to,-1.631133,12931,2033,8,success
+10,4,100,20,20,false,by removing,-1.476332,2305,1053,9,success
+10,4,100,20,20,false,been resolved,-1.455914,2137,744,10,success
+10,4,100,20,20,false,removing,-1.407060,2808,1168,11,success
+10,4,100,20,20,false,been updated,-1.393298,15521,2142,12,success
+10,4,100,20,20,false,removing the,-1.347267,2539,1098,13,success
+10,4,100,20,20,false,the changes,-1.262630,6183,1680,14,success
+10,4,100,20,20,false,issue has,-1.205132,2630,859,15,success
+10,4,100,20,20,false,code has,-1.154448,11885,1780,16,success
+10,4,100,20,20,false,resolved,-1.148464,3725,1077,17,success
+10,4,100,20,20,false,code base,-1.144471,239,208,18,success
+10,4,100,20,20,false,verify that,-1.128220,6241,1517,19,success
+15,0,10,10,10,false,up by,-1.662721,776,556,0,success
+15,0,10,10,10,false,no longer,-1.493341,1222,704,1,success
+15,0,10,10,10,false,longer needed,-1.473743,766,509,2,success
+15,0,10,10,10,false,longer,-1.407334,1313,740,3,success
+15,0,10,10,10,false,updated to,-1.368778,12478,2112,4,success
+15,0,10,10,10,false,file since,-1.367573,762,530,5,success
+15,0,10,10,10,false,been resolved,-1.340200,2499,867,6,success
+15,0,10,10,10,false,issue has,-1.319922,2820,919,7,success
+15,0,10,10,10,false,fix by,-1.188110,83,64,8,success
+15,0,10,10,10,false,been updated,-1.184960,14436,2178,9,success
+15,0,10,20,20,false,up by,-1.662721,776,556,0,success
+15,0,10,20,20,false,no longer,-1.493341,1222,704,1,success
+15,0,10,20,20,false,longer needed,-1.473743,766,509,2,success
+15,0,10,20,20,false,longer,-1.407334,1313,740,3,success
+15,0,10,20,20,false,updated to,-1.368778,12478,2112,4,success
+15,0,10,20,20,false,file since,-1.367573,762,530,5,success
+15,0,10,20,20,false,been resolved,-1.340200,2499,867,6,success
+15,0,10,20,20,false,issue has,-1.319922,2820,919,7,success
+15,0,10,20,20,false,fix by,-1.188110,83,64,8,success
+15,0,10,20,20,false,been updated,-1.184960,14436,2178,9,success
+15,0,10,20,20,false,before comparing,-1.179020,96,41,10,success
+15,0,10,20,20,false,let's edit,-1.134118,8475,1977,11,success
+15,0,10,20,20,false,remaining portion,-1.116702,10,10,12,success
+15,0,10,20,20,false,to verify,-1.100925,6578,1776,13,success
+15,0,10,20,20,false,that our,-1.084407,2219,1103,14,success
+15,0,10,20,20,false,code has,-1.081860,9445,1759,15,success
+15,0,10,20,20,false,verify that,-1.025120,6021,1664,16,success
+15,0,10,20,20,false,desired effect,-1.016314,1475,665,17,success
+15,0,10,20,20,false,the desired,-1.010596,1930,881,18,success
+15,0,10,20,20,false,the change,-1.008577,1225,659,19,success
+15,0,30,10,10,false,up by,-1.662721,776,556,0,success
+15,0,30,10,10,false,no longer,-1.493341,1222,704,1,success
+15,0,30,10,10,false,longer needed,-1.473743,766,509,2,success
+15,0,30,10,10,false,longer,-1.407334,1313,740,3,success
+15,0,30,10,10,false,updated to,-1.368778,12478,2112,4,success
+15,0,30,10,10,false,file since,-1.367573,762,530,5,success
+15,0,30,10,10,false,been resolved,-1.340200,2499,867,6,success
+15,0,30,10,10,false,issue has,-1.319922,2820,919,7,success
+15,0,30,10,10,false,fix by,-1.188110,83,64,8,success
+15,0,30,10,10,false,been updated,-1.184960,14436,2178,9,success
+15,0,30,20,20,false,up by,-1.662721,776,556,0,success
+15,0,30,20,20,false,no longer,-1.493341,1222,704,1,success
+15,0,30,20,20,false,longer needed,-1.473743,766,509,2,success
+15,0,30,20,20,false,longer,-1.407334,1313,740,3,success
+15,0,30,20,20,false,updated to,-1.368778,12478,2112,4,success
+15,0,30,20,20,false,file since,-1.367573,762,530,5,success
+15,0,30,20,20,false,been resolved,-1.340200,2499,867,6,success
+15,0,30,20,20,false,issue has,-1.319922,2820,919,7,success
+15,0,30,20,20,false,fix by,-1.188110,83,64,8,success
+15,0,30,20,20,false,been updated,-1.184960,14436,2178,9,success
+15,0,30,20,20,false,before comparing,-1.179020,96,41,10,success
+15,0,30,20,20,false,let's edit,-1.134118,8475,1977,11,success
+15,0,30,20,20,false,to verify,-1.100925,6578,1776,12,success
+15,0,30,20,20,false,that our,-1.084407,2219,1103,13,success
+15,0,30,20,20,false,code has,-1.081860,9445,1759,14,success
+15,0,30,20,20,false,verify that,-1.025120,6021,1664,15,success
+15,0,30,20,20,false,desired effect,-1.016314,1475,665,16,success
+15,0,30,20,20,false,the desired,-1.010596,1930,881,17,success
+15,0,30,20,20,false,the change,-1.008577,1225,659,18,success
+15,0,30,20,20,false,our changes,-1.001193,1807,979,19,success
+15,0,100,10,10,false,up by,-1.662721,776,556,0,success
+15,0,100,10,10,false,no longer,-1.493341,1222,704,1,success
+15,0,100,10,10,false,longer needed,-1.473743,766,509,2,success
+15,0,100,10,10,false,longer,-1.407334,1313,740,3,success
+15,0,100,10,10,false,updated to,-1.368778,12478,2112,4,success
+15,0,100,10,10,false,file since,-1.367573,762,530,5,success
+15,0,100,10,10,false,been resolved,-1.340200,2499,867,6,success
+15,0,100,10,10,false,issue has,-1.319922,2820,919,7,success
+15,0,100,10,10,false,been updated,-1.184960,14436,2178,8,success
+15,0,100,10,10,false,let's edit,-1.134118,8475,1977,9,success
+15,0,100,20,20,false,up by,-1.662721,776,556,0,success
+15,0,100,20,20,false,no longer,-1.493341,1222,704,1,success
+15,0,100,20,20,false,longer needed,-1.473743,766,509,2,success
+15,0,100,20,20,false,longer,-1.407334,1313,740,3,success
+15,0,100,20,20,false,updated to,-1.368778,12478,2112,4,success
+15,0,100,20,20,false,file since,-1.367573,762,530,5,success
+15,0,100,20,20,false,been resolved,-1.340200,2499,867,6,success
+15,0,100,20,20,false,issue has,-1.319922,2820,919,7,success
+15,0,100,20,20,false,been updated,-1.184960,14436,2178,8,success
+15,0,100,20,20,false,let's edit,-1.134118,8475,1977,9,success
+15,0,100,20,20,false,to verify,-1.100925,6578,1776,10,success
+15,0,100,20,20,false,that our,-1.084407,2219,1103,11,success
+15,0,100,20,20,false,code has,-1.081860,9445,1759,12,success
+15,0,100,20,20,false,verify that,-1.025120,6021,1664,13,success
+15,0,100,20,20,false,desired effect,-1.016314,1475,665,14,success
+15,0,100,20,20,false,the desired,-1.010596,1930,881,15,success
+15,0,100,20,20,false,the change,-1.008577,1225,659,16,success
+15,0,100,20,20,false,our changes,-1.001193,1807,979,17,success
+15,0,100,20,20,false,updated,-0.979598,15821,2227,18,success
+15,0,100,20,20,false,desired,-0.973888,1957,894,19,success
+15,1,10,10,10,false,up by,-1.761205,810,572,0,success
+15,1,10,10,10,false,clean up,-1.384450,1252,798,1,success
+15,1,10,10,10,false,no longer,-1.365828,1303,734,2,success
+15,1,10,10,10,false,longer needed,-1.325986,803,535,3,success
+15,1,10,10,10,false,let's clean,-1.319096,808,545,4,success
+15,1,10,10,10,false,longer,-1.284585,1393,765,5,success
+15,1,10,10,10,false,updated to,-1.280758,12615,2112,6,success
+15,1,10,10,10,false,that line,-1.241662,7049,1559,7,success
+15,1,10,10,10,false,file since,-1.211878,782,548,8,success
+15,1,10,10,10,false,that our,-1.195547,2232,1097,9,success
+15,1,10,20,20,false,up by,-1.761205,810,572,0,success
+15,1,10,20,20,false,clean up,-1.384450,1252,798,1,success
+15,1,10,20,20,false,no longer,-1.365828,1303,734,2,success
+15,1,10,20,20,false,longer needed,-1.325986,803,535,3,success
+15,1,10,20,20,false,let's clean,-1.319096,808,545,4,success
+15,1,10,20,20,false,longer,-1.284585,1393,765,5,success
+15,1,10,20,20,false,updated to,-1.280758,12615,2112,6,success
+15,1,10,20,20,false,that line,-1.241662,7049,1559,7,success
+15,1,10,20,20,false,file since,-1.211878,782,548,8,success
+15,1,10,20,20,false,that our,-1.195547,2232,1097,9,success
+15,1,10,20,20,false,clean,-1.188017,1431,856,10,success
+15,1,10,20,20,false,to that,-1.175361,7083,1591,11,success
+15,1,10,20,20,false,line to,-1.150137,7099,1607,12,success
+15,1,10,20,20,false,by removing,-1.145407,2436,1207,13,success
+15,1,10,20,20,false,to verify,-1.124496,6582,1789,14,success
+15,1,10,20,20,false,been updated,-1.122052,14598,2178,15,success
+15,1,10,20,20,false,url before,-1.112567,28,18,16,success
+15,1,10,20,20,false,at line,-1.083718,7180,1695,17,success
+15,1,10,20,20,false,issue has,-1.041123,2801,954,18,success
+15,1,10,20,20,false,navigate to,-1.040065,13641,2112,19,success
+15,1,30,10,10,false,up by,-1.761205,810,572,0,success
+15,1,30,10,10,false,clean up,-1.384450,1252,798,1,success
+15,1,30,10,10,false,no longer,-1.365828,1303,734,2,success
+15,1,30,10,10,false,longer needed,-1.325986,803,535,3,success
+15,1,30,10,10,false,let's clean,-1.319096,808,545,4,success
+15,1,30,10,10,false,longer,-1.284585,1393,765,5,success
+15,1,30,10,10,false,updated to,-1.280758,12615,2112,6,success
+15,1,30,10,10,false,that line,-1.241662,7049,1559,7,success
+15,1,30,10,10,false,file since,-1.211878,782,548,8,success
+15,1,30,10,10,false,that our,-1.195547,2232,1097,9,success
+15,1,30,20,20,false,up by,-1.761205,810,572,0,success
+15,1,30,20,20,false,clean up,-1.384450,1252,798,1,success
+15,1,30,20,20,false,no longer,-1.365828,1303,734,2,success
+15,1,30,20,20,false,longer needed,-1.325986,803,535,3,success
+15,1,30,20,20,false,let's clean,-1.319096,808,545,4,success
+15,1,30,20,20,false,longer,-1.284585,1393,765,5,success
+15,1,30,20,20,false,updated to,-1.280758,12615,2112,6,success
+15,1,30,20,20,false,that line,-1.241662,7049,1559,7,success
+15,1,30,20,20,false,file since,-1.211878,782,548,8,success
+15,1,30,20,20,false,that our,-1.195547,2232,1097,9,success
+15,1,30,20,20,false,clean,-1.188017,1431,856,10,success
+15,1,30,20,20,false,to that,-1.175361,7083,1591,11,success
+15,1,30,20,20,false,line to,-1.150137,7099,1607,12,success
+15,1,30,20,20,false,by removing,-1.145407,2436,1207,13,success
+15,1,30,20,20,false,to verify,-1.124496,6582,1789,14,success
+15,1,30,20,20,false,been updated,-1.122052,14598,2178,15,success
+15,1,30,20,20,false,at line,-1.083718,7180,1695,16,success
+15,1,30,20,20,false,issue has,-1.041123,2801,954,17,success
+15,1,30,20,20,false,navigate to,-1.040065,13641,2112,18,success
+15,1,30,20,20,false,verify that,-1.037061,6003,1667,19,success
+15,1,100,10,10,false,up by,-1.761205,810,572,0,success
+15,1,100,10,10,false,clean up,-1.384450,1252,798,1,success
+15,1,100,10,10,false,no longer,-1.365828,1303,734,2,success
+15,1,100,10,10,false,longer needed,-1.325986,803,535,3,success
+15,1,100,10,10,false,let's clean,-1.319096,808,545,4,success
+15,1,100,10,10,false,longer,-1.284585,1393,765,5,success
+15,1,100,10,10,false,updated to,-1.280758,12615,2112,6,success
+15,1,100,10,10,false,that line,-1.241662,7049,1559,7,success
+15,1,100,10,10,false,file since,-1.211878,782,548,8,success
+15,1,100,10,10,false,that our,-1.195547,2232,1097,9,success
+15,1,100,20,20,false,up by,-1.761205,810,572,0,success
+15,1,100,20,20,false,clean up,-1.384450,1252,798,1,success
+15,1,100,20,20,false,no longer,-1.365828,1303,734,2,success
+15,1,100,20,20,false,longer needed,-1.325986,803,535,3,success
+15,1,100,20,20,false,let's clean,-1.319096,808,545,4,success
+15,1,100,20,20,false,longer,-1.284585,1393,765,5,success
+15,1,100,20,20,false,updated to,-1.280758,12615,2112,6,success
+15,1,100,20,20,false,that line,-1.241662,7049,1559,7,success
+15,1,100,20,20,false,file since,-1.211878,782,548,8,success
+15,1,100,20,20,false,that our,-1.195547,2232,1097,9,success
+15,1,100,20,20,false,clean,-1.188017,1431,856,10,success
+15,1,100,20,20,false,to that,-1.175361,7083,1591,11,success
+15,1,100,20,20,false,line to,-1.150137,7099,1607,12,success
+15,1,100,20,20,false,by removing,-1.145407,2436,1207,13,success
+15,1,100,20,20,false,to verify,-1.124496,6582,1789,14,success
+15,1,100,20,20,false,been updated,-1.122052,14598,2178,15,success
+15,1,100,20,20,false,at line,-1.083718,7180,1695,16,success
+15,1,100,20,20,false,issue has,-1.041123,2801,954,17,success
+15,1,100,20,20,false,navigate to,-1.040065,13641,2112,18,success
+15,1,100,20,20,false,verify that,-1.037061,6003,1667,19,success
+15,2,10,10,10,false,up by,-1.566896,777,543,0,success
+15,2,10,10,10,false,issue has,-1.454416,2816,962,1,success
+15,2,10,10,10,false,longer needed,-1.423755,778,514,2,success
+15,2,10,10,10,false,updated to,-1.394780,12517,2121,3,success
+15,2,10,10,10,false,been resolved,-1.361818,2491,897,4,success
+15,2,10,10,10,false,no longer,-1.341043,1278,707,5,success
+15,2,10,10,10,false,longer,-1.302531,1354,737,6,success
+15,2,10,10,10,false,been updated,-1.255761,14527,2184,7,success
+15,2,10,10,10,false,url before,-1.154565,26,15,8,success
+15,2,10,10,10,false,verify that,-1.109415,5972,1650,9,success
+15,2,10,20,20,false,up by,-1.566896,777,543,0,success
+15,2,10,20,20,false,issue has,-1.454416,2816,962,1,success
+15,2,10,20,20,false,longer needed,-1.423755,778,514,2,success
+15,2,10,20,20,false,updated to,-1.394780,12517,2121,3,success
+15,2,10,20,20,false,been resolved,-1.361818,2491,897,4,success
+15,2,10,20,20,false,no longer,-1.341043,1278,707,5,success
+15,2,10,20,20,false,longer,-1.302531,1354,737,6,success
+15,2,10,20,20,false,been updated,-1.255761,14527,2184,7,success
+15,2,10,20,20,false,url before,-1.154565,26,15,8,success
+15,2,10,20,20,false,verify that,-1.109415,5972,1650,9,success
+15,2,10,20,20,false,clean up,-1.104070,1220,767,10,success
+15,2,10,20,20,false,to verify,-1.092203,6593,1781,11,success
+15,2,10,20,20,false,that our,-1.091603,2228,1108,12,success
+15,2,10,20,20,false,updated,-1.058493,15948,2229,13,success
+15,2,10,20,20,false,desired effect,-1.007876,1508,671,14,success
+15,2,10,20,20,false,let's clean,-1.004447,801,534,15,success
+15,2,10,20,20,false,file since,-0.989787,766,534,16,success
+15,2,10,20,20,false,resolved,-0.986507,4568,1301,17,success
+15,2,10,20,20,false,change has,-0.980663,1426,663,18,success
+15,2,10,20,20,false,for excluding,-0.979415,13,11,19,success
+15,2,30,10,10,false,up by,-1.566896,777,543,0,success
+15,2,30,10,10,false,issue has,-1.454416,2816,962,1,success
+15,2,30,10,10,false,longer needed,-1.423755,778,514,2,success
+15,2,30,10,10,false,updated to,-1.394780,12517,2121,3,success
+15,2,30,10,10,false,been resolved,-1.361818,2491,897,4,success
+15,2,30,10,10,false,no longer,-1.341043,1278,707,5,success
+15,2,30,10,10,false,longer,-1.302531,1354,737,6,success
+15,2,30,10,10,false,been updated,-1.255761,14527,2184,7,success
+15,2,30,10,10,false,verify that,-1.109415,5972,1650,8,success
+15,2,30,10,10,false,clean up,-1.104070,1220,767,9,success
+15,2,30,20,20,false,up by,-1.566896,777,543,0,success
+15,2,30,20,20,false,issue has,-1.454416,2816,962,1,success
+15,2,30,20,20,false,longer needed,-1.423755,778,514,2,success
+15,2,30,20,20,false,updated to,-1.394780,12517,2121,3,success
+15,2,30,20,20,false,been resolved,-1.361818,2491,897,4,success
+15,2,30,20,20,false,no longer,-1.341043,1278,707,5,success
+15,2,30,20,20,false,longer,-1.302531,1354,737,6,success
+15,2,30,20,20,false,been updated,-1.255761,14527,2184,7,success
+15,2,30,20,20,false,verify that,-1.109415,5972,1650,8,success
+15,2,30,20,20,false,clean up,-1.104070,1220,767,9,success
+15,2,30,20,20,false,to verify,-1.092203,6593,1781,10,success
+15,2,30,20,20,false,that our,-1.091603,2228,1108,11,success
+15,2,30,20,20,false,updated,-1.058493,15948,2229,12,success
+15,2,30,20,20,false,desired effect,-1.007876,1508,671,13,success
+15,2,30,20,20,false,let's clean,-1.004447,801,534,14,success
+15,2,30,20,20,false,file since,-0.989787,766,534,15,success
+15,2,30,20,20,false,resolved,-0.986507,4568,1301,16,success
+15,2,30,20,20,false,change has,-0.980663,1426,663,17,success
+15,2,30,20,20,false,to that,-0.979168,7316,1586,18,success
+15,2,30,20,20,false,should create,-0.976888,2990,1059,19,success
+15,2,100,10,10,false,up by,-1.566896,777,543,0,success
+15,2,100,10,10,false,issue has,-1.454416,2816,962,1,success
+15,2,100,10,10,false,longer needed,-1.423755,778,514,2,success
+15,2,100,10,10,false,updated to,-1.394780,12517,2121,3,success
+15,2,100,10,10,false,been resolved,-1.361818,2491,897,4,success
+15,2,100,10,10,false,no longer,-1.341043,1278,707,5,success
+15,2,100,10,10,false,longer,-1.302531,1354,737,6,success
+15,2,100,10,10,false,been updated,-1.255761,14527,2184,7,success
+15,2,100,10,10,false,verify that,-1.109415,5972,1650,8,success
+15,2,100,10,10,false,clean up,-1.104070,1220,767,9,success
+15,2,100,20,20,false,up by,-1.566896,777,543,0,success
+15,2,100,20,20,false,issue has,-1.454416,2816,962,1,success
+15,2,100,20,20,false,longer needed,-1.423755,778,514,2,success
+15,2,100,20,20,false,updated to,-1.394780,12517,2121,3,success
+15,2,100,20,20,false,been resolved,-1.361818,2491,897,4,success
+15,2,100,20,20,false,no longer,-1.341043,1278,707,5,success
+15,2,100,20,20,false,longer,-1.302531,1354,737,6,success
+15,2,100,20,20,false,been updated,-1.255761,14527,2184,7,success
+15,2,100,20,20,false,verify that,-1.109415,5972,1650,8,success
+15,2,100,20,20,false,clean up,-1.104070,1220,767,9,success
+15,2,100,20,20,false,to verify,-1.092203,6593,1781,10,success
+15,2,100,20,20,false,that our,-1.091603,2228,1108,11,success
+15,2,100,20,20,false,updated,-1.058493,15948,2229,12,success
+15,2,100,20,20,false,desired effect,-1.007876,1508,671,13,success
+15,2,100,20,20,false,let's clean,-1.004447,801,534,14,success
+15,2,100,20,20,false,file since,-0.989787,766,534,15,success
+15,2,100,20,20,false,resolved,-0.986507,4568,1301,16,success
+15,2,100,20,20,false,change has,-0.980663,1426,663,17,success
+15,2,100,20,20,false,to that,-0.979168,7316,1586,18,success
+15,2,100,20,20,false,should create,-0.976888,2990,1059,19,success
+15,3,10,10,10,false,up by,-1.757029,794,577,0,success
+15,3,10,10,10,false,updated to,-1.329768,12441,2126,1,success
+15,3,10,10,10,false,no longer,-1.287877,1231,709,2,success
+15,3,10,10,10,false,clean up,-1.282783,1223,785,3,success
+15,3,10,10,10,false,longer needed,-1.230148,760,523,4,success
+15,3,10,10,10,false,longer,-1.213953,1308,742,5,success
+15,3,10,10,10,false,file since,-1.204488,750,529,6,success
+15,3,10,10,10,false,been updated,-1.140472,14379,2189,7,success
+15,3,10,10,10,false,that our,-1.126584,2219,1112,8,success
+15,3,10,10,10,false,to verify,-1.115765,6669,1797,9,success
+15,3,10,20,20,false,up by,-1.757029,794,577,0,success
+15,3,10,20,20,false,updated to,-1.329768,12441,2126,1,success
+15,3,10,20,20,false,no longer,-1.287877,1231,709,2,success
+15,3,10,20,20,false,clean up,-1.282783,1223,785,3,success
+15,3,10,20,20,false,longer needed,-1.230148,760,523,4,success
+15,3,10,20,20,false,longer,-1.213953,1308,742,5,success
+15,3,10,20,20,false,file since,-1.204488,750,529,6,success
+15,3,10,20,20,false,been updated,-1.140472,14379,2189,7,success
+15,3,10,20,20,false,that our,-1.126584,2219,1112,8,success
+15,3,10,20,20,false,to verify,-1.115765,6669,1797,9,success
+15,3,10,20,20,false,clean,-1.099858,1433,850,10,success
+15,3,10,20,20,false,argument passed,-1.071218,15,11,11,success
+15,3,10,20,20,false,path handling,-1.064445,40,24,12,success
+15,3,10,20,20,false,verify that,-1.060232,6082,1677,13,success
+15,3,10,20,20,false,by removing,-1.056342,2430,1173,14,success
+15,3,10,20,20,false,before comparing,-1.053123,82,44,15,success
+15,3,10,20,20,false,our changes,-1.042719,1823,987,16,success
+15,3,10,20,20,false,issue has,-1.020230,2678,946,17,success
+15,3,10,20,20,false,let's clean,-1.012133,788,530,18,success
+15,3,10,20,20,false,to that,-0.989338,7097,1590,19,success
+15,3,30,10,10,false,up by,-1.757029,794,577,0,success
+15,3,30,10,10,false,updated to,-1.329768,12441,2126,1,success
+15,3,30,10,10,false,no longer,-1.287877,1231,709,2,success
+15,3,30,10,10,false,clean up,-1.282783,1223,785,3,success
+15,3,30,10,10,false,longer needed,-1.230148,760,523,4,success
+15,3,30,10,10,false,longer,-1.213953,1308,742,5,success
+15,3,30,10,10,false,file since,-1.204488,750,529,6,success
+15,3,30,10,10,false,been updated,-1.140472,14379,2189,7,success
+15,3,30,10,10,false,that our,-1.126584,2219,1112,8,success
+15,3,30,10,10,false,to verify,-1.115765,6669,1797,9,success
+15,3,30,20,20,false,up by,-1.757029,794,577,0,success
+15,3,30,20,20,false,updated to,-1.329768,12441,2126,1,success
+15,3,30,20,20,false,no longer,-1.287877,1231,709,2,success
+15,3,30,20,20,false,clean up,-1.282783,1223,785,3,success
+15,3,30,20,20,false,longer needed,-1.230148,760,523,4,success
+15,3,30,20,20,false,longer,-1.213953,1308,742,5,success
+15,3,30,20,20,false,file since,-1.204488,750,529,6,success
+15,3,30,20,20,false,been updated,-1.140472,14379,2189,7,success
+15,3,30,20,20,false,that our,-1.126584,2219,1112,8,success
+15,3,30,20,20,false,to verify,-1.115765,6669,1797,9,success
+15,3,30,20,20,false,clean,-1.099858,1433,850,10,success
+15,3,30,20,20,false,verify that,-1.060232,6082,1677,11,success
+15,3,30,20,20,false,by removing,-1.056342,2430,1173,12,success
+15,3,30,20,20,false,before comparing,-1.053123,82,44,13,success
+15,3,30,20,20,false,our changes,-1.042719,1823,987,14,success
+15,3,30,20,20,false,issue has,-1.020230,2678,946,15,success
+15,3,30,20,20,false,let's clean,-1.012133,788,530,16,success
+15,3,30,20,20,false,to that,-0.989338,7097,1590,17,success
+15,3,30,20,20,false,fix has,-0.980337,49,47,18,success
+15,3,30,20,20,false,been resolved,-0.975512,2356,884,19,success
+15,3,100,10,10,false,up by,-1.757029,794,577,0,success
+15,3,100,10,10,false,updated to,-1.329768,12441,2126,1,success
+15,3,100,10,10,false,no longer,-1.287877,1231,709,2,success
+15,3,100,10,10,false,clean up,-1.282783,1223,785,3,success
+15,3,100,10,10,false,longer needed,-1.230148,760,523,4,success
+15,3,100,10,10,false,longer,-1.213953,1308,742,5,success
+15,3,100,10,10,false,file since,-1.204488,750,529,6,success
+15,3,100,10,10,false,been updated,-1.140472,14379,2189,7,success
+15,3,100,10,10,false,that our,-1.126584,2219,1112,8,success
+15,3,100,10,10,false,to verify,-1.115765,6669,1797,9,success
+15,3,100,20,20,false,up by,-1.757029,794,577,0,success
+15,3,100,20,20,false,updated to,-1.329768,12441,2126,1,success
+15,3,100,20,20,false,no longer,-1.287877,1231,709,2,success
+15,3,100,20,20,false,clean up,-1.282783,1223,785,3,success
+15,3,100,20,20,false,longer needed,-1.230148,760,523,4,success
+15,3,100,20,20,false,longer,-1.213953,1308,742,5,success
+15,3,100,20,20,false,file since,-1.204488,750,529,6,success
+15,3,100,20,20,false,been updated,-1.140472,14379,2189,7,success
+15,3,100,20,20,false,that our,-1.126584,2219,1112,8,success
+15,3,100,20,20,false,to verify,-1.115765,6669,1797,9,success
+15,3,100,20,20,false,clean,-1.099858,1433,850,10,success
+15,3,100,20,20,false,verify that,-1.060232,6082,1677,11,success
+15,3,100,20,20,false,by removing,-1.056342,2430,1173,12,success
+15,3,100,20,20,false,our changes,-1.042719,1823,987,13,success
+15,3,100,20,20,false,issue has,-1.020230,2678,946,14,success
+15,3,100,20,20,false,let's clean,-1.012133,788,530,15,success
+15,3,100,20,20,false,to that,-0.989338,7097,1590,16,success
+15,3,100,20,20,false,been resolved,-0.975512,2356,884,17,success
+15,3,100,20,20,false,that line,-0.965240,7047,1546,18,success
+15,3,100,20,20,false,desired effect,-0.958018,1456,661,19,success
+15,4,10,10,10,false,up by,-1.590983,779,556,0,success
+15,4,10,10,10,false,longer needed,-1.423972,753,507,1,success
+15,4,10,10,10,false,no longer,-1.381992,1258,710,2,success
+15,4,10,10,10,false,updated to,-1.313292,12413,2117,3,success
+15,4,10,10,10,false,clean up,-1.307779,1206,779,4,success
+15,4,10,10,10,false,longer,-1.298095,1352,744,5,success
+15,4,10,10,10,false,been updated,-1.168159,14368,2183,6,success
+15,4,10,10,10,false,our fix,-1.144240,806,488,7,success
+15,4,10,10,10,false,by stripping,-1.129623,31,13,8,success
+15,4,10,10,10,false,clean,-1.129271,1417,836,9,success
+15,4,10,20,20,false,up by,-1.590983,779,556,0,success
+15,4,10,20,20,false,longer needed,-1.423972,753,507,1,success
+15,4,10,20,20,false,no longer,-1.381992,1258,710,2,success
+15,4,10,20,20,false,updated to,-1.313292,12413,2117,3,success
+15,4,10,20,20,false,clean up,-1.307779,1206,779,4,success
+15,4,10,20,20,false,longer,-1.298095,1352,744,5,success
+15,4,10,20,20,false,been updated,-1.168159,14368,2183,6,success
+15,4,10,20,20,false,our fix,-1.144240,806,488,7,success
+15,4,10,20,20,false,by stripping,-1.129623,31,13,8,success
+15,4,10,20,20,false,clean,-1.129271,1417,836,9,success
+15,4,10,20,20,false,before comparing,-1.117613,96,45,10,success
+15,4,10,20,20,false,let's clean,-1.117594,769,512,11,success
+15,4,10,20,20,false,file since,-1.099377,756,519,12,success
+15,4,10,20,20,false,the change,-1.075722,1224,654,13,success
+15,4,10,20,20,false,fix has,-1.046673,48,46,14,success
+15,4,10,20,20,false,then submit,-1.039086,152,139,15,success
+15,4,10,20,20,false,by removing,-1.029593,2377,1177,16,success
+15,4,10,20,20,false,updated,-1.019178,15786,2228,17,success
+15,4,10,20,20,false,to verify,-1.014184,6602,1785,18,success
+15,4,10,20,20,false,desired,-1.001571,1997,908,19,success
+15,4,30,10,10,false,up by,-1.590983,779,556,0,success
+15,4,30,10,10,false,longer needed,-1.423972,753,507,1,success
+15,4,30,10,10,false,no longer,-1.381992,1258,710,2,success
+15,4,30,10,10,false,updated to,-1.313292,12413,2117,3,success
+15,4,30,10,10,false,clean up,-1.307779,1206,779,4,success
+15,4,30,10,10,false,longer,-1.298095,1352,744,5,success
+15,4,30,10,10,false,been updated,-1.168159,14368,2183,6,success
+15,4,30,10,10,false,our fix,-1.144240,806,488,7,success
+15,4,30,10,10,false,clean,-1.129271,1417,836,8,success
+15,4,30,10,10,false,before comparing,-1.117613,96,45,9,success
+15,4,30,20,20,false,up by,-1.590983,779,556,0,success
+15,4,30,20,20,false,longer needed,-1.423972,753,507,1,success
+15,4,30,20,20,false,no longer,-1.381992,1258,710,2,success
+15,4,30,20,20,false,updated to,-1.313292,12413,2117,3,success
+15,4,30,20,20,false,clean up,-1.307779,1206,779,4,success
+15,4,30,20,20,false,longer,-1.298095,1352,744,5,success
+15,4,30,20,20,false,been updated,-1.168159,14368,2183,6,success
+15,4,30,20,20,false,our fix,-1.144240,806,488,7,success
+15,4,30,20,20,false,clean,-1.129271,1417,836,8,success
+15,4,30,20,20,false,before comparing,-1.117613,96,45,9,success
+15,4,30,20,20,false,let's clean,-1.117594,769,512,10,success
+15,4,30,20,20,false,file since,-1.099377,756,519,11,success
+15,4,30,20,20,false,the change,-1.075722,1224,654,12,success
+15,4,30,20,20,false,fix has,-1.046673,48,46,13,success
+15,4,30,20,20,false,then submit,-1.039086,152,139,14,success
+15,4,30,20,20,false,by removing,-1.029593,2377,1177,15,success
+15,4,30,20,20,false,updated,-1.019178,15786,2228,16,success
+15,4,30,20,20,false,to verify,-1.014184,6602,1785,17,success
+15,4,30,20,20,false,desired,-1.001571,1997,908,18,success
+15,4,30,20,20,false,issue has,-1.001158,2737,935,19,success
+15,4,100,10,10,false,up by,-1.590983,779,556,0,success
+15,4,100,10,10,false,longer needed,-1.423972,753,507,1,success
+15,4,100,10,10,false,no longer,-1.381992,1258,710,2,success
+15,4,100,10,10,false,updated to,-1.313292,12413,2117,3,success
+15,4,100,10,10,false,clean up,-1.307779,1206,779,4,success
+15,4,100,10,10,false,longer,-1.298095,1352,744,5,success
+15,4,100,10,10,false,been updated,-1.168159,14368,2183,6,success
+15,4,100,10,10,false,our fix,-1.144240,806,488,7,success
+15,4,100,10,10,false,clean,-1.129271,1417,836,8,success
+15,4,100,10,10,false,let's clean,-1.117594,769,512,9,success
+15,4,100,20,20,false,up by,-1.590983,779,556,0,success
+15,4,100,20,20,false,longer needed,-1.423972,753,507,1,success
+15,4,100,20,20,false,no longer,-1.381992,1258,710,2,success
+15,4,100,20,20,false,updated to,-1.313292,12413,2117,3,success
+15,4,100,20,20,false,clean up,-1.307779,1206,779,4,success
+15,4,100,20,20,false,longer,-1.298095,1352,744,5,success
+15,4,100,20,20,false,been updated,-1.168159,14368,2183,6,success
+15,4,100,20,20,false,our fix,-1.144240,806,488,7,success
+15,4,100,20,20,false,clean,-1.129271,1417,836,8,success
+15,4,100,20,20,false,let's clean,-1.117594,769,512,9,success
+15,4,100,20,20,false,file since,-1.099377,756,519,10,success
+15,4,100,20,20,false,the change,-1.075722,1224,654,11,success
+15,4,100,20,20,false,then submit,-1.039086,152,139,12,success
+15,4,100,20,20,false,by removing,-1.029593,2377,1177,13,success
+15,4,100,20,20,false,updated,-1.019178,15786,2228,14,success
+15,4,100,20,20,false,to verify,-1.014184,6602,1785,15,success
+15,4,100,20,20,false,desired,-1.001571,1997,908,16,success
+15,4,100,20,20,false,issue has,-1.001158,2737,935,17,success
+15,4,100,20,20,false,the desired,-0.996050,1959,890,18,success
+15,4,100,20,20,false,desired effect,-0.993296,1471,667,19,success
+20,0,10,10,10,false,up by,-1.136550,550,438,0,success
+20,0,10,10,10,false,dependency and,-1.002154,23,19,1,success
+20,0,10,10,10,false,contain only,-1.001525,32,21,2,success
+20,0,10,10,10,false,any concrete,-0.987567,14,12,3,success
+20,0,10,10,10,false,also forgot,-0.979686,10,10,4,success
+20,0,10,10,10,false,we've finally,-0.952892,12,12,5,success
+20,0,10,10,10,false,to verify,-0.924811,5692,1730,6,success
+20,0,10,10,10,false,updated to,-0.920665,10580,2061,7,success
+20,0,10,10,10,false,longer needed,-0.906890,454,360,8,success
+20,0,10,10,10,false,verify that,-0.903862,5214,1643,9,success
+20,0,10,20,20,false,up by,-1.136550,550,438,0,success
+20,0,10,20,20,false,dependency and,-1.002154,23,19,1,success
+20,0,10,20,20,false,contain only,-1.001525,32,21,2,success
+20,0,10,20,20,false,any concrete,-0.987567,14,12,3,success
+20,0,10,20,20,false,also forgot,-0.979686,10,10,4,success
+20,0,10,20,20,false,we've finally,-0.952892,12,12,5,success
+20,0,10,20,20,false,to verify,-0.924811,5692,1730,6,success
+20,0,10,20,20,false,updated to,-0.920665,10580,2061,7,success
+20,0,10,20,20,false,longer needed,-0.906890,454,360,8,success
+20,0,10,20,20,false,verify that,-0.903862,5214,1643,9,success
+20,0,10,20,20,false,by stripping,-0.886470,24,10,10,success
+20,0,10,20,20,false,no longer,-0.872710,828,565,11,success
+20,0,10,20,20,false,been updated,-0.869008,12078,2131,12,success
+20,0,10,20,20,false,actually handles,-0.865695,28,26,13,success
+20,0,10,20,20,false,code has,-0.864559,7541,1686,14,success
+20,0,10,20,20,false,let's edit,-0.862481,7269,1913,15,success
+20,0,10,20,20,false,test script,-0.855886,4267,1334,16,success
+20,0,10,20,20,false,script has,-0.839213,7006,1830,17,success
+20,0,10,20,20,false,correctly finds,-0.831043,14,12,18,success
+20,0,10,20,20,false,attribute value,-0.819368,16,11,19,success
+20,0,30,10,10,false,up by,-1.136550,550,438,0,success
+20,0,30,10,10,false,to verify,-0.924811,5692,1730,1,success
+20,0,30,10,10,false,updated to,-0.920665,10580,2061,2,success
+20,0,30,10,10,false,longer needed,-0.906890,454,360,3,success
+20,0,30,10,10,false,verify that,-0.903862,5214,1643,4,success
+20,0,30,10,10,false,no longer,-0.872710,828,565,5,success
+20,0,30,10,10,false,been updated,-0.869008,12078,2131,6,success
+20,0,30,10,10,false,code has,-0.864559,7541,1686,7,success
+20,0,30,10,10,false,let's edit,-0.862481,7269,1913,8,success
+20,0,30,10,10,false,test script,-0.855886,4267,1334,9,success
+20,0,30,20,20,false,up by,-1.136550,550,438,0,success
+20,0,30,20,20,false,to verify,-0.924811,5692,1730,1,success
+20,0,30,20,20,false,updated to,-0.920665,10580,2061,2,success
+20,0,30,20,20,false,longer needed,-0.906890,454,360,3,success
+20,0,30,20,20,false,verify that,-0.903862,5214,1643,4,success
+20,0,30,20,20,false,no longer,-0.872710,828,565,5,success
+20,0,30,20,20,false,been updated,-0.869008,12078,2131,6,success
+20,0,30,20,20,false,code has,-0.864559,7541,1686,7,success
+20,0,30,20,20,false,let's edit,-0.862481,7269,1913,8,success
+20,0,30,20,20,false,test script,-0.855886,4267,1334,9,success
+20,0,30,20,20,false,script has,-0.839213,7006,1830,10,success
+20,0,30,20,20,false,the test,-0.819234,5891,1595,11,success
+20,0,30,20,20,false,be resolved,-0.813450,214,160,12,success
+20,0,30,20,20,false,longer,-0.809739,886,600,13,success
+20,0,30,20,20,false,code will,-0.803846,274,233,14,success
+20,0,30,20,20,false,test,-0.795615,8522,1950,15,success
+20,0,30,20,20,false,that our,-0.782578,1977,1098,16,success
+20,0,30,20,20,false,now shows,-0.774859,104,82,17,success
+20,0,30,20,20,false,fix by,-0.767949,65,56,18,success
+20,0,30,20,20,false,a test,-0.765012,4379,1375,19,success
+20,0,100,10,10,false,up by,-1.136550,550,438,0,success
+20,0,100,10,10,false,to verify,-0.924811,5692,1730,1,success
+20,0,100,10,10,false,updated to,-0.920665,10580,2061,2,success
+20,0,100,10,10,false,longer needed,-0.906890,454,360,3,success
+20,0,100,10,10,false,verify that,-0.903862,5214,1643,4,success
+20,0,100,10,10,false,no longer,-0.872710,828,565,5,success
+20,0,100,10,10,false,been updated,-0.869008,12078,2131,6,success
+20,0,100,10,10,false,code has,-0.864559,7541,1686,7,success
+20,0,100,10,10,false,let's edit,-0.862481,7269,1913,8,success
+20,0,100,10,10,false,test script,-0.855886,4267,1334,9,success
+20,0,100,20,20,false,up by,-1.136550,550,438,0,success
+20,0,100,20,20,false,to verify,-0.924811,5692,1730,1,success
+20,0,100,20,20,false,updated to,-0.920665,10580,2061,2,success
+20,0,100,20,20,false,longer needed,-0.906890,454,360,3,success
+20,0,100,20,20,false,verify that,-0.903862,5214,1643,4,success
+20,0,100,20,20,false,no longer,-0.872710,828,565,5,success
+20,0,100,20,20,false,been updated,-0.869008,12078,2131,6,success
+20,0,100,20,20,false,code has,-0.864559,7541,1686,7,success
+20,0,100,20,20,false,let's edit,-0.862481,7269,1913,8,success
+20,0,100,20,20,false,test script,-0.855886,4267,1334,9,success
+20,0,100,20,20,false,script has,-0.839213,7006,1830,10,success
+20,0,100,20,20,false,the test,-0.819234,5891,1595,11,success
+20,0,100,20,20,false,be resolved,-0.813450,214,160,12,success
+20,0,100,20,20,false,longer,-0.809739,886,600,13,success
+20,0,100,20,20,false,code will,-0.803846,274,233,14,success
+20,0,100,20,20,false,test,-0.795615,8522,1950,15,success
+20,0,100,20,20,false,that our,-0.782578,1977,1098,16,success
+20,0,100,20,20,false,a test,-0.765012,4379,1375,17,success
+20,0,100,20,20,false,been resolved,-0.762676,2145,821,18,success
+20,0,100,20,20,false,file since,-0.749251,505,404,19,success
+20,1,10,10,10,false,up by,-1.350415,558,439,0,success
+20,1,10,10,10,false,longer needed,-1.130437,463,363,1,success
+20,1,10,10,10,false,clean up,-1.123954,1001,667,2,success
+20,1,10,10,10,false,no longer,-1.083130,872,567,3,success
+20,1,10,10,10,false,to verify,-1.080457,5642,1754,4,success
+20,1,10,10,10,false,we've finally,-1.051472,14,14,5,success
+20,1,10,10,10,false,verify that,-1.027045,5162,1650,6,success
+20,1,10,10,10,false,any concrete,-1.024846,13,11,7,success
+20,1,10,10,10,false,test script,-1.018226,4230,1346,8,success
+20,1,10,10,10,false,updated to,-1.015107,10679,2071,9,success
+20,1,10,20,20,false,up by,-1.350415,558,439,0,success
+20,1,10,20,20,false,longer needed,-1.130437,463,363,1,success
+20,1,10,20,20,false,clean up,-1.123954,1001,667,2,success
+20,1,10,20,20,false,no longer,-1.083130,872,567,3,success
+20,1,10,20,20,false,to verify,-1.080457,5642,1754,4,success
+20,1,10,20,20,false,we've finally,-1.051472,14,14,5,success
+20,1,10,20,20,false,verify that,-1.027045,5162,1650,6,success
+20,1,10,20,20,false,any concrete,-1.024846,13,11,7,success
+20,1,10,20,20,false,test script,-1.018226,4230,1346,8,success
+20,1,10,20,20,false,updated to,-1.015107,10679,2071,9,success
+20,1,10,20,20,false,clean,-0.995759,1183,757,10,success
+20,1,10,20,20,false,verified,-0.982100,310,269,11,success
+20,1,10,20,20,false,longer,-0.975760,931,599,12,success
+20,1,10,20,20,false,consistency,-0.975161,115,84,13,success
+20,1,10,20,20,false,then submit,-0.962632,121,112,14,success
+20,1,10,20,20,false,submit our,-0.961938,151,139,15,success
+20,1,10,20,20,false,that line,-0.953656,5774,1501,16,success
+20,1,10,20,20,false,script has,-0.949666,7089,1828,17,success
+20,1,10,20,20,false,to that,-0.923513,5783,1520,18,success
+20,1,10,20,20,false,code will,-0.917310,273,233,19,success
+20,1,30,10,10,false,up by,-1.350415,558,439,0,success
+20,1,30,10,10,false,longer needed,-1.130437,463,363,1,success
+20,1,30,10,10,false,clean up,-1.123954,1001,667,2,success
+20,1,30,10,10,false,no longer,-1.083130,872,567,3,success
+20,1,30,10,10,false,to verify,-1.080457,5642,1754,4,success
+20,1,30,10,10,false,verify that,-1.027045,5162,1650,5,success
+20,1,30,10,10,false,test script,-1.018226,4230,1346,6,success
+20,1,30,10,10,false,updated to,-1.015107,10679,2071,7,success
+20,1,30,10,10,false,clean,-0.995759,1183,757,8,success
+20,1,30,10,10,false,verified,-0.982100,310,269,9,success
+20,1,30,20,20,false,up by,-1.350415,558,439,0,success
+20,1,30,20,20,false,longer needed,-1.130437,463,363,1,success
+20,1,30,20,20,false,clean up,-1.123954,1001,667,2,success
+20,1,30,20,20,false,no longer,-1.083130,872,567,3,success
+20,1,30,20,20,false,to verify,-1.080457,5642,1754,4,success
+20,1,30,20,20,false,verify that,-1.027045,5162,1650,5,success
+20,1,30,20,20,false,test script,-1.018226,4230,1346,6,success
+20,1,30,20,20,false,updated to,-1.015107,10679,2071,7,success
+20,1,30,20,20,false,clean,-0.995759,1183,757,8,success
+20,1,30,20,20,false,verified,-0.982100,310,269,9,success
+20,1,30,20,20,false,longer,-0.975760,931,599,10,success
+20,1,30,20,20,false,consistency,-0.975161,115,84,11,success
+20,1,30,20,20,false,then submit,-0.962632,121,112,12,success
+20,1,30,20,20,false,submit our,-0.961938,151,139,13,success
+20,1,30,20,20,false,that line,-0.953656,5774,1501,14,success
+20,1,30,20,20,false,script has,-0.949666,7089,1828,15,success
+20,1,30,20,20,false,to that,-0.923513,5783,1520,16,success
+20,1,30,20,20,false,code will,-0.917310,273,233,17,success
+20,1,30,20,20,false,been updated,-0.905424,12160,2127,18,success
+20,1,30,20,20,false,the test,-0.900798,5905,1620,19,success
+20,1,100,10,10,false,up by,-1.350415,558,439,0,success
+20,1,100,10,10,false,longer needed,-1.130437,463,363,1,success
+20,1,100,10,10,false,clean up,-1.123954,1001,667,2,success
+20,1,100,10,10,false,no longer,-1.083130,872,567,3,success
+20,1,100,10,10,false,to verify,-1.080457,5642,1754,4,success
+20,1,100,10,10,false,verify that,-1.027045,5162,1650,5,success
+20,1,100,10,10,false,test script,-1.018226,4230,1346,6,success
+20,1,100,10,10,false,updated to,-1.015107,10679,2071,7,success
+20,1,100,10,10,false,clean,-0.995759,1183,757,8,success
+20,1,100,10,10,false,verified,-0.982100,310,269,9,success
+20,1,100,20,20,false,up by,-1.350415,558,439,0,success
+20,1,100,20,20,false,longer needed,-1.130437,463,363,1,success
+20,1,100,20,20,false,clean up,-1.123954,1001,667,2,success
+20,1,100,20,20,false,no longer,-1.083130,872,567,3,success
+20,1,100,20,20,false,to verify,-1.080457,5642,1754,4,success
+20,1,100,20,20,false,verify that,-1.027045,5162,1650,5,success
+20,1,100,20,20,false,test script,-1.018226,4230,1346,6,success
+20,1,100,20,20,false,updated to,-1.015107,10679,2071,7,success
+20,1,100,20,20,false,clean,-0.995759,1183,757,8,success
+20,1,100,20,20,false,verified,-0.982100,310,269,9,success
+20,1,100,20,20,false,longer,-0.975760,931,599,10,success
+20,1,100,20,20,false,then submit,-0.962632,121,112,11,success
+20,1,100,20,20,false,submit our,-0.961938,151,139,12,success
+20,1,100,20,20,false,that line,-0.953656,5774,1501,13,success
+20,1,100,20,20,false,script has,-0.949666,7089,1828,14,success
+20,1,100,20,20,false,to that,-0.923513,5783,1520,15,success
+20,1,100,20,20,false,code will,-0.917310,273,233,16,success
+20,1,100,20,20,false,been updated,-0.905424,12160,2127,17,success
+20,1,100,20,20,false,the test,-0.900798,5905,1620,18,success
+20,1,100,20,20,false,test,-0.876432,8528,1954,19,success
+20,2,10,10,10,false,consistency with,-1.001715,21,11,0,success
+20,2,10,10,10,false,dependency and,-0.981053,24,20,1,success
+20,2,10,10,10,false,verify that,-0.964121,5133,1636,2,success
+20,2,10,10,10,false,updated to,-0.925127,10656,2084,3,success
+20,2,10,10,10,false,longer needed,-0.914775,463,373,4,success
+20,2,10,10,10,false,its initial,-0.912632,28,12,5,success
+20,2,10,10,10,false,to verify,-0.901390,5656,1732,6,success
+20,2,10,10,10,false,test script,-0.890650,4216,1327,7,success
+20,2,10,10,10,false,been updated,-0.881004,12145,2142,8,success
+20,2,10,10,10,false,be resolved,-0.880901,212,162,9,success
+20,2,10,20,20,false,consistency with,-1.001715,21,11,0,success
+20,2,10,20,20,false,dependency and,-0.981053,24,20,1,success
+20,2,10,20,20,false,verify that,-0.964121,5133,1636,2,success
+20,2,10,20,20,false,updated to,-0.925127,10656,2084,3,success
+20,2,10,20,20,false,longer needed,-0.914775,463,373,4,success
+20,2,10,20,20,false,its initial,-0.912632,28,12,5,success
+20,2,10,20,20,false,to verify,-0.901390,5656,1732,6,success
+20,2,10,20,20,false,test script,-0.890650,4216,1327,7,success
+20,2,10,20,20,false,been updated,-0.881004,12145,2142,8,success
+20,2,10,20,20,false,be resolved,-0.880901,212,162,9,success
+20,2,10,20,20,false,let's convert,-0.877943,19,18,10,success
+20,2,10,20,20,false,not handled,-0.874362,129,110,11,success
+20,2,10,20,20,false,replicate it,-0.872653,17,15,12,success
+20,2,10,20,20,false,correctly finds,-0.862414,13,11,13,success
+20,2,10,20,20,false,now shows,-0.850245,108,84,14,success
+20,2,10,20,20,false,output now,-0.848099,153,106,15,success
+20,2,10,20,20,false,before navigating,-0.846499,11,11,16,success
+20,2,10,20,20,false,only class,-0.846180,17,13,17,success
+20,2,10,20,20,false,error from,-0.844889,22,21,18,success
+20,2,10,20,20,false,a test,-0.840390,4371,1366,19,success
+20,2,30,10,10,false,verify that,-0.964121,5133,1636,0,success
+20,2,30,10,10,false,updated to,-0.925127,10656,2084,1,success
+20,2,30,10,10,false,longer needed,-0.914775,463,373,2,success
+20,2,30,10,10,false,to verify,-0.901390,5656,1732,3,success
+20,2,30,10,10,false,test script,-0.890650,4216,1327,4,success
+20,2,30,10,10,false,been updated,-0.881004,12145,2142,5,success
+20,2,30,10,10,false,be resolved,-0.880901,212,162,6,success
+20,2,30,10,10,false,not handled,-0.874362,129,110,7,success
+20,2,30,10,10,false,now shows,-0.850245,108,84,8,success
+20,2,30,10,10,false,output now,-0.848099,153,106,9,success
+20,2,30,20,20,false,verify that,-0.964121,5133,1636,0,success
+20,2,30,20,20,false,updated to,-0.925127,10656,2084,1,success
+20,2,30,20,20,false,longer needed,-0.914775,463,373,2,success
+20,2,30,20,20,false,to verify,-0.901390,5656,1732,3,success
+20,2,30,20,20,false,test script,-0.890650,4216,1327,4,success
+20,2,30,20,20,false,been updated,-0.881004,12145,2142,5,success
+20,2,30,20,20,false,be resolved,-0.880901,212,162,6,success
+20,2,30,20,20,false,not handled,-0.874362,129,110,7,success
+20,2,30,20,20,false,now shows,-0.850245,108,84,8,success
+20,2,30,20,20,false,output now,-0.848099,153,106,9,success
+20,2,30,20,20,false,a test,-0.840390,4371,1366,10,success
+20,2,30,20,20,false,by its,-0.828738,69,35,11,success
+20,2,30,20,20,false,up by,-0.819659,520,415,12,success
+20,2,30,20,20,false,resolved,-0.817921,4236,1305,13,success
+20,2,30,20,20,false,issue has,-0.817489,2403,891,14,success
+20,2,30,20,20,false,been resolved,-0.795985,2185,848,15,success
+20,2,30,20,20,false,we see,0.794926,2144,871,16,failure
+20,2,30,20,20,false,write a,-0.793662,3119,1238,17,success
+20,2,30,20,20,false,and write,-0.790294,2595,1115,18,success
+20,2,30,20,20,false,attribute has,-0.775955,143,95,19,success
+20,2,100,10,10,false,verify that,-0.964121,5133,1636,0,success
+20,2,100,10,10,false,updated to,-0.925127,10656,2084,1,success
+20,2,100,10,10,false,longer needed,-0.914775,463,373,2,success
+20,2,100,10,10,false,to verify,-0.901390,5656,1732,3,success
+20,2,100,10,10,false,test script,-0.890650,4216,1327,4,success
+20,2,100,10,10,false,been updated,-0.881004,12145,2142,5,success
+20,2,100,10,10,false,be resolved,-0.880901,212,162,6,success
+20,2,100,10,10,false,not handled,-0.874362,129,110,7,success
+20,2,100,10,10,false,output now,-0.848099,153,106,8,success
+20,2,100,10,10,false,a test,-0.840390,4371,1366,9,success
+20,2,100,20,20,false,verify that,-0.964121,5133,1636,0,success
+20,2,100,20,20,false,updated to,-0.925127,10656,2084,1,success
+20,2,100,20,20,false,longer needed,-0.914775,463,373,2,success
+20,2,100,20,20,false,to verify,-0.901390,5656,1732,3,success
+20,2,100,20,20,false,test script,-0.890650,4216,1327,4,success
+20,2,100,20,20,false,been updated,-0.881004,12145,2142,5,success
+20,2,100,20,20,false,be resolved,-0.880901,212,162,6,success
+20,2,100,20,20,false,not handled,-0.874362,129,110,7,success
+20,2,100,20,20,false,output now,-0.848099,153,106,8,success
+20,2,100,20,20,false,a test,-0.840390,4371,1366,9,success
+20,2,100,20,20,false,up by,-0.819659,520,415,10,success
+20,2,100,20,20,false,resolved,-0.817921,4236,1305,11,success
+20,2,100,20,20,false,issue has,-0.817489,2403,891,12,success
+20,2,100,20,20,false,been resolved,-0.795985,2185,848,13,success
+20,2,100,20,20,false,we see,0.794926,2144,871,14,failure
+20,2,100,20,20,false,write a,-0.793662,3119,1238,15,success
+20,2,100,20,20,false,and write,-0.790294,2595,1115,16,success
+20,2,100,20,20,false,inspect,-0.759608,4349,1609,17,success
+20,2,100,20,20,false,the test,-0.758357,5866,1614,18,success
+20,2,100,20,20,false,script has,-0.753036,7014,1826,19,success
+20,3,10,10,10,false,i duplicated,-1.099895,112,100,0,success
+20,3,10,10,10,false,consistency with,-1.086885,17,10,1,success
+20,3,10,10,10,false,to verify,-1.022295,5742,1769,2,success
+20,3,10,10,10,false,we've finally,-1.006928,14,14,3,success
+20,3,10,10,10,false,verify that,-0.981008,5218,1656,4,success
+20,3,10,10,10,false,up by,-0.980914,552,442,5,success
+20,3,10,10,10,false,also forgot,-0.979686,10,10,6,success
+20,3,10,10,10,false,test script,-0.947112,4354,1343,7,success
+20,3,10,10,10,false,its initial,-0.912632,28,12,8,success
+20,3,10,10,10,false,contain only,-0.893255,38,25,9,success
+20,3,10,20,20,false,i duplicated,-1.099895,112,100,0,success
+20,3,10,20,20,false,consistency with,-1.086885,17,10,1,success
+20,3,10,20,20,false,to verify,-1.022295,5742,1769,2,success
+20,3,10,20,20,false,we've finally,-1.006928,14,14,3,success
+20,3,10,20,20,false,verify that,-0.981008,5218,1656,4,success
+20,3,10,20,20,false,up by,-0.980914,552,442,5,success
+20,3,10,20,20,false,also forgot,-0.979686,10,10,6,success
+20,3,10,20,20,false,test script,-0.947112,4354,1343,7,success
+20,3,10,20,20,false,its initial,-0.912632,28,12,8,success
+20,3,10,20,20,false,contain only,-0.893255,38,25,9,success
+20,3,10,20,20,false,consistency,-0.875459,123,89,10,success
+20,3,10,20,20,false,the test,-0.862713,5885,1600,11,success
+20,3,10,20,20,false,updated to,-0.853909,10559,2070,12,success
+20,3,10,20,20,false,our changes,-0.853458,1599,964,13,success
+20,3,10,20,20,false,already available,-0.850676,17,14,14,success
+20,3,10,20,20,false,a test,-0.847225,4461,1377,15,success
+20,3,10,20,20,false,should mock,-0.837177,22,20,16,success
+20,3,10,20,20,false,test,-0.836474,8416,1953,17,success
+20,3,10,20,20,false,similar change,-0.833538,70,54,18,success
+20,3,10,20,20,false,handles non,-0.831174,34,18,19,success
+20,3,30,10,10,false,i duplicated,-1.099895,112,100,0,success
+20,3,30,10,10,false,to verify,-1.022295,5742,1769,1,success
+20,3,30,10,10,false,verify that,-0.981008,5218,1656,2,success
+20,3,30,10,10,false,up by,-0.980914,552,442,3,success
+20,3,30,10,10,false,test script,-0.947112,4354,1343,4,success
+20,3,30,10,10,false,consistency,-0.875459,123,89,5,success
+20,3,30,10,10,false,the test,-0.862713,5885,1600,6,success
+20,3,30,10,10,false,updated to,-0.853909,10559,2070,7,success
+20,3,30,10,10,false,our changes,-0.853458,1599,964,8,success
+20,3,30,10,10,false,a test,-0.847225,4461,1377,9,success
+20,3,30,20,20,false,i duplicated,-1.099895,112,100,0,success
+20,3,30,20,20,false,to verify,-1.022295,5742,1769,1,success
+20,3,30,20,20,false,verify that,-0.981008,5218,1656,2,success
+20,3,30,20,20,false,up by,-0.980914,552,442,3,success
+20,3,30,20,20,false,test script,-0.947112,4354,1343,4,success
+20,3,30,20,20,false,consistency,-0.875459,123,89,5,success
+20,3,30,20,20,false,the test,-0.862713,5885,1600,6,success
+20,3,30,20,20,false,updated to,-0.853909,10559,2070,7,success
+20,3,30,20,20,false,our changes,-0.853458,1599,964,8,success
+20,3,30,20,20,false,a test,-0.847225,4461,1377,9,success
+20,3,30,20,20,false,test,-0.836474,8416,1953,10,success
+20,3,30,20,20,false,similar change,-0.833538,70,54,11,success
+20,3,30,20,20,false,only see,-0.826349,259,191,12,success
+20,3,30,20,20,false,not handled,-0.824578,122,104,13,success
+20,3,30,20,20,false,have fixed,-0.824194,1137,603,14,success
+20,3,30,20,20,false,to that,-0.813642,5817,1510,15,success
+20,3,30,20,20,false,longer needed,-0.805945,468,366,16,success
+20,3,30,20,20,false,that our,-0.795881,1985,1112,17,success
+20,3,30,20,20,false,handled differently,-0.785203,114,106,18,success
+20,3,30,20,20,false,then submit,-0.784989,116,106,19,success
+20,3,100,10,10,false,i duplicated,-1.099895,112,100,0,success
+20,3,100,10,10,false,to verify,-1.022295,5742,1769,1,success
+20,3,100,10,10,false,verify that,-0.981008,5218,1656,2,success
+20,3,100,10,10,false,up by,-0.980914,552,442,3,success
+20,3,100,10,10,false,test script,-0.947112,4354,1343,4,success
+20,3,100,10,10,false,the test,-0.862713,5885,1600,5,success
+20,3,100,10,10,false,updated to,-0.853909,10559,2070,6,success
+20,3,100,10,10,false,our changes,-0.853458,1599,964,7,success
+20,3,100,10,10,false,a test,-0.847225,4461,1377,8,success
+20,3,100,10,10,false,test,-0.836474,8416,1953,9,success
+20,3,100,20,20,false,i duplicated,-1.099895,112,100,0,success
+20,3,100,20,20,false,to verify,-1.022295,5742,1769,1,success
+20,3,100,20,20,false,verify that,-0.981008,5218,1656,2,success
+20,3,100,20,20,false,up by,-0.980914,552,442,3,success
+20,3,100,20,20,false,test script,-0.947112,4354,1343,4,success
+20,3,100,20,20,false,the test,-0.862713,5885,1600,5,success
+20,3,100,20,20,false,updated to,-0.853909,10559,2070,6,success
+20,3,100,20,20,false,our changes,-0.853458,1599,964,7,success
+20,3,100,20,20,false,a test,-0.847225,4461,1377,8,success
+20,3,100,20,20,false,test,-0.836474,8416,1953,9,success
+20,3,100,20,20,false,only see,-0.826349,259,191,10,success
+20,3,100,20,20,false,not handled,-0.824578,122,104,11,success
+20,3,100,20,20,false,have fixed,-0.824194,1137,603,12,success
+20,3,100,20,20,false,to that,-0.813642,5817,1510,13,success
+20,3,100,20,20,false,longer needed,-0.805945,468,366,14,success
+20,3,100,20,20,false,that our,-0.795881,1985,1112,15,success
+20,3,100,20,20,false,handled differently,-0.785203,114,106,16,success
+20,3,100,20,20,false,then submit,-0.784989,116,106,17,success
+20,3,100,20,20,false,fixed the,-0.781736,1221,648,18,success
+20,3,100,20,20,false,verify,-0.777383,7616,1961,19,success
+20,4,10,10,10,false,consistency with,-1.149244,22,12,0,success
+20,4,10,10,10,false,by stripping,-1.027364,24,11,1,success
+20,4,10,10,10,false,up by,-0.971863,560,450,2,success
+20,4,10,10,10,false,contain only,-0.971727,35,22,3,success
+20,4,10,10,10,false,test script,-0.968441,4269,1322,4,success
+20,4,10,10,10,false,module's contents,-0.946770,13,12,5,success
+20,4,10,10,10,false,updated to,-0.945708,10570,2066,6,success
+20,4,10,10,10,false,we've finally,-0.941895,16,16,7,success
+20,4,10,10,10,false,to verify,-0.921848,5716,1751,8,success
+20,4,10,10,10,false,dependency and,-0.921496,21,17,9,success
+20,4,10,20,20,false,consistency with,-1.149244,22,12,0,success
+20,4,10,20,20,false,by stripping,-1.027364,24,11,1,success
+20,4,10,20,20,false,up by,-0.971863,560,450,2,success
+20,4,10,20,20,false,contain only,-0.971727,35,22,3,success
+20,4,10,20,20,false,test script,-0.968441,4269,1322,4,success
+20,4,10,20,20,false,module's contents,-0.946770,13,12,5,success
+20,4,10,20,20,false,updated to,-0.945708,10570,2066,6,success
+20,4,10,20,20,false,we've finally,-0.941895,16,16,7,success
+20,4,10,20,20,false,to verify,-0.921848,5716,1751,8,success
+20,4,10,20,20,false,dependency and,-0.921496,21,17,9,success
+20,4,10,20,20,false,test,-0.915532,8420,1947,10,success
+20,4,10,20,20,false,been updated,-0.885072,12025,2123,11,success
+20,4,10,20,20,false,fix has,-0.875933,32,30,12,success
+20,4,10,20,20,false,strip it,-0.868220,11,10,13,success
+20,4,10,20,20,false,handles non,-0.858282,33,17,14,success
+20,4,10,20,20,false,code has,-0.852534,7612,1681,15,success
+20,4,10,20,20,false,works as,-0.851876,1871,936,16,success
+20,4,10,20,20,false,verify that,-0.846972,5205,1651,17,success
+20,4,10,20,20,false,didn't scroll,-0.830699,18,18,18,success
+20,4,10,20,20,false,works,-0.830188,4627,1625,19,success
+20,4,30,10,10,false,up by,-0.971863,560,450,0,success
+20,4,30,10,10,false,test script,-0.968441,4269,1322,1,success
+20,4,30,10,10,false,updated to,-0.945708,10570,2066,2,success
+20,4,30,10,10,false,to verify,-0.921848,5716,1751,3,success
+20,4,30,10,10,false,test,-0.915532,8420,1947,4,success
+20,4,30,10,10,false,been updated,-0.885072,12025,2123,5,success
+20,4,30,10,10,false,fix has,-0.875933,32,30,6,success
+20,4,30,10,10,false,code has,-0.852534,7612,1681,7,success
+20,4,30,10,10,false,works as,-0.851876,1871,936,8,success
+20,4,30,10,10,false,verify that,-0.846972,5205,1651,9,success
+20,4,30,20,20,false,up by,-0.971863,560,450,0,success
+20,4,30,20,20,false,test script,-0.968441,4269,1322,1,success
+20,4,30,20,20,false,updated to,-0.945708,10570,2066,2,success
+20,4,30,20,20,false,to verify,-0.921848,5716,1751,3,success
+20,4,30,20,20,false,test,-0.915532,8420,1947,4,success
+20,4,30,20,20,false,been updated,-0.885072,12025,2123,5,success
+20,4,30,20,20,false,fix has,-0.875933,32,30,6,success
+20,4,30,20,20,false,code has,-0.852534,7612,1681,7,success
+20,4,30,20,20,false,works as,-0.851876,1871,936,8,success
+20,4,30,20,20,false,verify that,-0.846972,5205,1651,9,success
+20,4,30,20,20,false,works,-0.830188,4627,1625,10,success
+20,4,30,20,20,false,code will,-0.828063,283,239,11,success
+20,4,30,20,20,false,key that,-0.826969,56,44,12,success
+20,4,30,20,20,false,longer needed,-0.826520,464,366,13,success
+20,4,30,20,20,false,consistency,-0.809479,144,103,14,success
+20,4,30,20,20,false,similar change,-0.807761,66,53,15,success
+20,4,30,20,20,false,the changes,-0.799931,5325,1708,16,success
+20,4,30,20,20,false,only see,-0.798057,271,192,17,success
+20,4,30,20,20,false,test the,-0.795535,2911,1306,18,success
+20,4,30,20,20,false,first before,0.790621,47,41,19,failure
+20,4,100,10,10,false,up by,-0.971863,560,450,0,success
+20,4,100,10,10,false,test script,-0.968441,4269,1322,1,success
+20,4,100,10,10,false,updated to,-0.945708,10570,2066,2,success
+20,4,100,10,10,false,to verify,-0.921848,5716,1751,3,success
+20,4,100,10,10,false,test,-0.915532,8420,1947,4,success
+20,4,100,10,10,false,been updated,-0.885072,12025,2123,5,success
+20,4,100,10,10,false,code has,-0.852534,7612,1681,6,success
+20,4,100,10,10,false,works as,-0.851876,1871,936,7,success
+20,4,100,10,10,false,verify that,-0.846972,5205,1651,8,success
+20,4,100,10,10,false,works,-0.830188,4627,1625,9,success
+20,4,100,20,20,false,up by,-0.971863,560,450,0,success
+20,4,100,20,20,false,test script,-0.968441,4269,1322,1,success
+20,4,100,20,20,false,updated to,-0.945708,10570,2066,2,success
+20,4,100,20,20,false,to verify,-0.921848,5716,1751,3,success
+20,4,100,20,20,false,test,-0.915532,8420,1947,4,success
+20,4,100,20,20,false,been updated,-0.885072,12025,2123,5,success
+20,4,100,20,20,false,code has,-0.852534,7612,1681,6,success
+20,4,100,20,20,false,works as,-0.851876,1871,936,7,success
+20,4,100,20,20,false,verify that,-0.846972,5205,1651,8,success
+20,4,100,20,20,false,works,-0.830188,4627,1625,9,success
+20,4,100,20,20,false,code will,-0.828063,283,239,10,success
+20,4,100,20,20,false,longer needed,-0.826520,464,366,11,success
+20,4,100,20,20,false,consistency,-0.809479,144,103,12,success
+20,4,100,20,20,false,the changes,-0.799931,5325,1708,13,success
+20,4,100,20,20,false,only see,-0.798057,271,192,14,success
+20,4,100,20,20,false,test the,-0.795535,2911,1306,15,success
+20,4,100,20,20,false,script has,-0.788972,7005,1814,16,success
+20,4,100,20,20,false,write a,-0.782603,3106,1239,17,success
+20,4,100,20,20,false,updated,-0.775809,13104,2171,18,success
+20,4,100,20,20,false,then submit,-0.773458,113,106,19,success

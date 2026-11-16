@@ -1,0 +1,211 @@
+{
+  "mode": "train OOF only; full execution by user",
+  "status": "complete",
+  "device": "cuda",
+  "seed": 42,
+  "thought_version": 1,
+  "s2": {
+    "phase5b_S1": "w3",
+    "phase5b_device": "cuda",
+    "phase5c_S2": "chg",
+    "phase5c_device": "cpu",
+    "definition": "w3 + chg",
+    "reproduce_5c_oof": {
+      "m1_xgb": null,
+      "m1_xgb_b1": null
+    }
+  },
+  "models": [
+    "m1_xgb",
+    "m1_xgb_b1"
+  ],
+  "N": [
+    3,
+    5,
+    8,
+    10,
+    15,
+    20
+  ],
+  "grid": [
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": true
+    }
+  ],
+  "xgb_fixed": {
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 1.0,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "n_jobs": 1,
+    "random_state": 42,
+    "eval_metric": "logloss"
+  },
+  "grid_tie": 0.002,
+  "k_star": 40,
+  "features": {
+    "official_matches_04_m1_cache": true,
+    "rows_per_N": {
+      "3": 61786,
+      "5": 59232,
+      "8": 52207,
+      "10": 46167,
+      "15": 33367,
+      "20": 25864
+    }
+  },
+  "selection": {
+    "model": "m1_xgb",
+    "N": [
+      8,
+      10,
+      15,
+      20
+    ],
+    "tie": 0.002,
+    "t": 100,
+    "vocab_k": 10,
+    "S3": "length_lexical",
+    "pick_by_model": {
+      "m1_xgb": {
+        "vocabulary": [
+          100,
+          10
+        ],
+        "S3": "length_lexical"
+      },
+      "m1_xgb_b1": {
+        "vocabulary": [
+          100,
+          10
+        ],
+        "S3": "length"
+      }
+    }
+  },
+  "candidates_seen": {
+    "vocab_pairs": 6,
+    "final_bundles": 4,
+    "xgb_configs": 8
+  },
+  "unique_designs": 108,
+  "grid_fits": 864,
+  "hypothesis": {
+    "rows": [
+      {
+        "model": "m1_xgb",
+        "N": 8,
+        "d_within_pair": 0.0070262534,
+        "d_within_pair_lo": 0.0005919744,
+        "d_within_pair_hi": 0.0136034034
+      },
+      {
+        "model": "m1_xgb",
+        "N": 10,
+        "d_within_pair": 0.0087409766,
+        "d_within_pair_lo": 0.0020202685,
+        "d_within_pair_hi": 0.014813954
+      },
+      {
+        "model": "m1_xgb",
+        "N": 15,
+        "d_within_pair": 0.0080746169,
+        "d_within_pair_lo": -0.0007124147,
+        "d_within_pair_hi": 0.0177966587
+      },
+      {
+        "model": "m1_xgb",
+        "N": 20,
+        "d_within_pair": -0.0036985668,
+        "d_within_pair_lo": -0.0143447377,
+        "d_within_pair_hi": 0.0079183985
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 8,
+        "d_within_pair": 0.0044672095,
+        "d_within_pair_lo": -0.0024151646,
+        "d_within_pair_hi": 0.0108694292
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 10,
+        "d_within_pair": 0.006191301,
+        "d_within_pair_lo": -0.0008368013,
+        "d_within_pair_hi": 0.0123191129
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 15,
+        "d_within_pair": 0.0088874084,
+        "d_within_pair_lo": 0.0001941633,
+        "d_within_pair_hi": 0.0169968767
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 20,
+        "d_within_pair": -0.0013209167,
+        "d_within_pair_lo": -0.0154255945,
+        "d_within_pair_hi": 0.0117329431
+      }
+    ],
+    "n_positive": 6,
+    "n_ci_lo_positive": 3
+  },
+  "bootstrap": {
+    "n_boot": 1000,
+    "skipped": false,
+    "unit": "train issue",
+    "seed": 42,
+    "base": "s2",
+    "selection_uncertainty_included": false
+  },
+  "criteria": {
+    "C1_features": true,
+    "C2_fold_boundaries": true,
+    "C3_s2_reproduced_when_available": true,
+    "C4_tables_complete": true,
+    "C5_vocabulary_complete": true,
+    "C6_bootstrap_ci": true
+  },
+  "external_validation": "pytest and byte reproducibility are separate; not implied by script criteria"
+}
