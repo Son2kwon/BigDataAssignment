@@ -193,6 +193,47 @@ def check_features(feats: pl.DataFrame, trajs: pl.DataFrame, n_grid, columns=Non
     return counts
 
 
+# ---- Phase 5d: 생각 추출·길이 (P5d-D2·D6). M3의 첫 펜스 앞 정의와 다르다. ----
+THOUGHT_LENGTH_BASES = ("thought_len_mean", "thought_len_max", "thought_len_last", "n_empty_thought")
+
+
+def extract_thought(action_text: str | None) -> str:
+    """모든 ``` 블록을 제거. 미완성 블록 뒤는 버리고, 블록 사이에는 단어 경계를 남긴다.
+
+    바깥 공백만 제거하고 내부 공백·대소문자는 보존한다. 길이는 이 문자열의 문자 수다.
+    """
+    return " ".join((action_text or "").split("```")[::2]).strip()
+
+
+def thought_length_columns(n: int, ks=(3,)) -> list[str]:
+    return [*THOUGHT_LENGTH_BASES, *[f"thought_len_mean_w{k}" for k in sorted(set(ks)) if k < n]]
+
+
+def thought_steps(steps: pl.DataFrame, trajs: pl.DataFrame, n: int) -> pl.DataFrame:
+    """진행 중 ID의 1..N. 누락 스텝을 빈 생각으로 대체하지 않고, 라벨은 참조하지 않는다."""
+    if n < 1:
+        raise ValueError("N must be positive")
+    alive = metrics.running(trajs, n).select("traj_id")
+    s = (steps.select("traj_id", "step_idx", "action_text")
+         .join(alive, on="traj_id", how="semi").filter(pl.col("step_idx") <= n).sort("traj_id", "step_idx"))
+    counts = s.group_by("traj_id").agg(pl.len().alias("n"), pl.col("step_idx").n_unique().alias("unique"),
+                                      pl.col("step_idx").min().alias("first"), pl.col("step_idx").max().alias("last"))
+    if (counts.height != alive.height or counts.filter(
+            (pl.col("n") != n) | (pl.col("unique") != n) | (pl.col("first") != 1) | (pl.col("last") != n)).height):
+        raise ValueError(f"N={n}: missing/duplicate prefix steps")
+    return s.with_columns(thought=pl.col("action_text").map_elements(extract_thought, return_dtype=pl.String, skip_nulls=False))
+
+
+def thought_length_features(steps: pl.DataFrame, trajs: pl.DataFrame, n: int, ks=(3,)) -> pl.DataFrame:
+    s = thought_steps(steps, trajs, n).with_columns(_len=pl.col("thought").str.len_chars().cast(pl.Float64))
+    out = s.group_by("traj_id", maintain_order=True).agg(
+        pl.col("_len").mean().alias("thought_len_mean"), pl.col("_len").max().alias("thought_len_max"),
+        pl.col("_len").last().alias("thought_len_last"), (pl.col("_len") == 0).sum().cast(pl.Float64).alias("n_empty_thought"),
+        *[pl.col("_len").filter(pl.col("step_idx") > n - k).mean().alias(f"thought_len_mean_w{k}")
+          for k in sorted(set(ks)) if k < n])
+    return out.select("traj_id", *thought_length_columns(n, ks)).sort("traj_id")
+
+
 # ---- Phase 5b: 마지막 k스텝 창·최근성 (PLAN 11절 P5b-D4~D6, docs/phase5b.md) ----
 # 창 k = 스텝 N−k+1..N. k ≥ N이면 그 k의 창 피처는 만들지 않는다 (N=3은 창 없음, N=5는 k=3만, P5b-D4).
 # 창 피처는 k마다 7개, 원시 횟수만 (비율·차이·감쇠·기울기는 5c, P5b-D5). 최근성 3개는 창과 무관하다 (P5b-D6).
