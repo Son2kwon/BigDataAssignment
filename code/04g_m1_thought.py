@@ -195,20 +195,20 @@ def distribution_rows(X, names, *, n, fold=None, t=None, vocab_k=None, sample="t
              "nonzero": float((X[:, j] != 0).mean())} for j, name in enumerate(names)]
 
 
-def evaluate_final(train, costs, k_star, predictions, disc, jobs, n_boot, skip_bootstrap):
-    """5b의 공용 평가 연결을 재사용. 동일 재표본, 묶음−S2, K* 대비 차이."""
+def evaluate_final(train, costs, k_star, predictions, disc, jobs, n_boot, skip_bootstrap, bundles=BUNDLES, base=BASE):
+    """5b의 공용 평가 연결을 재사용. 동일 재표본, 묶음−기준(5d: S2), K* 대비 차이. 5e도 bundles·base만 바꿔 쓴다."""
     tasks = [(v, m, n, train, predictions[(v, m)].filter(pl.col("N") == n), costs, k_star)
-             for v in BUNDLES for m in MODELS for n in evaluate.N_GRID]
+             for v in bundles for m in MODELS for n in evaluate.N_GRID]
     ops = [r for rs in evaluate.parallel(m1w.ops_task, tasks, jobs) for r in rs]
     points = {(r["bundle"], r["model"], r["N"], r["policy"]): (r["tau"], r["cap"]) for r in ops}
     boots = {}
     if not skip_bootstrap:
         tasks = []
-        for v in BUNDLES:
+        for v in bundles:
             for m in MODELS:
                 for n in evaluate.N_GRID:
-                    pa, pb = (predictions[(b, m)].filter(pl.col("N") == n) for b in (v, BASE))
-                    a, b = ({pol: points[(x, m, n, pol)] for pol in evaluate.POLICIES} for x in (v, BASE))
+                    pa, pb = (predictions[(b, m)].filter(pl.col("N") == n) for b in (v, base))
+                    a, b = ({pol: points[(x, m, n, pol)] for pol in evaluate.POLICIES} for x in (v, base))
                     c = evaluate.compressed_costs(costs, n, [cap for _, cap in (*a.values(), *b.values())], k_star)
                     tasks.append(((v, m, n), train, evaluate.pair_preds(pa, pb), m1w.oof_stat(n, a, b, k_star, c), n_boot))
         boots = {r["key"]: r["boot"] for r in evaluate.parallel(m1w.boot_task, tasks, jobs)}
@@ -223,7 +223,7 @@ def evaluate_final(train, costs, k_star, predictions, disc, jobs, n_boot, skip_b
     lookup = {(r["bundle"], r["model"], r["N"]): r for r in disc.iter_rows(named=True)}
     for r in disc.iter_rows(named=True):
         key = r["bundle"], r["model"], r["N"]
-        ref = lookup[(BASE, r["model"], r["N"])]
+        ref = lookup[(base, r["model"], r["N"])]
         row = dict(r)
         for c in ("auroc", "pr_auc", "within_pair", "within_issue_mean"):
             row[f"d_{c}"] = r[c] - ref[c]
@@ -234,7 +234,7 @@ def evaluate_final(train, costs, k_star, predictions, disc, jobs, n_boot, skip_b
     lookup = {(r["bundle"], r["model"], r["N"], r["policy"]): r for r in ops}
     for r in ops:
         key, pol = (r["bundle"], r["model"], r["N"]), r["policy"]
-        ref, row = lookup[(BASE, r["model"], r["N"], pol)], dict(r)
+        ref, row = lookup[(base, r["model"], r["N"], pol)], dict(r)
         for c in evaluate.DELTA_COLUMNS:
             row[f"{c}_lo"], row[f"{c}_hi"] = ci(key, f"{pol}.{c}")
             row[f"d_{c}_lo"], row[f"d_{c}_hi"] = ci(key, f"{pol}.dk_{c}")
