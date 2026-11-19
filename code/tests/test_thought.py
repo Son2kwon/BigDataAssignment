@@ -55,7 +55,7 @@ def test_repeated_word_counts_once_per_step_and_document_boundary_bigram():
     vocab = [{"ngram": "stuck"}, {"ngram": "stuck stuck"}, {"ngram": "stuck again"}]
     X = corpus.transform(["0_0"], vocab, 3)
     np.testing.assert_array_equal(X, [[2, 1, 0]])
-    assert "stuck again" in corpus.documents["0_0"]
+    assert "stuck again" in corpus.document_ngrams("0_0")
     # 선택 문서는 스텝2→3 경계 bigram도 포함하지만 모델은 스텝 안만 센다.
     assert thought.lexical_columns(3, 3) == ["thought_g00", "thought_g01", "thought_g02"]
 
@@ -135,3 +135,18 @@ def test_scope_rejects_issue_crossing_folds():
     train, *_ = fixture()
     with pytest.raises(ValueError, match="registry"):
         thought.TrainScope(train.with_columns(instance_id=pl.lit("same__repo-1")))
+
+
+def test_integer_ids_follow_string_order_and_decode_to_original_ngrams():
+    train, raw, corpus, scope, bodies, fit, stats, scores = fitted()
+    assert list(corpus.names) == sorted(corpus.names)
+    assert all(corpus.ids[g] == i for i, g in enumerate(corpus.names))
+    for tid, group in raw.sort("step_idx").group_by("traj_id", maintain_order=True):
+        pieces = group["action_text"].to_list()
+        assert corpus.document_ngrams(tid[0]) == thought.ngrams(thought.token_segments(" ".join(pieces)))
+        assert [frozenset(corpus.names[i] for i in s) for s in corpus.steps[tid[0]]] == [
+            thought.ngrams(thought.token_segments(p)) for p in pieces]
+    # 결과 행은 문자열 사전순이고 문자열 n-gram을 담는다.
+    assert [r["ngram"] for r in scores] == sorted(r["ngram"] for r in scores)
+    # 코퍼스에 없는 어휘는 0 열이 된다.
+    np.testing.assert_array_equal(corpus.transform(["0_0"], [{"ngram": "never seen"}], 1), [[0]])
