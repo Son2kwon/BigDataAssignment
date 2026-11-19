@@ -95,9 +95,16 @@ class TrainScope:
 
 @dataclass
 class Corpus:
+    """n-gram 문자열은 `names`/`ids`에 한 번만 두고 문서·스텝은 정수 ID 집합으로 든다 (메모리).
+
+    ID는 문자열 사전순 순위다. 따라서 ID 정렬 = 문자열 정렬이고, 정렬·동률 처리·합산 순서가
+    문자열 집합을 쓰던 때와 같다.
+    """
     n: int
-    documents: dict[str, frozenset[str]]
-    steps: dict[str, tuple[frozenset[str], ...]]
+    names: tuple[str, ...]
+    ids: dict[str, int]
+    documents: dict[str, frozenset[int]]
+    steps: dict[str, tuple[frozenset[int], ...]]
 
     @classmethod
     def build(cls, steps: pl.DataFrame, trajs: pl.DataFrame, n: int):
@@ -105,11 +112,32 @@ class Corpus:
         texts = defaultdict(list)
         for row in prefix.select("traj_id", "thought").iter_rows():
             texts[row[0]].append(row[1])
+        temp = {}  # 문자열 → 임시 ID (등장 순)
+
+        def encode(grams):
+            return frozenset(temp.setdefault(g, len(temp)) for g in grams)
+
         documents, per_step = {}, {}
         for tid, pieces in texts.items():
-            documents[tid] = ngrams(token_segments(" ".join(pieces)))
-            per_step[tid] = tuple(ngrams(token_segments(piece)) for piece in pieces)
-        return cls(n, documents, per_step)
+            documents[tid] = encode(ngrams(token_segments(" ".join(pieces))))
+            per_step[tid] = tuple(encode(ngrams(token_segments(piece))) for piece in pieces)
+        names = tuple(sorted(temp))
+        ids = {g: i for i, g in enumerate(names)}
+        remap = [0] * len(names)
+        for g, old in temp.items():
+            remap[old] = ids[g]
+        del temp
+        for tid in documents:
+            documents[tid] = frozenset(remap[i] for i in documents[tid])
+            per_step[tid] = tuple(frozenset(remap[i] for i in s) for s in per_step[tid])
+        return cls(n, names, ids, documents, per_step)
+
+    def encode(self, grams) -> frozenset[int]:
+        """외부 문자열 집합을 ID로. 코퍼스에 없는 n-gram은 어떤 문서에도 없으므로 버린다."""
+        return frozenset(self.ids[g] for g in grams if g in self.ids)
+
+    def document_ngrams(self, tid: str) -> frozenset[str]:
+        return frozenset(self.names[i] for i in self.documents[tid])
 
     def transform(self, ids, vocabulary, vocab_k: int, ks=(3,)) -> np.ndarray:
         """라벨 없이 변환. 열은 rank 순 합계, 창 k 순 rank. 부족 어휘 열은 0 패딩."""
@@ -117,10 +145,10 @@ class Corpus:
             raise ValueError("vocab_k smaller than vocabulary")
         windows = [k for k in sorted(set(ks)) if k < self.n]
         out = np.zeros((len(ids), vocab_k * (1 + len(windows))), dtype=np.float64)
+        codes = [self.ids.get(entry["ngram"], -1) for entry in vocabulary]  # -1: 어느 스텝에도 없음
         for i, tid in enumerate(ids):
             present = self.steps[tid]
-            for j, entry in enumerate(vocabulary):
-                g = entry["ngram"]
+            for j, g in enumerate(codes):
                 out[i, j] = sum(g in s for s in present)
                 for w, k in enumerate(windows, 1):
                     out[i, w * vocab_k + j] = sum(g in s for s in present[-k:])
@@ -149,7 +177,7 @@ def occurrences(corpus: Corpus, fit_meta: pl.DataFrame, scope: TrainScope, held_
     if "target" in fit_meta.columns:
         raise ValueError("unlabelled diagnostics must not receive target")
     count, issues, repos, overlap = Counter(), defaultdict(set), defaultdict(Counter), set()
-    issue_grams = {issue: ngrams(token_segments(baselines.strip_hint(issue_text[issue])))
+    issue_grams = {issue: corpus.encode(ngrams(token_segments(baselines.strip_hint(issue_text[issue]))))
                    for issue in sorted(set(fit_meta["instance_id"].to_list()))}
     for tid, issue in fit_meta.select("traj_id", "instance_id").sort("traj_id").iter_rows():
         repo = repo_id(issue)
@@ -190,7 +218,7 @@ def association(corpus: Corpus, fit: pl.DataFrame, scope: TrainScope, held_fold:
     for tid, r in residual.select("traj_id", "_r").iter_rows():
         for g in sorted(corpus.documents[tid]):
             sums[g] += r
-    return [{"ngram": g, "score": sums[g] / math.sqrt(stats.trajectory_count[g]),
+    return [{"ngram": corpus.names[g], "score": sums[g] / math.sqrt(stats.trajectory_count[g]),
              "n_trajectories": stats.trajectory_count[g], "n_issues": len(stats.issue_sets[g])}
             for g in sorted(stats.trajectory_count)]
 

@@ -49,7 +49,8 @@ def disc_rows(bundle_scores):
                          for v, score in bundle_scores.items() for m in runner.MODELS for n in evaluate.N_GRID])
 
 
-def test_search_tie_prefers_larger_t_then_smaller_k_and_s3_prefers_fewer_features():
+def test_search_tie_prefers_larger_t_then_smaller_k_and_s3_prefers_fewer_features(monkeypatch):
+    monkeypatch.setattr(runner, "S2", ("chg", ()))
     disc = disc_rows({f"lex_t{t}_k{k}": 0.6 for t, k in runner.SEARCH})
     assert runner.pick_vocab(disc, "m1_xgb")[0] == (100, 10)
     disc = disc_rows({"s2": 0.600, "length": 0.601, "lexical": 0.6015, "length_lexical": 0.602})
@@ -58,7 +59,8 @@ def test_search_tie_prefers_larger_t_then_smaller_k_and_s3_prefers_fewer_feature
         runner.mean_score(disc.filter(pl.col("N") != 20), "s2", "m1_xgb")
 
 
-def test_column_contract_and_cuda_default_with_explicit_cpu_override():
+def test_column_contract_and_cuda_default_with_explicit_cpu_override(monkeypatch):
+    monkeypatch.setattr(runner, "S2", ("chg", ()))
     assert len(runner.columns("s2", 3, False)) == 73
     assert len(runner.columns("length", 3, False)) == 77
     assert len(runner.columns("lexical", 3, False, 10)) == 83
@@ -68,12 +70,47 @@ def test_column_contract_and_cuda_default_with_explicit_cpu_override():
     assert runner.parser().parse_args(["--device", "cpu"]).device == "cpu"
 
 
-def test_changed_s2_stops_before_device_check(tmp_path, monkeypatch):
+def write_5c_summary(path, s2, criteria_ok=True, combo=("a2", "sl5")):
+    path.write_text(json.dumps({"device": "cpu", "selection": {"S2": s2, "combo": list(combo)},
+                                "criteria": {"C1": True, "C2": criteria_ok}}))
+
+
+@pytest.mark.parametrize("s2", ("chg", "sl5"))
+def test_s2_check_reads_5c_selection(tmp_path, monkeypatch, s2):
     monkeypatch.setattr(runner.m1t, "s1_check", lambda: {})
     monkeypatch.setattr(runner.m1t, "OUT_DIR", tmp_path)
-    (tmp_path / "summary.json").write_text(json.dumps({"selection": {"S2": "g05"}}))
-    with pytest.raises(ValueError, match="S2 changed"):
+    monkeypatch.setattr(runner, "S2", None)
+    write_5c_summary(tmp_path / "summary.json", s2)
+    upstream = runner.s2_check()
+    assert upstream == {"phase5c_S2": s2, "phase5c_device": "cpu"}
+    assert runner.S2 == (s2, ())
+    assert runner.columns("s2", 10, False) == runner.m1t.bundle_cols(s2, 10, False)
+    assert runner.columns("length", 10, True)[:len(runner.m1t.bundle_cols(s2, 10, True))] == runner.m1t.bundle_cols(s2, 10, True)
+
+
+def test_s2_check_reads_combo_members(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner.m1t, "s1_check", lambda: {})
+    monkeypatch.setattr(runner.m1t, "OUT_DIR", tmp_path)
+    monkeypatch.setattr(runner, "S2", None)
+    write_5c_summary(tmp_path / "summary.json", "combo")
+    assert runner.s2_check()["phase5c_combo"] == ["a2", "sl5"]
+    assert runner.columns("s2", 10, False) == runner.m1t.bundle_cols("combo", 10, False, ("a2", "sl5"))
+
+
+def test_s2_check_stops_on_incomplete_5c_criteria_or_unknown_variant(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner.m1t, "s1_check", lambda: {})
+    monkeypatch.setattr(runner.m1t, "OUT_DIR", tmp_path)
+    monkeypatch.setattr(runner, "S2", None)
+    write_5c_summary(tmp_path / "summary.json", "sl5", criteria_ok=False)
+    with pytest.raises(ValueError, match="incomplete criteria"):
         runner.s2_check()
+    assert runner.S2 is None
+    write_5c_summary(tmp_path / "summary.json", "nope")
+    with pytest.raises(KeyError):
+        runner.s2_check()
+    assert runner.S2 is None
+    with pytest.raises(RuntimeError, match="S2 not loaded"):
+        runner.columns("s2", 10, False)
 
 
 def fake_inputs():
@@ -102,7 +139,8 @@ def fake_base(train):
 @pytest.mark.parametrize("skip_bootstrap", (True, False))
 def test_smoke_end_to_end_with_fake_grid_has_no_test_or_gpu_or_official_outputs(tmp_path, monkeypatch, skip_bootstrap):
     inputs = fake_inputs()
-    monkeypatch.setattr(runner, "s2_check", lambda: {"phase5c_device": "cpu"})
+    monkeypatch.setattr(runner, "s2_check", lambda: {"phase5c_S2": "chg", "phase5c_device": "cpu"})
+    monkeypatch.setattr(runner, "S2", ("chg", ()))
     monkeypatch.setattr(runner, "load_train_inputs", lambda: inputs)
     monkeypatch.setattr(runner, "base_features", fake_base)
     monkeypatch.setattr(runner, "SMOKE_DIR", tmp_path / "smoke")
@@ -152,7 +190,8 @@ def test_smoke_end_to_end_with_fake_grid_has_no_test_or_gpu_or_official_outputs(
 
 
 def test_full_mode_candidate_shortage_stops_before_model_training(tmp_path, monkeypatch):
-    monkeypatch.setattr(runner, "s2_check", lambda: {"phase5c_device": "cpu"})
+    monkeypatch.setattr(runner, "s2_check", lambda: {"phase5c_S2": "chg", "phase5c_device": "cpu"})
+    monkeypatch.setattr(runner, "S2", ("chg", ()))
     monkeypatch.setattr(runner, "load_train_inputs", fake_inputs)
     monkeypatch.setattr(runner, "base_features", fake_base)
     monkeypatch.setattr(runner, "OUT_DIR", tmp_path / "results")

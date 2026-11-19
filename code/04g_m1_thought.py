@@ -31,25 +31,38 @@ OUT_DIR = io.RESULTS_DIR / "phase5d"
 DATA_DIR = io.PROCESSED_DIR / "phase5d"
 SMOKE_DIR = io.PROCESSED_DIR / "phase5d_smoke"
 FLOAT = m1w.FLOAT
+# (변형, combo). s2_check가 results/phase5c/summary.json의 selection.S2에서 채운다 (P9-D2 (a)).
+S2 = None
+
+
+def s2_cols(n, use_b1):
+    if S2 is None:
+        raise RuntimeError("S2 not loaded; call s2_check() first")
+    return m1t.bundle_cols(S2[0], n, use_b1, S2[1])
 
 
 def columns(bundle, n, use_b1, vocab_k=0):
-    return [*m1t.bundle_cols("chg", n, use_b1),
+    return [*s2_cols(n, use_b1),
             *(features.thought_length_columns(n, KS) if "length" in bundle else []),
             *(thought.lexical_columns(n, vocab_k, KS) if "lexical" in bundle else [])]
 
 
 def s2_check():
+    """5c가 고른 S2를 읽는다. 고정 비교 없이 재실행의 선택을 따른다 (P9-D2 (a))."""
+    global S2
     s1 = m1t.s1_check()
     path = m1t.OUT_DIR / "summary.json"
     if not path.exists():
         raise FileNotFoundError(f"S2 metadata missing: {path}; do not regenerate automatically")
     summary = json.loads(path.read_text())
-    if summary["selection"]["S2"] != "chg":
-        raise ValueError("S2 changed; this script implements P5c-D13 S2=chg. Stop (P9-D2).")
     if not all(summary["criteria"].values()):
         raise ValueError("Phase 5c recorded incomplete criteria")
-    return {**s1, "phase5c_S2": "chg", "phase5c_device": summary["device"]}
+    variant = summary["selection"]["S2"]
+    combo = tuple(summary["selection"]["combo"]) if variant == "combo" else ()
+    m1t.extra_cols(variant, max(evaluate.N_GRID), combo)  # 모르는 변형이면 KeyError로 멈춘다
+    S2 = (variant, combo)
+    return {**s1, "phase5c_S2": variant, **({"phase5c_combo": list(combo)} if combo else {}),
+            "phase5c_device": summary["device"]}
 
 
 def load_train_inputs():
@@ -75,7 +88,7 @@ def issue_texts(texts):
 def base_features(train):
     """S2 열만 보존. 5c의 검증된 같은 정의로 재구성한다."""
     feats, info = m1t.build_features(train)
-    return {n: f.select("traj_id", "N", *m1t.bundle_cols("chg", n, False)) for n, f in feats.items()}, info
+    return {n: f.select("traj_id", "N", *s2_cols(n, False)) for n, f in feats.items()}, info
 
 
 def fold_blocks(D, extras=None):
@@ -182,20 +195,20 @@ def distribution_rows(X, names, *, n, fold=None, t=None, vocab_k=None, sample="t
              "nonzero": float((X[:, j] != 0).mean())} for j, name in enumerate(names)]
 
 
-def evaluate_final(train, costs, k_star, predictions, disc, jobs, n_boot, skip_bootstrap):
-    """5b의 공용 평가 연결을 재사용. 동일 재표본, 묶음−S2, K* 대비 차이."""
+def evaluate_final(train, costs, k_star, predictions, disc, jobs, n_boot, skip_bootstrap, bundles=BUNDLES, base=BASE):
+    """5b의 공용 평가 연결을 재사용. 동일 재표본, 묶음−기준(5d: S2), K* 대비 차이. 5e도 bundles·base만 바꿔 쓴다."""
     tasks = [(v, m, n, train, predictions[(v, m)].filter(pl.col("N") == n), costs, k_star)
-             for v in BUNDLES for m in MODELS for n in evaluate.N_GRID]
+             for v in bundles for m in MODELS for n in evaluate.N_GRID]
     ops = [r for rs in evaluate.parallel(m1w.ops_task, tasks, jobs) for r in rs]
     points = {(r["bundle"], r["model"], r["N"], r["policy"]): (r["tau"], r["cap"]) for r in ops}
     boots = {}
     if not skip_bootstrap:
         tasks = []
-        for v in BUNDLES:
+        for v in bundles:
             for m in MODELS:
                 for n in evaluate.N_GRID:
-                    pa, pb = (predictions[(b, m)].filter(pl.col("N") == n) for b in (v, BASE))
-                    a, b = ({pol: points[(x, m, n, pol)] for pol in evaluate.POLICIES} for x in (v, BASE))
+                    pa, pb = (predictions[(b, m)].filter(pl.col("N") == n) for b in (v, base))
+                    a, b = ({pol: points[(x, m, n, pol)] for pol in evaluate.POLICIES} for x in (v, base))
                     c = evaluate.compressed_costs(costs, n, [cap for _, cap in (*a.values(), *b.values())], k_star)
                     tasks.append(((v, m, n), train, evaluate.pair_preds(pa, pb), m1w.oof_stat(n, a, b, k_star, c), n_boot))
         boots = {r["key"]: r["boot"] for r in evaluate.parallel(m1w.boot_task, tasks, jobs)}
@@ -210,7 +223,7 @@ def evaluate_final(train, costs, k_star, predictions, disc, jobs, n_boot, skip_b
     lookup = {(r["bundle"], r["model"], r["N"]): r for r in disc.iter_rows(named=True)}
     for r in disc.iter_rows(named=True):
         key = r["bundle"], r["model"], r["N"]
-        ref = lookup[(BASE, r["model"], r["N"])]
+        ref = lookup[(base, r["model"], r["N"])]
         row = dict(r)
         for c in ("auroc", "pr_auc", "within_pair", "within_issue_mean"):
             row[f"d_{c}"] = r[c] - ref[c]
@@ -221,7 +234,7 @@ def evaluate_final(train, costs, k_star, predictions, disc, jobs, n_boot, skip_b
     lookup = {(r["bundle"], r["model"], r["N"], r["policy"]): r for r in ops}
     for r in ops:
         key, pol = (r["bundle"], r["model"], r["N"]), r["policy"]
-        ref, row = lookup[(BASE, r["model"], r["N"], pol)], dict(r)
+        ref, row = lookup[(base, r["model"], r["N"], pol)], dict(r)
         for c in evaluate.DELTA_COLUMNS:
             row[f"{c}_lo"], row[f"{c}_hi"] = ci(key, f"{pol}.{c}")
             row[f"d_{c}_lo"], row[f"d_{c}_hi"] = ci(key, f"{pol}.dk_{c}")
@@ -340,7 +353,7 @@ def main(argv=None):
         for t, k in SEARCH:
             extras = {f: np.load(data_dir / f"lex_N{n}_f{f}_t{t}_k{k}.npy", allow_pickle=False) for f in range(5)}
             for model, use_b1 in MODELS.items():
-                D = m1w.design(train, feats, b1 if use_b1 else None, n, m1t.bundle_cols("chg", n, use_b1))
+                D = m1w.design(train, feats, b1 if use_b1 else None, n, s2_cols(n, use_b1))
                 if D["traj_id"].to_list() != ids:
                     raise ValueError("lexical/base row ordering mismatch")
                 run(f"lex_t{t}_k{k}", model, n, D, extras, t=t, vocab_k=k)
@@ -427,7 +440,7 @@ def main(argv=None):
         "d_saved_tokens", "d_saved_tokens_lo", "d_saved_tokens_hi", "do_saved_steps", "do_saved_tokens",
         "do_saved_tokens_lo", "do_saved_tokens_hi").write_csv(out_dir / "n_summary.csv", float_precision=FLOAT)
     summary = {"mode": "smoke" if args.smoke else "train OOF only; full execution by user", "status": "complete" if all(crit.values()) else "incomplete", "device": args.device,
-               "seed": io.SEED, "thought_version": thought.VERSION, "s2": {**upstream, "definition": "w3 + chg", "reproduce_5c_oof": repro},
+               "seed": io.SEED, "thought_version": thought.VERSION, "s2": {**upstream, "definition": f"w3 + {'+'.join(S2[1]) if S2[1] else S2[0]}", "reproduce_5c_oof": repro},
                "models": list(MODELS), "N": list(evaluate.N_GRID), "grid": list(grid), "xgb_fixed": m1.XGB_FIXED,
                "grid_tie": m1.GRID_TIE, "k_star": k_star, "features": feat_info,
                "selection": {"model": SELECT_MODEL, "N": list(SELECT_N), "tie": TIE, "t": t_star, "vocab_k": vocab_k,
@@ -463,7 +476,7 @@ def main(argv=None):
 def reproduce_s2(predictions, upstream, args):
     out = {}
     for model in MODELS:
-        path = m1t.DATA_DIR / f"{model}__chg.parquet"
+        path = m1t.DATA_DIR / f"{model}__{upstream['phase5c_S2']}.parquet"
         if args.smoke or not path.exists():
             out[model] = None
             continue
