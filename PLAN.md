@@ -732,7 +732,7 @@ B1 점수 분포 (5.0.6, `results/phase4/b1_score_dist.csv`, 궤적 단위, 표�
 
 ### Phase 5b~5e. M1 개선 보조 실험 (사전 등록 2026-11-12, P9-D1)
 
-상세 기록: [docs/phase5b.md](docs/phase5b.md) (5b.0에 공통 규칙, 5b.1 구현 ✓, 5b.2 결과 ✓), [docs/phase5c.md](docs/phase5c.md) (5c.1 구현 ✓, 5c.2 결과 ✓), [docs/phase5d.md](docs/phase5d.md) (코드 검증 ✓, 사용자 정식 실행 결과 기록 ✓, 5d.6), [docs/phase5e.md](docs/phase5e.md) (5e.1 구현 ✓ 2026-11-19, firebat CPU 경향 실행 5e.2). 5d 구현 계획은 [PHASE5D_PLAN.md](PHASE5D_PLAN.md). 결정은 11절 P5b-D1~D15, P5c-D1~D13, P5d-D1~D22, P5e-D1~D13에 있다
+상세 기록: [docs/phase5b.md](docs/phase5b.md) (5b.0에 공통 규칙, 5b.1 구현 ✓, 5b.2 결과 ✓), [docs/phase5c.md](docs/phase5c.md) (5c.1 구현 ✓, 5c.2 결과 ✓), [docs/phase5d.md](docs/phase5d.md) (코드 검증 ✓, 사용자 정식 실행 결과 기록 ✓, 5d.6), [docs/phase5e.md](docs/phase5e.md) (5e.1 구현 ✓, 5e.2 firebat CPU 경향 실행 ✓ 2026-11-19: S4 = 스텝 가중 λ=1, train OOF 절약 스텝 +0.70%p, 토큰은 N에 따라 혼재. 최종 수치는 01~5e 재실행으로 교체). 5d 구현 계획은 [PHASE5D_PLAN.md](PHASE5D_PLAN.md). 결정은 11절 P5b-D1~D15, P5c-D1~D13, P5d-D1~D22, P5e-D1~D13에 있다
 
 이 실험은 보조 실험이고 공식 M1(Phase 5)은 바꾸지 않는다. Phase 하나가 방법 하나다. 각 Phase에서 고른 묶음(S1~S3)이 다음 Phase의 출발점이 된다. 작업 단계 번호는 5b.1, 5c.1, …처럼 붙이고, 결정 ID는 P5b-D\* ~ P5e-D\*로 쓴다.
 
