@@ -1,0 +1,201 @@
+
+--- 05e-m1-cost-weight: starting attempt ---
+m1_weights_s3_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_s3_m1_xgb_b1_20: 0/8 tasks already checkpointed
+S3 refit complete (221.3s)
+lambda0 = {('m1_xgb', 'step'): 32.05101235380821, ('m1_xgb', 'token'): 31.76546680425165, ('m1_xgb_b1', 'step'): 25.56740665283497, ('m1_xgb_b1', 'token'): 26.89248236157114}
+m1_weights_step_lam1_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_step_lam1_m1_xgb_b1_20: 0/8 tasks already checkpointed
+step_lam1: complete (446.1s)
+m1_weights_step_lam0half_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_step_lam0half_m1_xgb_b1_20: 0/8 tasks already checkpointed
+step_lam0half: complete (662.1s)
+m1_weights_step_lam0_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_step_lam0_m1_xgb_b1_20: 0/8 tasks already checkpointed
+step_lam0: complete (877.7s)
+m1_weights_step_lam0x2_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_step_lam0x2_m1_xgb_b1_20: 0/8 tasks already checkpointed
+step_lam0x2: complete (1093.0s)
+m1_weights_step_sqrt_lam1_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam1_m1_xgb_b1_20: 0/8 tasks already checkpointed
+step_sqrt_lam1: complete (1309.6s)
+m1_weights_step_sqrt_lam0half_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0half_m1_xgb_b1_20: 0/8 tasks already checkpointed
+step_sqrt_lam0half: complete (1525.8s)
+m1_weights_step_sqrt_lam0_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0_m1_xgb_b1_20: 0/8 tasks already checkpointed
+step_sqrt_lam0: complete (1741.7s)
+m1_weights_step_sqrt_lam0x2_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_step_sqrt_lam0x2_m1_xgb_b1_20: 0/8 tasks already checkpointed
+step_sqrt_lam0x2: complete (1957.2s)
+m1_weights_token_lam1_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_token_lam1_m1_xgb_b1_20: 0/8 tasks already checkpointed
+token_lam1: complete (2174.9s)
+m1_weights_token_lam0half_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_token_lam0half_m1_xgb_b1_20: 0/8 tasks already checkpointed
+token_lam0half: complete (2392.4s)
+m1_weights_token_lam0_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_token_lam0_m1_xgb_b1_20: 0/8 tasks already checkpointed
+token_lam0: complete (2609.6s)
+m1_weights_token_lam0x2_m1_xgb_3: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_5: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_8: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_10: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_15: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_20: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_weights_token_lam0x2_m1_xgb_b1_20: 0/8 tasks already checkpointed
+token_lam0x2: complete (2826.4s)
+/home/chaseungjoon/code/bigdata-project/.venv/lib/python3.13/site-packages/joblib/externals/loky/process_executor.py:787: UserWarning: A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.
+  warnings.warn(
+S4=step (step_lam1); lambda picks={('step', 'm1_xgb'): 'step_lam1', ('step_sqrt', 'm1_xgb'): 'step_sqrt_lam1', ('token', 'm1_xgb'): 'token_lam0half', ('step', 'm1_xgb_b1'): 'step_lam1', ('step_sqrt', 'm1_xgb_b1'): 'step_sqrt_lam1', ('token', 'm1_xgb_b1'): 'token_lam1'}
+m1_oof_bootstrap_s3: 0/48 tasks already checkpointed
+shape: (32, 16)
+┌────────┬───────────┬───────────┬─────────────┬───┬─────────────┬────────────┬────────────┬───────┐
+│ stage  ┆ model     ┆ bundle    ┆ variant     ┆ … ┆ in_tie_band ┆ picked_by_ ┆ at_grid_bo ┆ used  │
+│ ---    ┆ ---       ┆ ---       ┆ ---         ┆   ┆ ---         ┆ this_model ┆ undary     ┆ ---   │
+│ str    ┆ str       ┆ str       ┆ str         ┆   ┆ bool        ┆ ---        ┆ ---        ┆ bool  │
+│        ┆           ┆           ┆             ┆   ┆             ┆ bool       ┆ bool       ┆       │
+╞════════╪═══════════╪═══════════╪═════════════╪═══╪═════════════╪════════════╪════════════╪═══════╡
+│ lambda ┆ m1_xgb    ┆ step      ┆ step_lam1   ┆ … ┆ true        ┆ true       ┆ false      ┆ true  │
+│ lambda ┆ m1_xgb    ┆ step      ┆ step_lam0ha ┆ … ┆ true        ┆ false      ┆ false      ┆ false │
+│        ┆           ┆           ┆ lf          ┆   ┆             ┆            ┆            ┆       │
+│ lambda ┆ m1_xgb    ┆ step      ┆ step_lam0   ┆ … ┆ true        ┆ false      ┆ false      ┆ false │
+│ lambda ┆ m1_xgb    ┆ step      ┆ step_lam0x2 ┆ … ┆ true        ┆ false      ┆ false      ┆ false │
+│ lambda ┆ m1_xgb    ┆ step_sqrt ┆ step_sqrt_l ┆ … ┆ true        ┆ true       ┆ false      ┆ true  │
+│        ┆           ┆           ┆ am1         ┆   ┆             ┆            ┆            ┆       │
+│ …      ┆ …         ┆ …         ┆ …           ┆ … ┆ …           ┆ …          ┆ …          ┆ …     │
+│ lambda ┆ m1_xgb_b1 ┆ token     ┆ token_lam0x ┆ … ┆ true        ┆ false      ┆ false      ┆ false │
+│        ┆           ┆           ┆ 2           ┆   ┆             ┆            ┆            ┆       │
+│ S4     ┆ m1_xgb_b1 ┆ s3        ┆ s3          ┆ … ┆ false       ┆ false      ┆ null       ┆ false │
+│ S4     ┆ m1_xgb_b1 ┆ step      ┆ step_lam1   ┆ … ┆ true        ┆ true       ┆ null       ┆ false │
+│ S4     ┆ m1_xgb_b1 ┆ step_sqrt ┆ step_sqrt_l ┆ … ┆ false       ┆ false      ┆ null       ┆ false │
+│        ┆           ┆           ┆ am1         ┆   ┆             ┆            ┆            ┆       │
+│ S4     ┆ m1_xgb_b1 ┆ token     ┆ token_lam0h ┆ … ┆ false       ┆ false      ┆ null       ┆ false │
+│        ┆           ┆           ┆ alf         ┆   ┆             ┆            ┆            ┆       │
+└────────┴───────────┴───────────┴─────────────┴───┴─────────────┴────────────┴────────────┴───────┘
+S4=step (step_lam1); criteria={'C1_upstream_and_inputs': True, 'C2_s3_reproduced_when_available': True, 'C3_weights_valid': True, 'C4_tables_complete': True, 'C5_lambda0_valid': True, 'C6_bootstrap_ci': True}; elapsed=3614.2s

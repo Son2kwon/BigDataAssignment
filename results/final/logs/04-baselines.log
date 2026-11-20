@@ -1,0 +1,107 @@
+
+--- 04-baselines: starting attempt ---
+[   0.9s] 입력·평가 집합·맥락 길이
+[   0.1s] B0 에러 개수 점수
+[  55.7s] B1 그리드·OOF
+[   0.1s] 오라클
+[   0.5s] 예측 저장·검증
+[   0.7s] 판별 지표·고정 상한
+[  42.2s] 운영점 선택·적용
+[   7.1s] 운영점 이전성
+[   1.5s] 비용 곡선
+baselines_bootstrap: 0/34 tasks already checkpointed
+[  63.2s] 부트스트랩 (34개 × 1000회)
+shape: (16, 8)
+┌────────────────┬───────────┬─────┬───────────┬───────────┬────────┬────────┬─────────────┐
+│ model          ┆ split     ┆ N   ┆ n_running ┆ base_rate ┆ auroc  ┆ pr_auc ┆ within_pair │
+│ ---            ┆ ---       ┆ --- ┆ ---       ┆ ---       ┆ ---    ┆ ---    ┆ ---         │
+│ str            ┆ str       ┆ i64 ┆ i64       ┆ f64       ┆ f64    ┆ f64    ┆ f64         │
+╞════════════════╪═══════════╪═════╪═══════════╪═══════════╪════════╪════════╪═════════════╡
+│ b0_err         ┆ train_oof ┆ 10  ┆ 46167     ┆ 0.1384    ┆ 0.5337 ┆ 0.1458 ┆ 0.5542      │
+│ b0_err         ┆ test      ┆ 10  ┆ 9351      ┆ 0.1370    ┆ 0.5284 ┆ 0.1431 ┆ 0.5509      │
+│ b0_editfail    ┆ train_oof ┆ 10  ┆ 46167     ┆ 0.1384    ┆ 0.5359 ┆ 0.1479 ┆ 0.5405      │
+│ b0_editfail    ┆ test      ┆ 10  ┆ 9351      ┆ 0.1370    ┆ 0.5270 ┆ 0.1438 ┆ 0.5338      │
+│ b1_static      ┆ train_oof ┆ 0   ┆ 62311     ┆ 0.1666    ┆ 0.6546 ┆ 0.2473 ┆ 0.5000      │
+│ b1_static      ┆ train_oof ┆ 10  ┆ 46167     ┆ 0.1384    ┆ 0.6442 ┆ 0.2023 ┆ 0.5000      │
+│ b1_static      ┆ test      ┆ 0   ┆ 12481     ┆ 0.1670    ┆ 0.5970 ┆ 0.2177 ┆ 0.5000      │
+│ b1_static      ┆ test      ┆ 10  ┆ 9351      ┆ 0.1370    ┆ 0.6068 ┆ 0.1849 ┆ 0.5000      │
+│ b1_n           ┆ train_oof ┆ 0   ┆ 62311     ┆ 0.1666    ┆ 0.6546 ┆ 0.2473 ┆ 0.5000      │
+│ b1_n           ┆ train_oof ┆ 10  ┆ 46167     ┆ 0.1384    ┆ 0.6430 ┆ 0.2008 ┆ 0.5000      │
+│ b1_n           ┆ test      ┆ 0   ┆ 12481     ┆ 0.1670    ┆ 0.5970 ┆ 0.2177 ┆ 0.5000      │
+│ b1_n           ┆ test      ┆ 10  ┆ 9351      ┆ 0.1370    ┆ 0.6003 ┆ 0.1737 ┆ 0.5000      │
+│ ref_oracle_loo ┆ train_oof ┆ 0   ┆ 62311     ┆ 0.1666    ┆ 0.9481 ┆ 0.7680 ┆ null        │
+│ ref_oracle_loo ┆ train_oof ┆ 10  ┆ 46167     ┆ 0.1384    ┆ 0.9435 ┆ 0.7025 ┆ null        │
+│ ref_oracle_loo ┆ test      ┆ 0   ┆ 12481     ┆ 0.1670    ┆ 0.9420 ┆ 0.7422 ┆ null        │
+│ ref_oracle_loo ┆ test      ┆ 10  ┆ 9351      ┆ 0.1370    ┆ 0.9377 ┆ 0.6876 ┆ null        │
+└────────────────┴───────────┴─────┴───────────┴───────────┴────────┴────────┴─────────────┘
+shape: (20, 13)
+┌─────────────┬──────────────┬──────┬────────┬──────┬───────┬───┬─────────────────┬───────────────────┬─────────────┬───────────────┬──────────────────┬──────────────────┐
+│ model       ┆ policy       ┆ N    ┆ tau    ┆ cap  ┆ split ┆ … ┆ lost_success_hi ┆ meets_judge_ci_hi ┆ saved_steps ┆ d_saved_steps ┆ d_saved_steps_lo ┆ d_saved_steps_hi │
+│ ---         ┆ ---          ┆ ---  ┆ ---    ┆ ---  ┆ ---   ┆   ┆ ---             ┆ ---               ┆ ---         ┆ ---           ┆ ---              ┆ ---              │
+│ str         ┆ str          ┆ i64  ┆ f64    ┆ i64  ┆ str   ┆   ┆ f64             ┆ bool              ┆ f64         ┆ f64           ┆ f64              ┆ f64              │
+╞═════════════╪══════════════╪══════╪════════╪══════╪═══════╪═══╪═════════════════╪═══════════════════╪═════════════╪═══════════════╪══════════════════╪══════════════════╡
+│ b0_cap      ┆ cap          ┆ null ┆ null   ┆ 40   ┆ train ┆ … ┆ null            ┆ null              ┆ 0.2021      ┆ null          ┆ null             ┆ null             │
+│ b0_cap      ┆ cap          ┆ null ┆ null   ┆ 40   ┆ test  ┆ … ┆ 0.0290          ┆ true              ┆ 0.1983      ┆ null          ┆ null             ┆ null             │
+│ b0_cap      ┆ cap_proposal ┆ null ┆ null   ┆ 35   ┆ train ┆ … ┆ null            ┆ null              ┆ 0.2388      ┆ 0.0368        ┆ null             ┆ null             │
+│ b0_cap      ┆ cap_proposal ┆ null ┆ null   ┆ 35   ┆ test  ┆ … ┆ 0.0413          ┆ true              ┆ 0.2346      ┆ 0.0363        ┆ 0.0346           ┆ 0.0381           │
+│ b0_err      ┆ single       ┆ 10   ┆ 5.0000 ┆ null ┆ train ┆ … ┆ null            ┆ null              ┆ 0.0877      ┆ -0.1144       ┆ null             ┆ null             │
+│ b0_err      ┆ single       ┆ 10   ┆ 5.0000 ┆ null ┆ test  ┆ … ┆ 0.0453          ┆ true              ┆ 0.0955      ┆ -0.1028       ┆ -0.1218          ┆ -0.0845          │
+│ b0_err      ┆ combined     ┆ 10   ┆ 9.0000 ┆ 40   ┆ train ┆ … ┆ null            ┆ null              ┆ 0.2048      ┆ 0.0027        ┆ null             ┆ null             │
+│ b0_err      ┆ combined     ┆ 10   ┆ 9.0000 ┆ 40   ┆ test  ┆ … ┆ 0.0290          ┆ true              ┆ 0.2021      ┆ 0.0039        ┆ 0.0024           ┆ 0.0057           │
+│ b0_editfail ┆ single       ┆ 10   ┆ 3.0000 ┆ null ┆ train ┆ … ┆ null            ┆ null              ┆ 0.0561      ┆ -0.1460       ┆ null             ┆ null             │
+│ b0_editfail ┆ single       ┆ 10   ┆ 3.0000 ┆ null ┆ test  ┆ … ┆ 0.0489          ┆ true              ┆ 0.0556      ┆ -0.1426       ┆ -0.1664          ┆ -0.1214          │
+│ b0_editfail ┆ combined     ┆ 10   ┆ 9.0000 ┆ 40   ┆ train ┆ … ┆ null            ┆ null              ┆ 0.2034      ┆ 0.0014        ┆ null             ┆ null             │
+│ b0_editfail ┆ combined     ┆ 10   ┆ 9.0000 ┆ 40   ┆ test  ┆ … ┆ 0.0290          ┆ true              ┆ 0.2002      ┆ 0.0020        ┆ 0.0009           ┆ 0.0034           │
+│ b1_static   ┆ single       ┆ 10   ┆ 0.9085 ┆ null ┆ train ┆ … ┆ null            ┆ null              ┆ 0.1190      ┆ -0.0831       ┆ null             ┆ null             │
+│ b1_static   ┆ single       ┆ 10   ┆ 0.9085 ┆ null ┆ test  ┆ … ┆ 0.0744          ┆ false             ┆ 0.1241      ┆ -0.0742       ┆ -0.1020          ┆ -0.0437          │
+│ b1_static   ┆ combined     ┆ 10   ┆ 0.9202 ┆ 47   ┆ train ┆ … ┆ null            ┆ null              ┆ 0.2092      ┆ 0.0071        ┆ null             ┆ null             │
+│ b1_static   ┆ combined     ┆ 10   ┆ 0.9202 ┆ 47   ┆ test  ┆ … ┆ 0.0611          ┆ false             ┆ 0.2083      ┆ 0.0100        ┆ -0.0044          ┆ 0.0267           │
+│ b1_n        ┆ single       ┆ 10   ┆ 0.9128 ┆ null ┆ train ┆ … ┆ null            ┆ null              ┆ 0.1198      ┆ -0.0823       ┆ null             ┆ null             │
+│ b1_n        ┆ single       ┆ 10   ┆ 0.9128 ┆ null ┆ test  ┆ … ┆ 0.0676          ┆ false             ┆ 0.1143      ┆ -0.0839       ┆ -0.1127          ┆ -0.0537          │
+│ b1_n        ┆ combined     ┆ 10   ┆ 0.9213 ┆ 46   ┆ train ┆ … ┆ null            ┆ null              ┆ 0.2161      ┆ 0.0140        ┆ null             ┆ null             │
+│ b1_n        ┆ combined     ┆ 10   ┆ 0.9213 ┆ 46   ┆ test  ┆ … ┆ 0.0556          ┆ false             ┆ 0.2095      ┆ 0.0112        ┆ -0.0024          ┆ 0.0263           │
+└─────────────┴──────────────┴──────┴────────┴──────┴───────┴───┴─────────────────┴───────────────────┴─────────────┴───────────────┴──────────────────┴──────────────────┘
+{
+  "k_star": 40,
+  "b1": {
+    "analyzer": "char_wb",
+    "C": 0.1,
+    "weighting": "traj",
+    "min_df": 2,
+    "max_features": 200000,
+    "sublinear_tf": true,
+    "ngram_range": [
+      3,
+      5
+    ]
+  },
+  "criteria": {
+    "C1_preds_cover_running": true,
+    "C2_b1_within_issue_half": true,
+    "C3_oof_no_seen_issue_and_one_text": true,
+    "C3b_in_fold_much_higher_than_oof": true,
+    "C4_fixed_cap_matches_phase3": true,
+    "C5_k_star": true,
+    "C6_oracle_full_loo": true,
+    "C7_discrimination_table": true,
+    "C8_operating_points_with_ci": true,
+    "C10_tau_transfer_table": true,
+    "C11_loss_criteria_flags": true,
+    "C12_test_fold_scores": true,
+    "C13_foldwise_operating_points": true
+  },
+  "timings": {
+    "입력·평가 집합·맥락 길이": 0.9,
+    "B0 에러 개수 점수": 0.1,
+    "B1 그리드·OOF": 55.7,
+    "오라클": 0.1,
+    "예측 저장·검증": 0.5,
+    "판별 지표·고정 상한": 0.7,
+    "운영점 선택·적용": 42.2,
+    "운영점 이전성": 7.1,
+    "비용 곡선": 1.5,
+    "부트스트랩 (34개 × 1000회)": 63.2
+  }
+}
+
+완료 기준 통과

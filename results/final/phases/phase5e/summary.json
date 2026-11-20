@@ -1,0 +1,252 @@
+{
+  "mode": "train OOF only",
+  "status": "complete",
+  "device": "cuda",
+  "seed": 42,
+  "upstream": {
+    "phase5b_S1": "w3",
+    "phase5b_device": "cuda",
+    "phase5c_S2": "sl35",
+    "phase5c_device": "cuda",
+    "phase5d_S3": "length",
+    "phase5d_t": 100,
+    "phase5d_vocab_k": 10,
+    "phase5d_device": "cuda",
+    "reproduce_5d_s3_oof": {
+      "m1_xgb": {
+        "same_rows": true,
+        "same_scores": true,
+        "matches_when_same_device": true
+      },
+      "m1_xgb_b1": {
+        "same_rows": true,
+        "same_scores": true,
+        "matches_when_same_device": true
+      }
+    }
+  },
+  "models": [
+    "m1_xgb",
+    "m1_xgb_b1"
+  ],
+  "N": [
+    3,
+    5,
+    8,
+    10,
+    15,
+    20
+  ],
+  "grid": [
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": true
+    }
+  ],
+  "xgb_fixed": {
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 1.0,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "device": "cuda",
+    "n_jobs": 1,
+    "random_state": 42,
+    "eval_metric": "logloss"
+  },
+  "grid_tie": 0.002,
+  "k_star": 40,
+  "fold_k_star": {
+    "0": 41,
+    "1": 40,
+    "2": 40,
+    "3": 40,
+    "4": 40
+  },
+  "features": {
+    "official_matches_04_m1_cache": true,
+    "rows_per_N": {
+      "3": 61786,
+      "5": 59232,
+      "8": 52207,
+      "10": 46167,
+      "15": 33367,
+      "20": 25864
+    }
+  },
+  "lambda0": {
+    "m1_xgb.step": 32.0510123538,
+    "m1_xgb.token": 31.7654668043,
+    "m1_xgb_b1.step": 25.5674066528,
+    "m1_xgb_b1.token": 26.8924823616
+  },
+  "lambda0_loss_band": [
+    0.03,
+    0.04
+  ],
+  "selection": {
+    "model": "m1_xgb",
+    "N": [
+      8,
+      10,
+      15,
+      20
+    ],
+    "tie": 0.002,
+    "metric": "combined saved_steps mean",
+    "S4": "step",
+    "S4_variant": "step_lam1",
+    "lambda_by_bundle": {
+      "step": "step_lam1",
+      "step_sqrt": "step_sqrt_lam1",
+      "token": "token_lam0half"
+    },
+    "pick_by_model": {
+      "m1_xgb": {
+        "S4": "step",
+        "lambda": {
+          "step": "step_lam1",
+          "step_sqrt": "step_sqrt_lam1",
+          "token": "token_lam0half"
+        }
+      },
+      "m1_xgb_b1": {
+        "S4": "step",
+        "lambda": {
+          "step": "step_lam1",
+          "step_sqrt": "step_sqrt_lam1",
+          "token": "token_lam1"
+        }
+      }
+    }
+  },
+  "candidates_seen": {
+    "variants": 13,
+    "lambda_per_bundle": 4,
+    "final_bundles": 4,
+    "xgb_configs": 8
+  },
+  "hypothesis": {
+    "rows": [
+      {
+        "model": "m1_xgb",
+        "N": 8,
+        "do_saved_steps": 0.0037874206,
+        "do_saved_steps_lo": 0.0015059999,
+        "do_saved_steps_hi": 0.0060388247
+      },
+      {
+        "model": "m1_xgb",
+        "N": 10,
+        "do_saved_steps": 0.0027805436,
+        "do_saved_steps_lo": 0.0007149425,
+        "do_saved_steps_hi": 0.0049667979
+      },
+      {
+        "model": "m1_xgb",
+        "N": 15,
+        "do_saved_steps": 0.0083304641,
+        "do_saved_steps_lo": 0.0067892429,
+        "do_saved_steps_hi": 0.0101229478
+      },
+      {
+        "model": "m1_xgb",
+        "N": 20,
+        "do_saved_steps": 0.0050933207,
+        "do_saved_steps_lo": 0.0039401534,
+        "do_saved_steps_hi": 0.0062240784
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 8,
+        "do_saved_steps": 0.0060102425,
+        "do_saved_steps_lo": 0.0022227037,
+        "do_saved_steps_hi": 0.0102726177
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 10,
+        "do_saved_steps": 0.0102157992,
+        "do_saved_steps_lo": 0.0080853487,
+        "do_saved_steps_hi": 0.0127445522
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 15,
+        "do_saved_steps": 0.0106482042,
+        "do_saved_steps_lo": 0.0087087717,
+        "do_saved_steps_hi": 0.012999979
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 20,
+        "do_saved_steps": 0.0073620507,
+        "do_saved_steps_lo": 0.0060924064,
+        "do_saved_steps_hi": 0.0085903811
+      }
+    ],
+    "n_positive": 8,
+    "n_ci_lo_positive": 8
+  },
+  "bootstrap": {
+    "n_boot": 1000,
+    "skipped": false,
+    "unit": "train issue",
+    "seed": 42,
+    "base": "s3",
+    "bundles": [
+      "s3",
+      "step",
+      "step_sqrt",
+      "token"
+    ],
+    "lambda_candidates_point_only": true,
+    "selection_uncertainty_included": false
+  },
+  "criteria": {
+    "C1_upstream_and_inputs": true,
+    "C2_s3_reproduced_when_available": true,
+    "C3_weights_valid": true,
+    "C4_tables_complete": true,
+    "C5_lambda0_valid": true,
+    "C6_bootstrap_ci": true
+  },
+  "external_validation": "pytest and byte reproducibility are separate; not implied by script criteria"
+}

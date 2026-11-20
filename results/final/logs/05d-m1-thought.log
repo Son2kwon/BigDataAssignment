@@ -1,0 +1,176 @@
+
+--- 05d-m1-thought: starting attempt ---
+N=3: preparing fit-only vocabulary
+N=3: vocabulary preparation complete (50.2s)
+N=5: preparing fit-only vocabulary
+N=5: vocabulary preparation complete (134.3s)
+N=8: preparing fit-only vocabulary
+N=8: vocabulary preparation complete (247.7s)
+N=10: preparing fit-only vocabulary
+N=10: vocabulary preparation complete (368.0s)
+N=15: preparing fit-only vocabulary
+N=15: vocabulary preparation complete (492.2s)
+N=20: preparing fit-only vocabulary
+N=20: vocabulary preparation complete (612.7s)
+m1_thought_lex_t10_k10_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k10_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_b1_3: 0/8 tasks already checkpointed
+N=3: vocabulary search complete (825.0s)
+m1_thought_lex_t10_k10_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k10_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_b1_5: 0/8 tasks already checkpointed
+N=5: vocabulary search complete (1046.2s)
+m1_thought_lex_t10_k10_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k10_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_b1_8: 0/8 tasks already checkpointed
+N=8: vocabulary search complete (1267.3s)
+m1_thought_lex_t10_k10_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k10_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_b1_10: 0/8 tasks already checkpointed
+N=10: vocabulary search complete (1486.1s)
+m1_thought_lex_t10_k10_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k10_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_b1_15: 0/8 tasks already checkpointed
+N=15: vocabulary search complete (1699.3s)
+m1_thought_lex_t10_k10_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k10_m1_xgb_b1_20: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_lex_t10_k20_m1_xgb_b1_20: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k10_m1_xgb_b1_20: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_lex_t30_k20_m1_xgb_b1_20: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k10_m1_xgb_b1_20: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_lex_t100_k20_m1_xgb_b1_20: 0/8 tasks already checkpointed
+N=20: vocabulary search complete (1904.3s)
+Selected t=100, vocab_k=10; fitting four final bundles
+m1_thought_s2_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_3: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_b1_3: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_5: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_b1_5: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_8: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_b1_8: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_10: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_b1_10: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_15: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_b1_15: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_20: 0/8 tasks already checkpointed
+m1_thought_s2_m1_xgb_b1_20: 0/8 tasks already checkpointed
+m1_thought_length_m1_xgb_b1_20: 0/8 tasks already checkpointed
+m1_thought_length_lexical_m1_xgb_b1_20: 0/8 tasks already checkpointed
+m1_oof_bootstrap_s2: 0/48 tasks already checkpointed
+shape: (20, 17)
+┌────────────┬───────────┬─────────────┬──────┬───┬─────────────┬───────┬─────────────┬────────────┐
+│ stage      ┆ model     ┆ bundle      ┆ t    ┆ … ┆ picked_by_t ┆ used  ┆ d_select_me ┆ n_features │
+│ ---        ┆ ---       ┆ ---         ┆ ---  ┆   ┆ his_model   ┆ ---   ┆ an_vs_s2    ┆ _N20       │
+│ str        ┆ str       ┆ str         ┆ i64  ┆   ┆ ---         ┆ bool  ┆ ---         ┆ ---        │
+│            ┆           ┆             ┆      ┆   ┆ bool        ┆       ┆ f64         ┆ i64        │
+╞════════════╪═══════════╪═════════════╪══════╪═══╪═════════════╪═══════╪═════════════╪════════════╡
+│ vocabulary ┆ m1_xgb    ┆ lex_t10_k10 ┆ 10   ┆ … ┆ false       ┆ false ┆ null        ┆ null       │
+│ vocabulary ┆ m1_xgb    ┆ lex_t10_k20 ┆ 10   ┆ … ┆ false       ┆ false ┆ null        ┆ null       │
+│ vocabulary ┆ m1_xgb    ┆ lex_t30_k10 ┆ 30   ┆ … ┆ false       ┆ false ┆ null        ┆ null       │
+│ vocabulary ┆ m1_xgb    ┆ lex_t30_k20 ┆ 30   ┆ … ┆ false       ┆ false ┆ null        ┆ null       │
+│ vocabulary ┆ m1_xgb    ┆ lex_t100_k1 ┆ 100  ┆ … ┆ true        ┆ true  ┆ null        ┆ null       │
+│            ┆           ┆ 0           ┆      ┆   ┆             ┆       ┆             ┆            │
+│ …          ┆ …         ┆ …           ┆ …    ┆ … ┆ …           ┆ …     ┆ …           ┆ …          │
+│ vocabulary ┆ m1_xgb_b1 ┆ lex_t100_k2 ┆ 100  ┆ … ┆ false       ┆ false ┆ null        ┆ null       │
+│            ┆           ┆ 0           ┆      ┆   ┆             ┆       ┆             ┆            │
+│ S3         ┆ m1_xgb_b1 ┆ s2          ┆ null ┆ … ┆ false       ┆ false ┆ 0.0         ┆ 82         │
+│ S3         ┆ m1_xgb_b1 ┆ length      ┆ null ┆ … ┆ false       ┆ false ┆ 0.001799    ┆ 87         │
+│ S3         ┆ m1_xgb_b1 ┆ lexical     ┆ 100  ┆ … ┆ true        ┆ false ┆ 0.002364    ┆ 102        │
+│ S3         ┆ m1_xgb_b1 ┆ length_lexi ┆ 100  ┆ … ┆ false       ┆ false ┆ 0.004228    ┆ 107        │
+│            ┆           ┆ cal         ┆      ┆   ┆             ┆       ┆             ┆            │
+└────────────┴───────────┴─────────────┴──────┴───┴─────────────┴───────┴─────────────┴────────────┘
+shape: (98, 10)
+┌────────────┬───────────┬────────────┬──────┬───┬────────────┬────────────┬───────────┬───────────┐
+│ bundle     ┆ model     ┆ policy     ┆ N    ┆ … ┆ d_saved_st ┆ d_saved_to ┆ d_saved_t ┆ d_saved_t │
+│ ---        ┆ ---       ┆ ---        ┆ ---  ┆   ┆ eps        ┆ kens       ┆ okens_lo  ┆ okens_hi  │
+│ str        ┆ str       ┆ str        ┆ i64  ┆   ┆ ---        ┆ ---        ┆ ---       ┆ ---       │
+│            ┆           ┆            ┆      ┆   ┆ f64        ┆ f64        ┆ f64       ┆ f64       │
+╞════════════╪═══════════╪════════════╪══════╪═══╪════════════╪════════════╪═══════════╪═══════════╡
+│ s2         ┆ m1_xgb    ┆ single     ┆ 3    ┆ … ┆ -0.090371  ┆ -0.229617  ┆ -0.242835 ┆ -0.213784 │
+│ s2         ┆ m1_xgb    ┆ combined   ┆ 3    ┆ … ┆ 0.004218   ┆ -0.00805   ┆ -0.010553 ┆ -0.005172 │
+│ s2         ┆ m1_xgb    ┆ single     ┆ 5    ┆ … ┆ -0.072012  ┆ -0.200742  ┆ -0.212495 ┆ -0.186932 │
+│ s2         ┆ m1_xgb    ┆ combined   ┆ 5    ┆ … ┆ 0.003086   ┆ -0.02592   ┆ -0.02909  ┆ -0.022642 │
+│ s2         ┆ m1_xgb    ┆ single     ┆ 8    ┆ … ┆ -0.057725  ┆ -0.169404  ┆ -0.181015 ┆ -0.157658 │
+│ …          ┆ …         ┆ …          ┆ …    ┆ … ┆ …          ┆ …          ┆ …         ┆ …         │
+│ length_lex ┆ m1_xgb_b1 ┆ combined   ┆ 15   ┆ … ┆ 0.054858   ┆ 0.044315   ┆ 0.036286  ┆ 0.052383  │
+│ ical       ┆           ┆            ┆      ┆   ┆            ┆            ┆           ┆           │
+│ length_lex ┆ m1_xgb_b1 ┆ single     ┆ 20   ┆ … ┆ 0.079433   ┆ 0.093846   ┆ 0.081822  ┆ 0.10464   │
+│ ical       ┆           ┆            ┆      ┆   ┆            ┆            ┆           ┆           │
+│ length_lex ┆ m1_xgb_b1 ┆ combined   ┆ 20   ┆ … ┆ 0.077783   ┆ 0.09925    ┆ 0.090999  ┆ 0.106476  │
+│ ical       ┆           ┆            ┆      ┆   ┆            ┆            ┆           ┆           │
+│ null       ┆ b0_cap    ┆ cap        ┆ null ┆ … ┆ 0.0        ┆ 0.0        ┆ 0.0       ┆ 0.0       │
+│ null       ┆ b0_cap    ┆ cap_propos ┆ null ┆ … ┆ 0.036753   ┆ 0.063288   ┆ 0.061987  ┆ 0.064697  │
+│            ┆           ┆ al         ┆      ┆   ┆            ┆            ┆           ┆           │
+└────────────┴───────────┴────────────┴──────┴───┴────────────┴────────────┴───────────┴───────────┘
+S3=length; criteria={'C1_features': True, 'C2_fold_boundaries': True, 'C3_s2_reproduced_when_available': True, 'C4_tables_complete': True, 'C5_vocabulary_complete': True, 'C6_bootstrap_ci': True}; elapsed=3148.5s

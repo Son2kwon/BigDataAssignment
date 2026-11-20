@@ -1,0 +1,170 @@
+{
+  "run_id": "120c121ea083ab4d",
+  "commit": "067a40d04ee559a06d6f9bd480a7ae2c3333ebd6",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 5070",
+    "memory_bytes": 12322603008,
+    "gpu_id": "dbc9a66a-30f2-33a3-df68-bcf992a77ff6",
+    "capability": [
+      12,
+      0
+    ],
+    "torch_cuda": "13.0",
+    "xgboost_device": "cuda:0"
+  },
+  "versions": {
+    "torch": "2.14.1+cu130",
+    "xgboost": "3.4.1",
+    "scikit-learn": "1.9.1",
+    "polars": "2.0.0",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.0",
+    "transformers": "5.20.2",
+    "shap": "0.54.1",
+    "matplotlib": "3.11.2",
+    "joblib": "1.6.0"
+  },
+  "python": "3.13.3 (main, May 30 2025, 05:38:56) [Clang 20.1.4 ]",
+  "sources": {
+    "code/01_parse.py": "2d1c3b92d5ea609e76c0db44b7ecc7480722c6a1670600f00643c1e725796d09",
+    "code/02_split.py": "2314dadf8422689f6ef6ea741df3657d5fa5d00eba0984162f6319895f2b2645",
+    "code/03_baselines.py": "d5bb4ab037c79805c6bdafffb83f7a232196bfad95b0b53f254ac36eac7f2cc0",
+    "code/04_m1.py": "9d865078bad4022f101906fd4b838670fb6b0caf98a054b319484454cd69fb1c",
+    "code/04b_solution_files.py": "39257d6e6f149a44977f7b6368854d1c5af3bbb052e52394624a7d3b0679cd24",
+    "code/04c_fig_auroc.py": "db0a85473c8c4b015a2a2aff94c381e0607ada742a668457269cb4ac153f5549",
+    "code/04d_m1_supplementary.py": "163fb2b878600db2b3c58050694198b5af715e5bac9a45449d2d1e373a099769",
+    "code/04e_m1_window.py": "45a01a966b666c2cc459fc5ef5dc042ef052f11c8223ffd9f1052aa1e614e857",
+    "code/04f_m1_trend.py": "4d524a3c8a4d32817ea0c3811ab6711cb83a0478546ed4b8217a15064dafd400",
+    "code/04g_m1_thought.py": "d5bced03b00875a03dd7281ac2da075795e8ea3d4192141fb68ebf04e948c4fc",
+    "code/04h_m1_cost_weight.py": "f7d6f77c9352c3da1bbcd6b5c517ac924b1e7855a36d73f8ccea2ca239ea0dac",
+    "code/05_m2.py": "a2ee39dbf8bff3a602480a484ac95659b5eb336bd7b60bd934f89185e98eca3d",
+    "code/05b_m2_supplementary.py": "20c769d4f3528452f51556091d05633c1ec650e6c7fd909763085b64a7463fef",
+    "code/06_m3.py": "2aa53a2f9eee9dfe9beb64c9edf62bf0e66508ed541e24927c5f00272d484be1",
+    "code/06b_m3_fold_spread.py": "1231eeef5de59678597e7a5fa1149559cac86d28c158c001f50287f8ed16abcd",
+    "code/07_m1_cross.py": "f3a8753f4216841fca3e7ede10b913891cc79213bd237c9d4836808b8520aa89",
+    "code/afp/__init__.py": "150edb5e83920939b76b7c8456825e91cc65216823994d41c8000cd658817598",
+    "code/afp/baselines.py": "80b97dc1e117ca504eb83e040ef22c3a58a5a688724f6d7b03da69b006245282",
+    "code/afp/cross.py": "67ede7a2c3a1fa2ef5795e06358306e59f7a9254351c7fc5c051563ba2112eb5",
+    "code/afp/evaluate.py": "247debe33623a1c6bb537c4008c1b3d4832e8fcb18cc2add1eb5a003baed94d1",
+    "code/afp/features.py": "cdf70447e0e7adb64dc6c8a0617a101d57eb681bec119d080dce9c0c70951885",
+    "code/afp/io.py": "7a495c07acefb447080ffbf31444fdf15fff4873ca624f4a166b6601180f3990",
+    "code/afp/leakage.py": "b393dcea83e3bee19d6b564b4731601267501f30625f46b78532e234b368d8d1",
+    "code/afp/lstm.py": "e297014cb1c1f01212f1ff8206fe6e568c3bd1df097a47b47fbb6b6bdf4f53fa",
+    "code/afp/m3.py": "0882117efd2fd151de6f61d3cc960c82cd8218d245ea991cb796350becc5b9ac",
+    "code/afp/m3_text.py": "0c98877c97f0697d16700d59eaa996c01007dc03474dd5593bfa30db2d7254e4",
+    "code/afp/metrics.py": "21abe90dddfcb29ce5cd0a2811c9ccb4487a50d62ffd750cf7f934c4d3e2c25e",
+    "code/afp/oof.py": "9ad84e9aa06cca3127008ccca651c01d2ae9a5b2112bb5a6961cfa8070a40b96",
+    "code/afp/parse.py": "2cbdfbd210df44ecb056f881b66f0b02c6a2dde7612f85a4afd455bf75e2c609",
+    "code/afp/preds.py": "1f36f886c6bf5ec01ce6e5a22b46f8169fb8507bbe2d5d9bfb34402a72eb81f2",
+    "code/afp/sequences.py": "79607a3d753435394d000fa9fa0b091e7eef10a53e996b01cca9d9d68c078d76",
+    "code/afp/split.py": "70b27eeac6f927a2e2627a07af360e825c7cf37e86877a6648dbcdfca1976506",
+    "code/afp/thought.py": "13f66a90ede7031a2544273fb9582b9b3e5f3eecdc1d1a327719236bd43ac9f6",
+    "code/tests/feature_helpers.py": "8183787f0af577fa15d82a3c3bbe4e44512c5cca61161140708650cb88d58834",
+    "code/tests/test_baselines.py": "ce7c07a940bd5ec5b3593a76e5cc4a7ebb72a24b88492e8edc10a10156cd10a3",
+    "code/tests/test_check_device.py": "89197ab96318390ac1cc98292650a7b889867ffa143db5f23256378de543c9a4",
+    "code/tests/test_cross.py": "760e65cb8801949dfbef6f0c7c0597ea78e4b29abb2f0317ab2f6ce58279ae4b",
+    "code/tests/test_evaluate_paired.py": "38788c92dd770187f552f18a88c4d43939fb2ca8e57d1fc74b101008ff6bdc81",
+    "code/tests/test_features.py": "27efa16d4c6d808e8a79a40149a3579ba338faa3c687a21dd695474f45d7658e",
+    "code/tests/test_features_leakage.py": "6fa383b07e77bb1ff39daea7f6f4b688ae0b97d9983daf295b9281e8e55b2f47",
+    "code/tests/test_features_thought.py": "086ecf8c0e6b90f5308cd4f12ee5187e524b78ed7e5f1e5633ebd61d8e247bbc",
+    "code/tests/test_features_trend.py": "0bdc4aba9a62627557c020fddef878dc9e4cf896818255f8de89bc8630194130",
+    "code/tests/test_features_window.py": "5024d71633087fbdbaffdfe4a8f655126be2a135b98f8d2d892598ec1e99a418",
+    "code/tests/test_io.py": "dda5b0b32d016ada296dceb2714951163716cb17c3ba2af337e082e05f069e97",
+    "code/tests/test_leakage.py": "77d9362c2ee3a994cbbfdd1e5556953abd4b10d762d588061c831dcf613421a4",
+    "code/tests/test_lstm.py": "029f913ab9241c71d772f73ebbd63c99423b75373d1d568b84e186a8f496ee11",
+    "code/tests/test_m1_cost_weight.py": "f044463819cf9962c6256b4e8766bfa51eadbf865e658feb9b97b663a4188469",
+    "code/tests/test_m1_thought.py": "9c3a5a016cdcc96c4fbb064602a5d913c9a82c9282df39629e566090c8aa6c74",
+    "code/tests/test_m2_supplementary.py": "d83c59e9f015efd8911acebf212543f01653930b0542c49f0ccd937a8cdfcdda",
+    "code/tests/test_m3.py": "0449d35b8d02d09b47c1d34eeacae7f74d583bf303bb5a5481d9820f132b8ff5",
+    "code/tests/test_m3_text.py": "add5040be04862747fe8eeadbabb68ed25266c928974b61ca21eacf7c00fe0b5",
+    "code/tests/test_metrics.py": "7124961033455aa1d09b5fbff9f8ea4f9b8b6ce7890e407869a3f5e46135bdf4",
+    "code/tests/test_oof.py": "8f57afb6ed72ff857fbc4ba77a197efebec55d79e52c7129cd7290b7ae9ad47d",
+    "code/tests/test_operating_point.py": "7ca005dff590930952120a800e6841f8b00cbfff1bb07c4414aca5cec71e28e4",
+    "code/tests/test_parse.py": "93e3649635c1edbdef3e73dcc7e747943400de7ff13c9d576f0524100d2f5784",
+    "code/tests/test_phase2_data.py": "492c486b2c03b26cfd1f5e6ac1bbc06bf1db1f1fad992bfedd85b2245cfef208",
+    "code/tests/test_phase4_data.py": "bcc9e2b4b503fea67628a0ada8f00313e97396102021acdaf34cc78a4e4e4637",
+    "code/tests/test_preds.py": "a4e1a31df7dd2eeec1f9aecd3fce71cf9f985e80bb6b3959f7dd79759e0540e4",
+    "code/tests/test_sequences.py": "810c99082a2e4cfc2f9dda446dcf9588120e152b3021e337ea68f1180cc41620",
+    "code/tests/test_solution_files.py": "293a858342dddfd3060d969f4328e19a3328c2b63fd5248b5ff861e73466d550",
+    "code/tests/test_split.py": "16c89bc63fc078b00ee91e5177c34926817b503c0071f800cebaa5bec38f351d",
+    "code/tests/test_thought.py": "9252c178bba1e4d101bd927ed30406d43002361866319197b743a380a679c2eb",
+    "data/download.sh": "44a9d9dc262068d27f18de6456303338a19dec45454465680ea680ed4317618f",
+    "full_run.sh": "20afd79f9f95deb21a0e195a0e65c532aa4276e1c810408bb8f68fbcd16165a5",
+    "pyproject.toml": "355ecd60bddac4e0c76f452df886c2435bc92ab28063c34b0c73a090353e8966",
+    "uv.lock": "f8a860fb145b0ea222b30bdcc242e593e6a61171f663504042afcc726390478f"
+  },
+  "status": "complete",
+  "file_counts": {
+    "tables": 6,
+    "plots": 35,
+    "phases": 420,
+    "logs": 23
+  },
+  "seed": 42,
+  "n_boot": 1000,
+  "K_star": 40,
+  "K_proposal": 35,
+  "train_selection_max_loss": 0.035,
+  "test_judgment_max_loss": 0.05,
+  "m1_chain": {
+    "m1_xgb_s1": {
+      "tag": "s1",
+      "bundle": "w3",
+      "variant": "w3",
+      "base_model": "m1_xgb"
+    },
+    "m1_xgb_b1_s1": {
+      "tag": "s1",
+      "bundle": "w3",
+      "variant": "w3",
+      "base_model": "m1_xgb_b1"
+    },
+    "m1_xgb_s2": {
+      "tag": "s2",
+      "bundle": "sl35",
+      "variant": "sl35",
+      "base_model": "m1_xgb",
+      "trend_combo": []
+    },
+    "m1_xgb_b1_s2": {
+      "tag": "s2",
+      "bundle": "sl35",
+      "variant": "sl35",
+      "base_model": "m1_xgb_b1",
+      "trend_combo": []
+    },
+    "m1_xgb_s3": {
+      "tag": "s3",
+      "bundle": "length",
+      "variant": "length",
+      "base_model": "m1_xgb"
+    },
+    "m1_xgb_b1_s3": {
+      "tag": "s3",
+      "bundle": "length",
+      "variant": "length",
+      "base_model": "m1_xgb_b1"
+    },
+    "m1_xgb_s4": {
+      "tag": "s4",
+      "bundle": "step",
+      "variant": "step_lam1",
+      "base_model": "m1_xgb"
+    },
+    "m1_xgb_b1_s4": {
+      "tag": "s4",
+      "bundle": "step",
+      "variant": "step_lam1",
+      "base_model": "m1_xgb_b1"
+    }
+  },
+  "execution": {
+    "xgboost_training": "CUDA hist",
+    "xgboost_prediction_and_tree_shap": "CPU on recorded trees",
+    "torch_training_and_scoring": "CUDA",
+    "sklearn_and_resampling": "CPU"
+  },
+  "working_directory": "data/processed/full_run/120c121ea083ab4d",
+  "prediction_directory": "data/processed/full_run/120c121ea083ab4d/data/processed/preds",
+  "supplemental_plot_count": 12
+}

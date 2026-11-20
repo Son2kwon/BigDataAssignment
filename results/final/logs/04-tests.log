@@ -1,0 +1,40 @@
+
+--- 04-tests: starting attempt ---
+============================= test session starts ==============================
+platform linux -- Python 3.13.3, pytest-9.2.0, pluggy-1.7.0
+rootdir: /home/chaseungjoon/code/bigdata-project/data/processed/full_run/120c121ea083ab4d
+configfile: pyproject.toml
+testpaths: code/tests
+plugins: anyio-4.15.1, platformdirs-4.13.5
+collected 255 items
+
+code/tests/test_baselines.py ..........                                  [  3%]
+code/tests/test_check_device.py ..                                       [  4%]
+code/tests/test_cross.py .......                                         [  7%]
+code/tests/test_evaluate_paired.py ...                                   [  8%]
+code/tests/test_features.py .....                                        [ 10%]
+code/tests/test_features_leakage.py .......                              [ 13%]
+code/tests/test_features_thought.py ...............                      [ 19%]
+code/tests/test_features_trend.py ............                           [ 23%]
+code/tests/test_features_window.py ..........                            [ 27%]
+code/tests/test_io.py ....                                               [ 29%]
+code/tests/test_leakage.py ............                                  [ 34%]
+code/tests/test_lstm.py .......                                          [ 36%]
+code/tests/test_m1_cost_weight.py ............                           [ 41%]
+code/tests/test_m1_thought.py ............                               [ 46%]
+code/tests/test_m2_supplementary.py ...                                  [ 47%]
+code/tests/test_m3.py ......                                             [ 49%]
+code/tests/test_m3_text.py .........                                     [ 53%]
+code/tests/test_metrics.py .............................                 [ 64%]
+code/tests/test_oof.py .....                                             [ 66%]
+code/tests/test_operating_point.py ...................                   [ 74%]
+code/tests/test_parse.py ........                                        [ 77%]
+code/tests/test_phase2_data.py ..                                        [ 78%]
+code/tests/test_phase4_data.py .....                                     [ 80%]
+code/tests/test_preds.py ......                                          [ 82%]
+code/tests/test_sequences.py ...........                                 [ 86%]
+code/tests/test_solution_files.py ....                                   [ 88%]
+code/tests/test_split.py ..............                                  [ 93%]
+code/tests/test_thought.py ................                              [100%]
+
+============================= 255 passed in 48.29s =============================

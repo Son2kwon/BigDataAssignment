@@ -1,0 +1,17 @@
+
+--- 00-download: starting attempt ---
+[swe-agent] nebius/SWE-agent-trajectories@68195a1 -> swe-agent-trajectories/
+  (1/12) train-00000-of-00012.parquet 이미 있음
+  (2/12) train-00001-of-00012.parquet 이미 있음
+  (3/12) train-00002-of-00012.parquet 이미 있음
+  (4/12) train-00003-of-00012.parquet 이미 있음
+  (5/12) train-00004-of-00012.parquet 이미 있음
+  (6/12) train-00005-of-00012.parquet 이미 있음
+  (7/12) train-00006-of-00012.parquet 이미 있음
+  (8/12) train-00007-of-00012.parquet 이미 있음
+  (9/12) train-00008-of-00012.parquet 이미 있음
+  (10/12) train-00009-of-00012.parquet 이미 있음
+  (11/12) train-00010-of-00012.parquet 이미 있음
+  (12/12) train-00011-of-00012.parquet 이미 있음
+  완료: 12개 파일 검증됨
+모두 완료

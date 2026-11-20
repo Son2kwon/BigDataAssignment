@@ -1,0 +1,3 @@
+model,wprop_select_mean,best_fixed_single,best_fixed_select_mean,d_wprop_minus_fixed,d_wprop_minus_S1,exceeds_tie
+m1_xgb,0.611978,w3,0.612711,-0.000732,-0.000732,false
+m1_xgb_b1,0.615556,w5,0.616208,-0.000653,-0.000048,false

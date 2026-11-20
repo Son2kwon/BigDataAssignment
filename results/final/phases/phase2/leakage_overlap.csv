@@ -1,0 +1,9 @@
+group,subset,n_traj,n_with_test_ids,any_test_name_hit,any_specific_name_hit,any_specific_name_hit_unexplained,any_node_id_hit,any_test_file_hit,any_failed_test_name_hit,with_new_test_files,any_new_test_file_hit,any_new_file_test_name_hit,any_result_line,any_result_line_without_test_run,any_harness_marker,any_harness_dir,test_name_share_matched_mean,cat_harness_artifact,cat_issue_text,cat_agent_typed,cat_agent_test_run,cat_repo_view,cat_other
+observed,all,4000,3158,295,252,0,30,729,150,265,2,9,32,0,0,2,0.0289,0,38,97,141,852,0
+observed,swe-agent-llama-70b,3738,2945,280,237,0,28,682,140,250,2,9,31,0,0,2,0.0293,0,37,92,137,701,0
+observed,swe-agent-llama-8b,203,165,14,14,0,2,40,9,12,0,0,1,0,0,0,0.0239,0,1,5,4,144,0
+observed,swe-agent-llama-405b,59,48,1,1,0,0,7,1,3,0,0,0,0,0,0,0.0162,0,0,0,0,7,0
+observed,target=True,669,669,58,49,0,5,103,3,39,0,1,5,0,0,0,0.0331,0,9,28,26,126,0
+observed,target=False,3331,2489,237,203,0,25,626,147,226,2,8,27,0,0,2,0.0277,0,29,69,115,726,0
+control_same_repo,all,2206,2206,127,105,0,11,250,62,134,3,2,15,0,0,1,0.0113,0,9,26,133,410,0
+control_other_repo,all,3158,3158,28,5,0,0,0,8,206,0,0,1,0,0,1,0.0013,0,4,4,4,19,0

@@ -1,0 +1,148 @@
+
+--- 02-split: starting attempt ---
+{
+  "provenance": {
+    "raw_rows": 80036,
+    "raw_sha256_verified": 12,
+    "trajectory_rows_matching_raw": 80036
+  },
+  "determinism": {
+    "same_result_on_shuffled_input": true,
+    "written": true
+  },
+  "splits": {
+    "trajectories": 74792,
+    "excluded_trajectories": {
+      "swe-agent-llama-8b": 4053,
+      "swe-agent-llama-405b": 1191
+    },
+    "split_trajectories": {
+      "train": 62311,
+      "test": 12481
+    },
+    "train_issues": 2989,
+    "test_issues": 602,
+    "train_test_issue_overlap": 0,
+    "train_issues_crossing_folds": 0,
+    "heldout_fold": -1
+  },
+  "folds": {
+    "GroupKFold": {
+      "success_rate_min": 0.1587,
+      "success_rate_max": 0.1845,
+      "success_rate_range": 0.0258,
+      "n_traj_range": 1,
+      "n_issues_range": 1
+    },
+    "StratifiedGroupKFold": {
+      "success_rate_min": 0.1665,
+      "success_rate_max": 0.1668,
+      "success_rate_range": 0.0003,
+      "n_traj_range": 19,
+      "n_issues_range": 13
+    },
+    "chosen": "StratifiedGroupKFold"
+  },
+  "system_prompt": {
+    "n_hashes": 1,
+    "hashes": [
+      {
+        "system_hash": "bfc71085e702",
+        "count": 80036
+      }
+    ]
+  },
+  "leakage_static": {
+    "files_referencing_leaky_columns": {
+      "01_parse.py": [
+        "exit_status"
+      ],
+      "afp/io.py": [
+        "eval_logs",
+        "exit_status",
+        "generated_patch"
+      ],
+      "afp/leakage.py": [
+        "eval_logs",
+        "generated_patch"
+      ]
+    },
+    "references_outside_allowlist": {},
+    "allowlist": [
+      "afp/io.py",
+      "afp/leakage.py",
+      "01_parse.py"
+    ],
+    "leaky_columns_in_processed": {
+      "trajectories.parquet": [
+        "exit_status"
+      ]
+    },
+    "splits_columns": [
+      "traj_id",
+      "split",
+      "fold"
+    ],
+    "safe_loader_rejects_leaky": true
+  },
+  "harness_marker_scan_first20": {
+    "observations": 1208185,
+    "___TESTS_SECTION___": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "___TESTS_SECTION_END___": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "___ENVIRONMENT_SET_UP_PATCH_APPLIED___": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "test_patch.patch": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "prediction_patch.patch": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "Will execute following command for run_tests": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "Will execute following command for apply_patch": {
+      "observations": 0,
+      "trajectories": 0
+    },
+    "swebench_matterhorn": {
+      "observations": 137,
+      "trajectories": 104
+    }
+  }
+}
+shape: (8, 24)
+┌────────────┬────────────┬────────┬───────────┬───┬───────────┬───────────┬───────────┬───────────┐
+│ group      ┆ subset     ┆ n_traj ┆ n_with_te ┆ … ┆ cat_agent ┆ cat_agent ┆ cat_repo_ ┆ cat_other │
+│ ---        ┆ ---        ┆ ---    ┆ st_ids    ┆   ┆ _typed    ┆ _test_run ┆ view      ┆ ---       │
+│ str        ┆ str        ┆ i64    ┆ ---       ┆   ┆ ---       ┆ ---       ┆ ---       ┆ i64       │
+│            ┆            ┆        ┆ i64       ┆   ┆ i64       ┆ i64       ┆ i64       ┆           │
+╞════════════╪════════════╪════════╪═══════════╪═══╪═══════════╪═══════════╪═══════════╪═══════════╡
+│ observed   ┆ all        ┆ 4000   ┆ 3158      ┆ … ┆ 97        ┆ 141       ┆ 852       ┆ 0         │
+│ observed   ┆ swe-agent- ┆ 3738   ┆ 2945      ┆ … ┆ 92        ┆ 137       ┆ 701       ┆ 0         │
+│            ┆ llama-70b  ┆        ┆           ┆   ┆           ┆           ┆           ┆           │
+│ observed   ┆ swe-agent- ┆ 203    ┆ 165       ┆ … ┆ 5         ┆ 4         ┆ 144       ┆ 0         │
+│            ┆ llama-8b   ┆        ┆           ┆   ┆           ┆           ┆           ┆           │
+│ observed   ┆ swe-agent- ┆ 59     ┆ 48        ┆ … ┆ 0         ┆ 0         ┆ 7         ┆ 0         │
+│            ┆ llama-405b ┆        ┆           ┆   ┆           ┆           ┆           ┆           │
+│ observed   ┆ target=Tru ┆ 669    ┆ 669       ┆ … ┆ 28        ┆ 26        ┆ 126       ┆ 0         │
+│            ┆ e          ┆        ┆           ┆   ┆           ┆           ┆           ┆           │
+│ observed   ┆ target=Fal ┆ 3331   ┆ 2489      ┆ … ┆ 69        ┆ 115       ┆ 726       ┆ 0         │
+│            ┆ se         ┆        ┆           ┆   ┆           ┆           ┆           ┆           │
+│ control_sa ┆ all        ┆ 2206   ┆ 2206      ┆ … ┆ 26        ┆ 133       ┆ 410       ┆ 0         │
+│ me_repo    ┆            ┆        ┆           ┆   ┆           ┆           ┆           ┆           │
+│ control_ot ┆ all        ┆ 3158   ┆ 3158      ┆ … ┆ 4         ┆ 4         ┆ 19        ┆ 0         │
+│ her_repo   ┆            ┆        ┆           ┆   ┆           ┆           ┆           ┆           │
+└────────────┴────────────┴────────┴───────────┴───┴───────────┴───────────┴───────────┴───────────┘
+
+완료 기준 통과

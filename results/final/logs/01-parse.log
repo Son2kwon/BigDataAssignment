@@ -1,0 +1,103 @@
+
+--- 01-parse: starting attempt ---
+파싱:   0%|          | 0/12 [00:00<?, ?it/s]파싱:   8%|▊         | 1/12 [00:07<01:18,  7.13s/it]파싱:  17%|█▋        | 2/12 [00:14<01:09,  7.00s/it]파싱:  25%|██▌       | 3/12 [00:20<01:01,  6.88s/it]파싱:  33%|███▎      | 4/12 [00:27<00:56,  7.00s/it]파싱:  42%|████▏     | 5/12 [00:34<00:48,  6.97s/it]파싱:  50%|█████     | 6/12 [00:42<00:42,  7.16s/it]파싱:  58%|█████▊    | 7/12 [00:49<00:34,  6.98s/it]파싱:  67%|██████▋   | 8/12 [00:56<00:28,  7.03s/it]파싱:  75%|███████▌  | 9/12 [01:02<00:20,  6.97s/it]파싱:  83%|████████▎ | 10/12 [01:10<00:14,  7.05s/it]파싱:  92%|█████████▏| 11/12 [01:16<00:06,  6.97s/it]파싱: 100%|██████████| 12/12 [01:24<00:00,  7.08s/it]파싱: 100%|██████████| 12/12 [01:24<00:00,  7.03s/it]
+{
+  "trajectories": 80036,
+  "issues": 3591,
+  "traj_id_dup": 0,
+  "steps_total": 2115623,
+  "steps_rows": 2115623,
+  "success_rate": 0.1673,
+  "models": {
+    "swe-agent-llama-70b": {
+      "n": 74792,
+      "success_rate": 0.1667
+    },
+    "swe-agent-llama-8b": {
+      "n": 4053,
+      "success_rate": 0.1515
+    },
+    "swe-agent-llama-405b": {
+      "n": 1191,
+      "success_rate": 0.2586
+    }
+  },
+  "median_steps": {
+    "success": 12.0,
+    "failure": 19.0
+  },
+  "max_steps": 408,
+  "running_at_N": {
+    "3": {
+      "n": 79402,
+      "success_rate": 0.168
+    },
+    "5": {
+      "n": 76182,
+      "success_rate": 0.1661
+    },
+    "8": {
+      "n": 67388,
+      "success_rate": 0.1568
+    },
+    "10": {
+      "n": 59708,
+      "success_rate": 0.1379
+    },
+    "15": {
+      "n": 43550,
+      "success_rate": 0.0922
+    },
+    "20": {
+      "n": 34059,
+      "success_rate": 0.0636
+    }
+  },
+  "traj_per_issue": {
+    "median": 16.0,
+    "max": 125
+  },
+  "issues_never_success": 2753,
+  "issues_mixed": {
+    "issues": 807,
+    "trajectories": 34922
+  },
+  "role_pattern_bad": {
+    "n": 0,
+    "examples": []
+  },
+  "system_prompt_hashes": [
+    {
+      "system_hash": "bfc71085e702",
+      "count": 80036
+    }
+  ],
+  "zero_step_trajectories": 1,
+  "steps_stats": {
+    "no_obs": 80035,
+    "no_command": 0,
+    "error_rate": 0.3002,
+    "edit_failed_rate": 0.1164,
+    "other_rate": 0.0326
+  },
+  "fixed_cap": {
+    "30": {
+      "lost_success": 0.0697,
+      "saved_steps": 0.2942
+    },
+    "35": {
+      "lost_success": 0.049,
+      "saved_steps": 0.2456
+    },
+    "40": {
+      "lost_success": 0.0371,
+      "saved_steps": 0.2081
+    },
+    "50": {
+      "lost_success": 0.0219,
+      "saved_steps": 0.1577
+    }
+  }
+}
+
+완료 기준 통과
