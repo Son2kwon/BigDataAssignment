@@ -1,0 +1,53 @@
+
+--- 05-m1-solution-files: starting attempt ---
+shape: (4, 6)
+┌───────────────┬──────┬─────────┬────────┬──────────┬─────────────┐
+│ scope         ┆ N    ┆ target  ┆ n_traj ┆ n_issues ┆ opened_rate │
+│ ---           ┆ ---  ┆ ---     ┆ ---    ┆ ---      ┆ ---         │
+│ str           ┆ null ┆ str     ┆ i64    ┆ i64      ┆ f64         │
+╞═══════════════╪══════╪═════════╪════════╪══════════╪═════════════╡
+│ all_models    ┆ null ┆ success ┆ 13313  ┆ 763      ┆ 0.997       │
+│ all_models    ┆ null ┆ failure ┆ 22018  ┆ 807      ┆ 0.843       │
+│ 70b_eval_sets ┆ null ┆ success ┆ 12393  ┆ 762      ┆ 0.997       │
+│ 70b_eval_sets ┆ null ┆ failure ┆ 20478  ┆ 802      ┆ 0.843       │
+└───────────────┴──────┴─────────┴────────┴──────────┴─────────────┘
+shape: (12, 6)
+┌─────────────────────────────┬─────┬─────────┬────────┬──────────┬─────────────┐
+│ scope                       ┆ N   ┆ target  ┆ n_traj ┆ n_issues ┆ opened_rate │
+│ ---                         ┆ --- ┆ ---     ┆ ---    ┆ ---      ┆ ---         │
+│ str                         ┆ i64 ┆ str     ┆ i64    ┆ i64      ┆ f64         │
+╞═════════════════════════════╪═════╪═════════╪════════╪══════════╪═════════════╡
+│ 70b_eval_sets_first_n_steps ┆ 3   ┆ success ┆ 12350  ┆ 762      ┆ 0.419       │
+│ 70b_eval_sets_first_n_steps ┆ 3   ┆ failure ┆ 20305  ┆ 799      ┆ 0.313       │
+│ 70b_eval_sets_first_n_steps ┆ 5   ┆ success ┆ 11724  ┆ 761      ┆ 0.697       │
+│ 70b_eval_sets_first_n_steps ┆ 5   ┆ failure ┆ 19428  ┆ 797      ┆ 0.542       │
+│ 70b_eval_sets_first_n_steps ┆ 8   ┆ success ┆ 9755   ┆ 757      ┆ 0.875       │
+│ 70b_eval_sets_first_n_steps ┆ 8   ┆ failure ┆ 17006  ┆ 789      ┆ 0.709       │
+│ 70b_eval_sets_first_n_steps ┆ 10  ┆ success ┆ 7607   ┆ 742      ┆ 0.911       │
+│ 70b_eval_sets_first_n_steps ┆ 10  ┆ failure ┆ 14958  ┆ 778      ┆ 0.754       │
+│ 70b_eval_sets_first_n_steps ┆ 15  ┆ success ┆ 3681   ┆ 674      ┆ 0.937       │
+│ 70b_eval_sets_first_n_steps ┆ 15  ┆ failure ┆ 10443  ┆ 762      ┆ 0.791       │
+│ 70b_eval_sets_first_n_steps ┆ 20  ┆ success ┆ 1938   ┆ 556      ┆ 0.960       │
+│ 70b_eval_sets_first_n_steps ┆ 20  ┆ failure ┆ 7683   ┆ 736      ┆ 0.793       │
+└─────────────────────────────┴─────┴─────────┴────────┴──────────┴─────────────┘
+shape: (13, 4)
+┌─────────────────────────────────┬────────┬─────────┬───────────────┐
+│ instance_id                     ┆ n_hint ┆ n_proxy ┆ hint_in_proxy │
+│ ---                             ┆ ---    ┆ ---     ┆ ---           │
+│ str                             ┆ u32    ┆ u32     ┆ u32           │
+╞═════════════════════════════════╪════════╪═════════╪═══════════════╡
+│ marshmallow-code__marshmallow-… ┆ 1      ┆ 0       ┆ 0             │
+│ pvlib__pvlib-python-1707        ┆ 1      ┆ 0       ┆ 0             │
+│ pydicom__pydicom-1139           ┆ 1      ┆ 0       ┆ 0             │
+│ pydicom__pydicom-1256           ┆ 1      ┆ 0       ┆ 0             │
+│ pydicom__pydicom-1413           ┆ 1      ┆ 0       ┆ 0             │
+│ pydicom__pydicom-901            ┆ 1      ┆ 0       ┆ 0             │
+│ pylint-dev__astroid-1196        ┆ 1      ┆ 1       ┆ 1             │
+│ pylint-dev__astroid-1333        ┆ 1      ┆ 0       ┆ 0             │
+│ pylint-dev__astroid-1866        ┆ 1      ┆ 0       ┆ 0             │
+│ pylint-dev__astroid-1978        ┆ 1      ┆ 0       ┆ 0             │
+│ sqlfluff__sqlfluff-1517         ┆ 1      ┆ 0       ┆ 0             │
+│ sqlfluff__sqlfluff-1625         ┆ 1      ┆ 0       ┆ 0             │
+│ sqlfluff__sqlfluff-1763         ┆ 1      ┆ 0       ┆ 0             │
+└─────────────────────────────────┴────────┴─────────┴───────────────┘
+{'all_models': 44705, 'success': 76, 'issues': 2829} {'issues': 13, 'with_proxy': 1, 'hint_files': 13, 'hint_files_in_proxy': 1}

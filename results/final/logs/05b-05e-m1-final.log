@@ -1,0 +1,11 @@
+
+--- 05b-05e-m1-final: starting attempt ---
+Frozen variant choices: {"m1_xgb_s1": "w3", "m1_xgb_b1_s1": "w3", "m1_xgb_s2": "sl35", "m1_xgb_b1_s2": "sl35", "m1_xgb_s3": "length", "m1_xgb_b1_s3": "length", "m1_xgb_s4": "step_lam1", "m1_xgb_b1_s4": "step_lam1"}
+m1_variants_refit_N3: 0/8 tasks already checkpointed
+m1_variants_refit_N5: 0/8 tasks already checkpointed
+m1_variants_refit_N8: 0/8 tasks already checkpointed
+m1_variants_refit_N10: 0/8 tasks already checkpointed
+m1_variants_refit_N15: 0/8 tasks already checkpointed
+m1_variants_refit_N20: 0/8 tasks already checkpointed
+m1_variants_bootstrap: 0/49 tasks already checkpointed
+m1_variants_pairs: 0/30 tasks already checkpointed

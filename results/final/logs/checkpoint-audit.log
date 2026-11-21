@@ -1,0 +1,1 @@
+Moved 48 synthetic pytest bootstrap checkpoints (n_boot=20) outside the production task cache before Phase 5d began. The final Phase 5d bootstrap starts with an empty production cache and uses n_boot=1000.

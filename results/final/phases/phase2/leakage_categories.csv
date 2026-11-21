@@ -1,0 +1,10 @@
+kind,category,generic_name,n,trajectories,with_result_line,failed_in_eval
+new_test_file,repo_view,false,2,2,0,0
+test_name,repo_view,false,803,152,49,101
+test_name,agent_test_run,false,135,23,130,70
+test_name,agent_typed,false,76,76,0,37
+test_name,issue_text,false,31,28,4,15
+test_name,repo_view,true,47,39,2,11
+test_name,agent_typed,true,21,21,0,10
+test_name,issue_text,true,7,7,0,6
+test_name,agent_test_run,true,6,3,6,5

@@ -1,0 +1,167 @@
+
+--- 05-m1: starting attempt ---
+[   0.0s] 입력·평가 집합·맥락 길이
+[   1.5s] 피처 (73개, 행 334789)
+m1_grid_xgb: 0/96 tasks already checkpointed
+m1_grid_lr: 0/96 tasks already checkpointed
+[ 300.2s] 그리드 OOF (192개)
+m1_refit: 0/24 tasks already checkpointed
+[  13.9s] 고른 설정 다시 학습 (24개)
+[   0.7s] 예측 저장·검증
+[  54.0s] 판별 지표·운영점 선택·적용
+m1_bootstrap: 0/25 tasks already checkpointed
+[ 106.2s] 부트스트랩 (25개 × 1000회)
+[   7.5s] ② 민감도
+/home/chaseungjoon/code/bigdata-project/data/processed/full_run/120c121ea083ab4d/code/04_m1.py:257: FutureWarning: The NumPy global RNG was seeded by calling `np.random.seed`. In a future version this function will no longer use the global RNG. Pass `rng` explicitly to opt-in to the new behaviour and silence this warning.
+  shap.summary_plot(avg, x_plot, feature_names=cols, max_display=SHAP_PLOT_TOP, show=False, plot_size=(8, 6))
+/home/chaseungjoon/code/bigdata-project/data/processed/full_run/120c121ea083ab4d/code/04_m1.py:257: FutureWarning: The NumPy global RNG was seeded by calling `np.random.seed`. In a future version this function will no longer use the global RNG. Pass `rng` explicitly to opt-in to the new behaviour and silence this warning.
+  shap.summary_plot(avg, x_plot, feature_names=cols, max_display=SHAP_PLOT_TOP, show=False, plot_size=(8, 6))
+/home/chaseungjoon/code/bigdata-project/data/processed/full_run/120c121ea083ab4d/code/04_m1.py:257: FutureWarning: The NumPy global RNG was seeded by calling `np.random.seed`. In a future version this function will no longer use the global RNG. Pass `rng` explicitly to opt-in to the new behaviour and silence this warning.
+  shap.summary_plot(avg, x_plot, feature_names=cols, max_display=SHAP_PLOT_TOP, show=False, plot_size=(8, 6))
+/home/chaseungjoon/code/bigdata-project/data/processed/full_run/120c121ea083ab4d/code/04_m1.py:257: FutureWarning: The NumPy global RNG was seeded by calling `np.random.seed`. In a future version this function will no longer use the global RNG. Pass `rng` explicitly to opt-in to the new behaviour and silence this warning.
+  shap.summary_plot(avg, x_plot, feature_names=cols, max_display=SHAP_PLOT_TOP, show=False, plot_size=(8, 6))
+/home/chaseungjoon/code/bigdata-project/data/processed/full_run/120c121ea083ab4d/code/04_m1.py:257: FutureWarning: The NumPy global RNG was seeded by calling `np.random.seed`. In a future version this function will no longer use the global RNG. Pass `rng` explicitly to opt-in to the new behaviour and silence this warning.
+  shap.summary_plot(avg, x_plot, feature_names=cols, max_display=SHAP_PLOT_TOP, show=False, plot_size=(8, 6))
+/home/chaseungjoon/code/bigdata-project/data/processed/full_run/120c121ea083ab4d/code/04_m1.py:257: FutureWarning: The NumPy global RNG was seeded by calling `np.random.seed`. In a future version this function will no longer use the global RNG. Pass `rng` explicitly to opt-in to the new behaviour and silence this warning.
+  shap.summary_plot(avg, x_plot, feature_names=cols, max_display=SHAP_PLOT_TOP, show=False, plot_size=(8, 6))
+[  14.2s] SHAP
+shape: (16, 6)
+┌─────────────┬───────────┬────────┬────────┬─────────────┬───────────────────┐
+│ model       ┆ split     ┆ auroc  ┆ pr_auc ┆ within_pair ┆ within_issue_mean │
+│ ---         ┆ ---       ┆ ---    ┆ ---    ┆ ---         ┆ ---               │
+│ str         ┆ str       ┆ f64    ┆ f64    ┆ f64         ┆ f64               │
+╞═════════════╪═══════════╪════════╪════════╪═════════════╪═══════════════════╡
+│ b0_editfail ┆ test      ┆ 0.5270 ┆ 0.1438 ┆ 0.5338      ┆ 0.5209            │
+│ b0_err      ┆ test      ┆ 0.5284 ┆ 0.1431 ┆ 0.5509      ┆ 0.5299            │
+│ b1_n        ┆ test      ┆ 0.6003 ┆ 0.1737 ┆ 0.5000      ┆ 0.5000            │
+│ b1_static   ┆ test      ┆ 0.6068 ┆ 0.1849 ┆ 0.5000      ┆ 0.5000            │
+│ m1_lr       ┆ test      ┆ 0.6805 ┆ 0.2884 ┆ 0.6117      ┆ 0.6151            │
+│ m1_lr_b1    ┆ test      ┆ 0.6948 ┆ 0.2803 ┆ 0.6125      ┆ 0.6138            │
+│ m1_xgb      ┆ test      ┆ 0.7014 ┆ 0.3066 ┆ 0.6111      ┆ 0.6159            │
+│ m1_xgb_b1   ┆ test      ┆ 0.7140 ┆ 0.2969 ┆ 0.6179      ┆ 0.6193            │
+│ b0_editfail ┆ train_oof ┆ 0.5359 ┆ 0.1479 ┆ 0.5405      ┆ 0.5388            │
+│ b0_err      ┆ train_oof ┆ 0.5337 ┆ 0.1458 ┆ 0.5542      ┆ 0.5469            │
+│ b1_n        ┆ train_oof ┆ 0.6430 ┆ 0.2008 ┆ 0.5000      ┆ 0.5000            │
+│ b1_static   ┆ train_oof ┆ 0.6442 ┆ 0.2023 ┆ 0.5000      ┆ 0.5000            │
+│ m1_lr       ┆ train_oof ┆ 0.6852 ┆ 0.2723 ┆ 0.5958      ┆ 0.5848            │
+│ m1_lr_b1    ┆ train_oof ┆ 0.7042 ┆ 0.2767 ┆ 0.5982      ┆ 0.5870            │
+│ m1_xgb      ┆ train_oof ┆ 0.6983 ┆ 0.2819 ┆ 0.5939      ┆ 0.5800            │
+│ m1_xgb_b1   ┆ train_oof ┆ 0.7171 ┆ 0.2889 ┆ 0.5941      ┆ 0.5793            │
+└─────────────┴───────────┴────────┴────────┴─────────────┴───────────────────┘
+shape: (18, 12)
+┌─────────────┬──────────────┬────────┬──────┬───────────┬──────────────┬─────────────────┬───────────────────┬─────────────┬───────────────┬──────────────────┬──────────────────┐
+│ model       ┆ policy       ┆ tau    ┆ cap  ┆ stop_rate ┆ lost_success ┆ lost_success_hi ┆ meets_judge_ci_hi ┆ saved_steps ┆ d_saved_steps ┆ d_saved_steps_lo ┆ d_saved_steps_hi │
+│ ---         ┆ ---          ┆ ---    ┆ ---  ┆ ---       ┆ ---          ┆ ---             ┆ ---               ┆ ---         ┆ ---           ┆ ---              ┆ ---              │
+│ str         ┆ str          ┆ f64    ┆ i64  ┆ f64       ┆ f64          ┆ f64             ┆ bool              ┆ f64         ┆ f64           ┆ f64              ┆ f64              │
+╞═════════════╪══════════════╪════════╪══════╪═══════════╪══════════════╪═════════════════╪═══════════════════╪═════════════╪═══════════════╪══════════════════╪══════════════════╡
+│ b0_cap      ┆ cap          ┆ null   ┆ 40   ┆ 0.1586    ┆ 0.0202       ┆ 0.0290          ┆ true              ┆ 0.1983      ┆ null          ┆ null             ┆ null             │
+│ b0_cap      ┆ cap_proposal ┆ null   ┆ 35   ┆ 0.2073    ┆ 0.0307       ┆ 0.0413          ┆ true              ┆ 0.2346      ┆ 0.0363        ┆ 0.0346           ┆ 0.0381           │
+│ b0_err      ┆ single       ┆ 5.0000 ┆ null ┆ 0.0936    ┆ 0.0317       ┆ 0.0453          ┆ true              ┆ 0.0955      ┆ -0.1028       ┆ -0.1218          ┆ -0.0845          │
+│ b0_err      ┆ combined     ┆ 9.0000 ┆ 40   ┆ 0.0047    ┆ 0.0202       ┆ 0.0290          ┆ true              ┆ 0.2021      ┆ 0.0039        ┆ 0.0024           ┆ 0.0057           │
+│ b0_editfail ┆ single       ┆ 3.0000 ┆ null ┆ 0.0929    ┆ 0.0317       ┆ 0.0489          ┆ true              ┆ 0.0556      ┆ -0.1426       ┆ -0.1664          ┆ -0.1214          │
+│ b0_editfail ┆ combined     ┆ 9.0000 ┆ 40   ┆ 0.0024    ┆ 0.0202       ┆ 0.0290          ┆ true              ┆ 0.2002      ┆ 0.0020        ┆ 0.0009           ┆ 0.0034           │
+│ b1_static   ┆ single       ┆ 0.9085 ┆ null ┆ 0.1451    ┆ 0.0445       ┆ 0.0744          ┆ false             ┆ 0.1241      ┆ -0.0742       ┆ -0.1020          ┆ -0.0437          │
+│ b1_static   ┆ combined     ┆ 0.9202 ┆ 47   ┆ 0.0807    ┆ 0.0349       ┆ 0.0611          ┆ false             ┆ 0.2083      ┆ 0.0100        ┆ -0.0044          ┆ 0.0267           │
+│ b1_n        ┆ single       ┆ 0.9128 ┆ null ┆ 0.1330    ┆ 0.0389       ┆ 0.0676          ┆ false             ┆ 0.1143      ┆ -0.0839       ┆ -0.1127          ┆ -0.0537          │
+│ b1_n        ┆ combined     ┆ 0.9213 ┆ 46   ┆ 0.0751    ┆ 0.0305       ┆ 0.0556          ┆ false             ┆ 0.2095      ┆ 0.0112        ┆ -0.0024          ┆ 0.0263           │
+│ m1_lr       ┆ single       ┆ 0.9457 ┆ null ┆ 0.1546    ┆ 0.0440       ┆ 0.0600          ┆ false             ┆ 0.1663      ┆ -0.0319       ┆ -0.0509          ┆ -0.0152          │
+│ m1_lr       ┆ combined     ┆ 0.9761 ┆ 42   ┆ 0.0332    ┆ 0.0259       ┆ 0.0363          ┆ true              ┆ 0.2094      ┆ 0.0112        ┆ 0.0064           ┆ 0.0163           │
+│ m1_lr_b1    ┆ single       ┆ 0.9454 ┆ null ┆ 0.1742    ┆ 0.0412       ┆ 0.0596          ┆ false             ┆ 0.1843      ┆ -0.0140       ┆ -0.0339          ┆ 0.0038           │
+│ m1_lr_b1    ┆ combined     ┆ 0.9586 ┆ 50   ┆ 0.1019    ┆ 0.0355       ┆ 0.0499          ┆ true              ┆ 0.2195      ┆ 0.0212        ┆ 0.0125           ┆ 0.0300           │
+│ m1_xgb      ┆ single       ┆ 0.9462 ┆ null ┆ 0.1549    ┆ 0.0357       ┆ 0.0499          ┆ true              ┆ 0.1673      ┆ -0.0309       ┆ -0.0482          ┆ -0.0162          │
+│ m1_xgb      ┆ combined     ┆ 0.9711 ┆ 41   ┆ 0.0294    ┆ 0.0224       ┆ 0.0313          ┆ true              ┆ 0.2104      ┆ 0.0122        ┆ 0.0086           ┆ 0.0159           │
+│ m1_xgb_b1   ┆ single       ┆ 0.9483 ┆ null ┆ 0.1862    ┆ 0.0393       ┆ 0.0601          ┆ false             ┆ 0.1886      ┆ -0.0096       ┆ -0.0301          ┆ 0.0110           │
+│ m1_xgb_b1   ┆ combined     ┆ 0.9559 ┆ 57   ┆ 0.1397    ┆ 0.0318       ┆ 0.0487          ┆ true              ┆ 0.2241      ┆ 0.0259        ┆ 0.0131           ┆ 0.0406           │
+└─────────────┴──────────────┴────────┴──────┴───────────┴──────────────┴─────────────────┴───────────────────┴─────────────┴───────────────┴──────────────────┴──────────────────┘
+shape: (16, 8)
+┌─────────────┬──────────┬─────┬───────────────────┬────────────────┬────────────────┬──────────────────┬─────────────────────┐
+│ model       ┆ policy   ┆ n   ┆ half_width_median ┆ half_width_min ┆ half_width_max ┆ stop_rate_median ┆ lost_success_median │
+│ ---         ┆ ---      ┆ --- ┆ ---               ┆ ---            ┆ ---            ┆ ---              ┆ ---                 │
+│ str         ┆ str      ┆ u32 ┆ f64               ┆ f64            ┆ f64            ┆ f64              ┆ f64                 │
+╞═════════════╪══════════╪═════╪═══════════════════╪════════════════╪════════════════╪══════════════════╪═════════════════════╡
+│ b0_editfail ┆ combined ┆ 6   ┆ 0.0080            ┆ 0.0076         ┆ 0.0081         ┆ 0.0023           ┆ 0.0202              │
+│ b0_err      ┆ combined ┆ 6   ┆ 0.0080            ┆ 0.0074         ┆ 0.0081         ┆ 0.0046           ┆ 0.0202              │
+│ b1_n        ┆ combined ┆ 6   ┆ 0.0159            ┆ 0.0105         ┆ 0.0294         ┆ 0.0494           ┆ 0.0261              │
+│ b1_static   ┆ combined ┆ 6   ┆ 0.0205            ┆ 0.0105         ┆ 0.0294         ┆ 0.0737           ┆ 0.0342              │
+│ m1_lr       ┆ combined ┆ 6   ┆ 0.0091            ┆ 0.0083         ┆ 0.0126         ┆ 0.0288           ┆ 0.0258              │
+│ m1_lr_b1    ┆ combined ┆ 6   ┆ 0.0117            ┆ 0.0086         ┆ 0.0135         ┆ 0.0885           ┆ 0.0320              │
+│ m1_xgb      ┆ combined ┆ 6   ┆ 0.0086            ┆ 0.0078         ┆ 0.0107         ┆ 0.0242           ┆ 0.0244              │
+│ m1_xgb_b1   ┆ combined ┆ 6   ┆ 0.0127            ┆ 0.0080         ┆ 0.0154         ┆ 0.1179           ┆ 0.0304              │
+│ b0_editfail ┆ single   ┆ 6   ┆ 0.0118            ┆ 0.0070         ┆ 0.0157         ┆ 0.0734           ┆ 0.0242              │
+│ b0_err      ┆ single   ┆ 6   ┆ 0.0123            ┆ 0.0092         ┆ 0.0144         ┆ 0.0883           ┆ 0.0257              │
+│ b1_n        ┆ single   ┆ 6   ┆ 0.0298            ┆ 0.0124         ┆ 0.0346         ┆ 0.1293           ┆ 0.0415              │
+│ b1_static   ┆ single   ┆ 6   ┆ 0.0309            ┆ 0.0148         ┆ 0.0355         ┆ 0.1360           ┆ 0.0443              │
+│ m1_lr       ┆ single   ┆ 6   ┆ 0.0156            ┆ 0.0110         ┆ 0.0273         ┆ 0.1324           ┆ 0.0447              │
+│ m1_lr_b1    ┆ single   ┆ 6   ┆ 0.0168            ┆ 0.0114         ┆ 0.0267         ┆ 0.1521           ┆ 0.0448              │
+│ m1_xgb      ┆ single   ┆ 6   ┆ 0.0155            ┆ 0.0096         ┆ 0.0299         ┆ 0.1389           ┆ 0.0424              │
+│ m1_xgb_b1   ┆ single   ┆ 6   ┆ 0.0184            ┆ 0.0096         ┆ 0.0236         ┆ 0.1602           ┆ 0.0373              │
+└─────────────┴──────────┴─────┴───────────────────┴────────────────┴────────────────┴──────────────────┴─────────────────────┘
+{
+  "criteria": {
+    "C1_features_one_to_one_finite": true,
+    "C2_grid_no_seen_issue": true,
+    "C3_selected_refit_reproduces_scores": true,
+    "C4_k_star": true,
+    "C5_b1_test_input_differs_by_fold": true,
+    "C6_preds_and_fold_files": true,
+    "C7_operating_points": true,
+    "C8_cap_rows_match_phase4": true,
+    "C9_b1_sensitivity": true,
+    "C10_shap": true
+  },
+  "timings": {
+    "입력·평가 집합·맥락 길이": 0.0,
+    "피처 (73개, 행 334789)": 1.5,
+    "그리드 OOF (192개)": 300.2,
+    "고른 설정 다시 학습 (24개)": 13.9,
+    "예측 저장·검증": 0.7,
+    "판별 지표·운영점 선택·적용": 54.0,
+    "부트스트랩 (25개 × 1000회)": 106.2,
+    "② 민감도": 7.5,
+    "SHAP": 14.2
+  },
+  "good_n": [
+    {
+      "model": "m1_lr",
+      "N": 20,
+      "train_oof_auroc": 0.713109417625505,
+      "train_saved_steps_combined": 0.2583876941401997,
+      "in_tie_band": true,
+      "selected": true
+    },
+    {
+      "model": "m1_lr_b1",
+      "N": 20,
+      "train_oof_auroc": 0.7283992554714663,
+      "train_saved_steps_combined": 0.26396118902051285,
+      "in_tie_band": true,
+      "selected": true
+    },
+    {
+      "model": "m1_xgb",
+      "N": 20,
+      "train_oof_auroc": 0.7284822326355904,
+      "train_saved_steps_combined": 0.2670500615727256,
+      "in_tie_band": true,
+      "selected": true
+    },
+    {
+      "model": "m1_xgb_b1",
+      "N": 20,
+      "train_oof_auroc": 0.7426264674742037,
+      "train_saved_steps_combined": 0.271335647351132,
+      "in_tie_band": true,
+      "selected": true
+    }
+  ],
+  "shap_top1": {
+    "m1_xgb_N5": "cmd_find_file",
+    "m1_xgb_N10": "n_edit_ok",
+    "m1_xgb_N20": "n_edit_ok",
+    "m1_xgb_b1_N5": "b1_score",
+    "m1_xgb_b1_N10": "b1_score",
+    "m1_xgb_b1_N20": "n_edit_ok"
+  }
+}
+
+완료 기준 통과

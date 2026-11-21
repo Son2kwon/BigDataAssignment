@@ -1,0 +1,220 @@
+{
+  "mode": "train OOF only; full execution by user",
+  "status": "complete",
+  "device": "cuda",
+  "seed": 42,
+  "thought_version": 1,
+  "s2": {
+    "phase5b_S1": "w3",
+    "phase5b_device": "cuda",
+    "phase5c_S2": "sl35",
+    "phase5c_device": "cuda",
+    "definition": "w3 + sl35",
+    "reproduce_5c_oof": {
+      "m1_xgb": {
+        "same_rows": true,
+        "same_scores": true,
+        "matches_when_same_device": true
+      },
+      "m1_xgb_b1": {
+        "same_rows": true,
+        "same_scores": true,
+        "matches_when_same_device": true
+      }
+    }
+  },
+  "models": [
+    "m1_xgb",
+    "m1_xgb_b1"
+  ],
+  "N": [
+    3,
+    5,
+    8,
+    10,
+    15,
+    20
+  ],
+  "grid": [
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": false
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": false
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 200,
+      "balance": true
+    },
+    {
+      "max_depth": 6,
+      "n_estimators": 600,
+      "balance": true
+    }
+  ],
+  "xgb_fixed": {
+    "learning_rate": 0.05,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "min_child_weight": 1.0,
+    "reg_lambda": 1.0,
+    "tree_method": "hist",
+    "device": "cuda",
+    "n_jobs": 1,
+    "random_state": 42,
+    "eval_metric": "logloss"
+  },
+  "grid_tie": 0.002,
+  "k_star": 40,
+  "features": {
+    "official_matches_04_m1_cache": true,
+    "rows_per_N": {
+      "3": 61786,
+      "5": 59232,
+      "8": 52207,
+      "10": 46167,
+      "15": 33367,
+      "20": 25864
+    }
+  },
+  "selection": {
+    "model": "m1_xgb",
+    "N": [
+      8,
+      10,
+      15,
+      20
+    ],
+    "tie": 0.002,
+    "t": 100,
+    "vocab_k": 10,
+    "S3": "length",
+    "pick_by_model": {
+      "m1_xgb": {
+        "vocabulary": [
+          100,
+          10
+        ],
+        "S3": "length"
+      },
+      "m1_xgb_b1": {
+        "vocabulary": [
+          100,
+          10
+        ],
+        "S3": "lexical"
+      }
+    }
+  },
+  "candidates_seen": {
+    "vocab_pairs": 6,
+    "final_bundles": 4,
+    "xgb_configs": 8
+  },
+  "unique_designs": 108,
+  "grid_fits": 864,
+  "hypothesis": {
+    "rows": [
+      {
+        "model": "m1_xgb",
+        "N": 8,
+        "d_within_pair": 0.0052312842,
+        "d_within_pair_lo": -0.0004887201,
+        "d_within_pair_hi": 0.0109953005
+      },
+      {
+        "model": "m1_xgb",
+        "N": 10,
+        "d_within_pair": 0.0044323475,
+        "d_within_pair_lo": -0.0020748061,
+        "d_within_pair_hi": 0.0104742179
+      },
+      {
+        "model": "m1_xgb",
+        "N": 15,
+        "d_within_pair": 0.0036508994,
+        "d_within_pair_lo": -0.0026114369,
+        "d_within_pair_hi": 0.0099955674
+      },
+      {
+        "model": "m1_xgb",
+        "N": 20,
+        "d_within_pair": -0.0031041543,
+        "d_within_pair_lo": -0.0127527949,
+        "d_within_pair_hi": 0.0075189759
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 8,
+        "d_within_pair": 0.0064319731,
+        "d_within_pair_lo": 0.0009345566,
+        "d_within_pair_hi": 0.0117276893
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 10,
+        "d_within_pair": 0.002834766,
+        "d_within_pair_lo": -0.0029753202,
+        "d_within_pair_hi": 0.0082481771
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 15,
+        "d_within_pair": 0.0080346436,
+        "d_within_pair_lo": 0.0013342207,
+        "d_within_pair_hi": 0.0152552017
+      },
+      {
+        "model": "m1_xgb_b1",
+        "N": 20,
+        "d_within_pair": -0.0101050129,
+        "d_within_pair_lo": -0.019212439,
+        "d_within_pair_hi": -0.000676516
+      }
+    ],
+    "n_positive": 6,
+    "n_ci_lo_positive": 2
+  },
+  "bootstrap": {
+    "n_boot": 1000,
+    "skipped": false,
+    "unit": "train issue",
+    "seed": 42,
+    "base": "s2",
+    "selection_uncertainty_included": false
+  },
+  "criteria": {
+    "C1_features": true,
+    "C2_fold_boundaries": true,
+    "C3_s2_reproduced_when_available": true,
+    "C4_tables_complete": true,
+    "C5_vocabulary_complete": true,
+    "C6_bootstrap_ci": true
+  },
+  "external_validation": "pytest and byte reproducibility are separate; not implied by script criteria"
+}

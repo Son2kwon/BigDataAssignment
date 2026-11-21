@@ -1,0 +1,243 @@
+
+--- 07-m3-dev: starting attempt ---
+모드: 개발, 장치 cuda
+[   42.3s] train 토큰 배열 (62225궤적, 토큰 74,559,515)
+  fold 0: 학습 시작 (fit 궤적 49786, seed 3444837047)
+Loading weights:   0%|          | 0/136 [00:00<?, ?it/s]Loading weights: 100%|██████████| 136/136 [00:00<00:00, 5909.06it/s]
+[transformers] [1mModernBertForSequenceClassification LOAD REPORT[0m from: answerdotai/ModernBERT-base
+Key               | Status     | 
+------------------+------------+-
+decoder.bias      | UNEXPECTED | 
+classifier.weight | MISSING    | 
+classifier.bias   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+    epoch 1 검증 1/2: 걸음 362/1446, 학습 손실 0.2998, 검증 AUROC 0.7445 {5: 0.760, 10: 0.760, 20: 0.714} [472s]
+    epoch 1 검증 2/2: 걸음 723/1446, 학습 손실 0.2265, 검증 AUROC 0.7216 {5: 0.749, 10: 0.719, 20: 0.696} [977s]
+    epoch 2 검증 1/2: 걸음 1085/1446, 학습 손실 0.1712, 검증 AUROC 0.6960 {5: 0.707, 10: 0.689, 20: 0.693} [1457s]
+    epoch 2 검증 2/2: 걸음 1446/1446, 학습 손실 0.1546, 검증 AUROC 0.6964 {5: 0.706, 10: 0.692, 20: 0.691} [1919s]
+  fold 0: 완료 32.0분, 최고 검증 AUROC 0.7445 (epoch 1, 검증 1)
+  fold 1: 학습 시작 (fit 궤적 49781, seed 3329053876)
+Loading weights:   0%|          | 0/136 [00:00<?, ?it/s]Loading weights: 100%|██████████| 136/136 [00:00<00:00, 25529.24it/s]
+[transformers] [1mModernBertForSequenceClassification LOAD REPORT[0m from: answerdotai/ModernBERT-base
+Key               | Status     | 
+------------------+------------+-
+decoder.bias      | UNEXPECTED | 
+classifier.weight | MISSING    | 
+classifier.bias   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+    epoch 1 검증 1/2: 걸음 362/1446, 학습 손실 0.2872, 검증 AUROC 0.7083 {5: 0.724, 10: 0.698, 20: 0.703} [452s]
+    epoch 1 검증 2/2: 걸음 723/1446, 학습 손실 0.2299, 검증 AUROC 0.7206 {5: 0.737, 10: 0.689, 20: 0.736} [938s]
+    epoch 2 검증 1/2: 걸음 1085/1446, 학습 손실 0.1741, 검증 AUROC 0.6990 {5: 0.711, 10: 0.676, 20: 0.710} [1416s]
+    epoch 2 검증 2/2: 걸음 1446/1446, 학습 손실 0.1443, 검증 AUROC 0.7064 {5: 0.719, 10: 0.682, 20: 0.718} [1867s]
+  fold 1: 완료 31.1분, 최고 검증 AUROC 0.7206 (epoch 1, 검증 2)
+  fold 2: 학습 시작 (fit 궤적 49766, seed 955475868)
+Loading weights:   0%|          | 0/136 [00:00<?, ?it/s]Loading weights: 100%|██████████| 136/136 [00:00<00:00, 23972.49it/s]
+[transformers] [1mModernBertForSequenceClassification LOAD REPORT[0m from: answerdotai/ModernBERT-base
+Key               | Status     | 
+------------------+------------+-
+decoder.bias      | UNEXPECTED | 
+classifier.weight | MISSING    | 
+classifier.bias   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+    epoch 1 검증 1/2: 걸음 364/1456, 학습 손실 0.3007, 검증 AUROC 0.6586 {5: 0.637, 10: 0.646, 20: 0.693} [461s]
+    epoch 1 검증 2/2: 걸음 728/1456, 학습 손실 0.2377, 검증 AUROC 0.6753 {5: 0.664, 10: 0.673, 20: 0.689} [943s]
+    epoch 2 검증 1/2: 걸음 1092/1456, 학습 손실 0.1786, 검증 AUROC 0.6768 {5: 0.665, 10: 0.684, 20: 0.681} [1435s]
+    epoch 2 검증 2/2: 걸음 1456/1456, 학습 손실 0.1560, 검증 AUROC 0.6560 {5: 0.643, 10: 0.664, 20: 0.661} [1902s]
+  fold 2: 완료 31.7분, 최고 검증 AUROC 0.6768 (epoch 2, 검증 1)
+  fold 3: 학습 시작 (fit 궤적 49782, seed 2541583436)
+Loading weights:   0%|          | 0/136 [00:00<?, ?it/s]Loading weights: 100%|██████████| 136/136 [00:00<00:00, 23842.23it/s]
+[transformers] [1mModernBertForSequenceClassification LOAD REPORT[0m from: answerdotai/ModernBERT-base
+Key               | Status     | 
+------------------+------------+-
+decoder.bias      | UNEXPECTED | 
+classifier.weight | MISSING    | 
+classifier.bias   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+    epoch 1 검증 1/2: 걸음 364/1456, 학습 손실 0.2960, 검증 AUROC 0.7451 {5: 0.696, 10: 0.757, 20: 0.782} [487s]
+    epoch 1 검증 2/2: 걸음 728/1456, 학습 손실 0.2365, 검증 AUROC 0.7404 {5: 0.683, 10: 0.746, 20: 0.793} [931s]
+    epoch 2 검증 1/2: 걸음 1092/1456, 학습 손실 0.1869, 검증 AUROC 0.7202 {5: 0.656, 10: 0.739, 20: 0.766} [1396s]
+    epoch 2 검증 2/2: 걸음 1456/1456, 학습 손실 0.1566, 검증 AUROC 0.7054 {5: 0.644, 10: 0.718, 20: 0.754} [1860s]
+  fold 3: 완료 31.0분, 최고 검증 AUROC 0.7451 (epoch 1, 검증 1)
+  fold 4: 학습 시작 (fit 궤적 49785, seed 964687612)
+Loading weights:   0%|          | 0/136 [00:00<?, ?it/s]Loading weights: 100%|██████████| 136/136 [00:00<00:00, 25664.78it/s]
+[transformers] [1mModernBertForSequenceClassification LOAD REPORT[0m from: answerdotai/ModernBERT-base
+Key               | Status     | 
+------------------+------------+-
+decoder.bias      | UNEXPECTED | 
+classifier.weight | MISSING    | 
+classifier.bias   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+
+--- 07-m3-dev: starting attempt ---
+모드: 개발, 장치 cuda
+[    1.7s] train 토큰 배열 (62225궤적, 토큰 74,559,515)
+  fold 0: 저장된 모델 사용 (검증 AUROC 0.7445)
+  fold 1: 저장된 모델 사용 (검증 AUROC 0.7206)
+  fold 2: 저장된 모델 사용 (검증 AUROC 0.6768)
+  fold 3: 저장된 모델 사용 (검증 AUROC 0.7451)
+  fold 4: 학습 시작 (fit 궤적 49785, seed 964687612)
+Loading weights:   0%|          | 0/136 [00:00<?, ?it/s]Loading weights: 100%|██████████| 136/136 [00:00<00:00, 25073.64it/s]
+[transformers] [1mModernBertForSequenceClassification LOAD REPORT[0m from: answerdotai/ModernBERT-base
+Key               | Status     | 
+------------------+------------+-
+decoder.bias      | UNEXPECTED | 
+classifier.weight | MISSING    | 
+classifier.bias   | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+    epoch 1 검증 1/2: 걸음 364/1454, 학습 손실 0.3025, 검증 AUROC 0.7121 {5: 0.714, 10: 0.730, 20: 0.692} [462s]
+    epoch 1 검증 2/2: 걸음 727/1454, 학습 손실 0.2228, 검증 AUROC 0.6835 {5: 0.691, 10: 0.685, 20: 0.675} [958s]
+    epoch 2 검증 1/2: 걸음 1091/1454, 학습 손실 0.1764, 검증 AUROC 0.6541 {5: 0.651, 10: 0.655, 20: 0.657} [1428s]
+    epoch 2 검증 2/2: 걸음 1454/1454, 학습 손실 0.1475, 검증 AUROC 0.6408 {5: 0.635, 10: 0.638, 20: 0.650} [1870s]
+  fold 4: 완료 31.2분, 최고 검증 AUROC 0.7121 (epoch 1, 검증 1)
+[ 1870.7s] fold 모델 학습
+    채점 train fold 0: 26526예 275초
+    채점 train fold 1: 25900예 268초
+    채점 train fold 2: 26123예 271초
+    채점 train fold 3: 26605예 280초
+    채점 train fold 4: 26109예 268초
+[ 1362.7s] train OOF 채점·결합
+shape: (5, 11)
+┌──────┬────────────┬──────────┬────────────┬───────────┬───────────┬──────────────┬────────────┬────────────────────┬────────────────┬─────────┐
+│ fold ┆ seed       ┆ best_val ┆ best_epoch ┆ best_eval ┆ best_step ┆ n_train_rows ┆ n_val_rows ┆ examples_per_epoch ┆ n_val_examples ┆ minutes │
+│ ---  ┆ ---        ┆ ---      ┆ ---        ┆ ---       ┆ ---       ┆ ---          ┆ ---        ┆ ---                ┆ ---            ┆ ---     │
+│ i64  ┆ i64        ┆ f64      ┆ i64        ┆ i64       ┆ i64       ┆ i64          ┆ i64        ┆ str                ┆ i64            ┆ f64     │
+╞══════╪════════════╪══════════╪════════════╪═══════════╪═══════════╪══════════════╪════════════╪════════════════════╪════════════════╪═════════╡
+│ 0    ┆ 3444837047 ┆ 0.7445   ┆ 1          ┆ 1         ┆ 362       ┆ 43563        ┆ 6223       ┆ [23117, 23117]     ┆ 3268           ┆ 32.0000 │
+│ 1    ┆ 3329053876 ┆ 0.7206   ┆ 1          ┆ 2         ┆ 723       ┆ 43563        ┆ 6218       ┆ [23108, 23108]     ┆ 3379           ┆ 31.1000 │
+│ 2    ┆ 955475868  ┆ 0.6768   ┆ 2          ┆ 1         ┆ 1092      ┆ 43541        ┆ 6225       ┆ [23276, 23276]     ┆ 3299           ┆ 31.7000 │
+│ 3    ┆ 2541583436 ┆ 0.7451   ┆ 1          ┆ 1         ┆ 364       ┆ 43565        ┆ 6217       ┆ [23281, 23281]     ┆ 3212           ┆ 31.0000 │
+│ 4    ┆ 964687612  ┆ 0.7121   ┆ 1          ┆ 1         ┆ 364       ┆ 43568        ┆ 6217       ┆ [23258, 23258]     ┆ 3142           ┆ 31.2000 │
+└──────┴────────────┴──────────┴────────────┴───────────┴───────────┴──────────────┴────────────┴────────────────────┴────────────────┴─────────┘
+shape: (10, 4)
+┌──────────────┬────────┬────────┬────────┐
+│ model        ┆ 5      ┆ 10     ┆ 20     │
+│ ---          ┆ ---    ┆ ---    ┆ ---    │
+│ str          ┆ f64    ┆ f64    ┆ f64    │
+╞══════════════╪════════╪════════╪════════╡
+│ m3_bert      ┆ 0.6429 ┆ 0.6606 ┆ 0.6778 │
+│ m3_bert_b1   ┆ 0.6691 ┆ 0.6735 ┆ 0.6872 │
+│ m1_lr        ┆ 0.6485 ┆ 0.6852 ┆ 0.7131 │
+│ m1_lr_b1     ┆ 0.6783 ┆ 0.7042 ┆ 0.7284 │
+│ m1_xgb       ┆ 0.6676 ┆ 0.6983 ┆ 0.7285 │
+│ m1_xgb_b1    ┆ 0.6976 ┆ 0.7171 ┆ 0.7426 │
+│ m2_lstm      ┆ 0.6700 ┆ 0.6986 ┆ 0.7121 │
+│ m2_lstm_b1   ┆ 0.6971 ┆ 0.7134 ┆ 0.7211 │
+│ m2x_nocum    ┆ 0.6712 ┆ 0.7100 ┆ 0.7457 │
+│ m2x_nocum_b1 ┆ 0.6986 ┆ 0.7248 ┆ 0.7504 │
+└──────────────┴────────┴────────┴────────┘
+shape: (10, 4)
+┌──────────────┬────────┬────────┬────────┐
+│ model        ┆ 5      ┆ 10     ┆ 20     │
+│ ---          ┆ ---    ┆ ---    ┆ ---    │
+│ str          ┆ f64    ┆ f64    ┆ f64    │
+╞══════════════╪════════╪════════╪════════╡
+│ m3_bert      ┆ 0.5410 ┆ 0.5736 ┆ 0.6147 │
+│ m3_bert_b1   ┆ 0.5410 ┆ 0.5736 ┆ 0.6147 │
+│ m1_lr        ┆ 0.5412 ┆ 0.5958 ┆ 0.6364 │
+│ m1_lr_b1     ┆ 0.5441 ┆ 0.5982 ┆ 0.6395 │
+│ m1_xgb       ┆ 0.5420 ┆ 0.5939 ┆ 0.6469 │
+│ m1_xgb_b1    ┆ 0.5497 ┆ 0.5941 ┆ 0.6560 │
+│ m2_lstm      ┆ 0.5481 ┆ 0.6023 ┆ 0.6329 │
+│ m2_lstm_b1   ┆ 0.5534 ┆ 0.6037 ┆ 0.6321 │
+│ m2x_nocum    ┆ 0.5478 ┆ 0.6089 ┆ 0.6504 │
+│ m2x_nocum_b1 ┆ 0.5520 ┆ 0.6091 ┆ 0.6521 │
+└──────────────┴────────┴────────┴────────┘
+shape: (60, 11)
+┌──────────────┬─────┬──────────┬────────┬──────┬───────────┬──────────────┬─────────────┬──────────────┬───────────────┬────────────────┐
+│ model        ┆ N   ┆ policy   ┆ tau    ┆ cap  ┆ stop_rate ┆ lost_success ┆ saved_steps ┆ saved_tokens ┆ d_saved_steps ┆ d_saved_tokens │
+│ ---          ┆ --- ┆ ---      ┆ ---    ┆ ---  ┆ ---       ┆ ---          ┆ ---         ┆ ---          ┆ ---           ┆ ---            │
+│ str          ┆ i64 ┆ str      ┆ f64    ┆ i64  ┆ f64       ┆ f64          ┆ f64         ┆ f64          ┆ f64           ┆ f64            │
+╞══════════════╪═════╪══════════╪════════╪══════╪═══════════╪══════════════╪═════════════╪══════════════╪═══════════════╪════════════════╡
+│ m1_lr        ┆ 5   ┆ combined ┆ 0.9782 ┆ 41   ┆ 0.0093    ┆ 0.0350       ┆ 0.2031      ┆ 0.3463       ┆ 0.0010        ┆ -0.0053        │
+│ m1_lr_b1     ┆ 5   ┆ combined ┆ 0.9683 ┆ 42   ┆ 0.0213    ┆ 0.0350       ┆ 0.2080      ┆ 0.3450       ┆ 0.0060        ┆ -0.0066        │
+│ m1_xgb       ┆ 5   ┆ combined ┆ 0.9648 ┆ 41   ┆ 0.0091    ┆ 0.0350       ┆ 0.2034      ┆ 0.3467       ┆ 0.0013        ┆ -0.0049        │
+│ m1_xgb_b1    ┆ 5   ┆ combined ┆ 0.8232 ┆ 55   ┆ 0.0922    ┆ 0.0350       ┆ 0.2185      ┆ 0.3185       ┆ 0.0165        ┆ -0.0331        │
+│ m2_lstm      ┆ 5   ┆ combined ┆ 0.9703 ┆ 42   ┆ 0.0163    ┆ 0.0350       ┆ 0.2045      ┆ 0.3426       ┆ 0.0024        ┆ -0.0090        │
+│ m2_lstm_b1   ┆ 5   ┆ combined ┆ 0.9668 ┆ 43   ┆ 0.0304    ┆ 0.0350       ┆ 0.2114      ┆ 0.3441       ┆ 0.0094        ┆ -0.0075        │
+│ m2x_nocum    ┆ 5   ┆ combined ┆ 0.9595 ┆ 42   ┆ 0.0181    ┆ 0.0350       ┆ 0.2064      ┆ 0.3442       ┆ 0.0043        ┆ -0.0075        │
+│ m2x_nocum_b1 ┆ 5   ┆ combined ┆ 0.9428 ┆ 55   ┆ 0.0862    ┆ 0.0350       ┆ 0.2157      ┆ 0.3164       ┆ 0.0136        ┆ -0.0352        │
+│ m3_bert      ┆ 5   ┆ combined ┆ 0.9989 ┆ 40   ┆ 0.0007    ┆ 0.0350       ┆ 0.2027      ┆ 0.3521       ┆ 0.0006        ┆ 0.0005         │
+│ m3_bert_b1   ┆ 5   ┆ combined ┆ 0.9458 ┆ 46   ┆ 0.0433    ┆ 0.0350       ┆ 0.2041      ┆ 0.3287       ┆ 0.0020        ┆ -0.0229        │
+│ m1_lr        ┆ 5   ┆ single   ┆ 0.9347 ┆ null ┆ 0.0820    ┆ 0.0350       ┆ 0.1081      ┆ 0.1267       ┆ -0.0940       ┆ -0.2249        │
+│ m1_lr_b1     ┆ 5   ┆ single   ┆ 0.9374 ┆ null ┆ 0.0985    ┆ 0.0350       ┆ 0.1312      ┆ 0.1547       ┆ -0.0709       ┆ -0.1969        │
+│ m1_xgb       ┆ 5   ┆ single   ┆ 0.9303 ┆ null ┆ 0.1029    ┆ 0.0350       ┆ 0.1310      ┆ 0.1522       ┆ -0.0711       ┆ -0.1994        │
+│ m1_xgb_b1    ┆ 5   ┆ single   ┆ 0.7870 ┆ null ┆ 0.1337    ┆ 0.0350       ┆ 0.1637      ┆ 0.1937       ┆ -0.0383       ┆ -0.1580        │
+│ m2_lstm      ┆ 5   ┆ single   ┆ 0.9360 ┆ null ┆ 0.0918    ┆ 0.0350       ┆ 0.1193      ┆ 0.1405       ┆ -0.0827       ┆ -0.2111        │
+│ m2_lstm_b1   ┆ 5   ┆ single   ┆ 0.9393 ┆ null ┆ 0.1155    ┆ 0.0345       ┆ 0.1484      ┆ 0.1751       ┆ -0.0537       ┆ -0.1765        │
+│ m2x_nocum    ┆ 5   ┆ single   ┆ 0.9271 ┆ null ┆ 0.0976    ┆ 0.0350       ┆ 0.1280      ┆ 0.1517       ┆ -0.0741       ┆ -0.2000        │
+│ m2x_nocum_b1 ┆ 5   ┆ single   ┆ 0.9329 ┆ null ┆ 0.1256    ┆ 0.0350       ┆ 0.1569      ┆ 0.1856       ┆ -0.0451       ┆ -0.1660        │
+│ m3_bert      ┆ 5   ┆ single   ┆ 0.9906 ┆ null ┆ 0.0894    ┆ 0.0349       ┆ 0.0988      ┆ 0.1177       ┆ -0.1033       ┆ -0.2339        │
+│ m3_bert_b1   ┆ 5   ┆ single   ┆ 0.9275 ┆ null ┆ 0.1229    ┆ 0.0350       ┆ 0.1347      ┆ 0.1627       ┆ -0.0674       ┆ -0.1889        │
+│ m1_lr        ┆ 10  ┆ combined ┆ 0.9761 ┆ 42   ┆ 0.0317    ┆ 0.0350       ┆ 0.2108      ┆ 0.3489       ┆ 0.0087        ┆ -0.0028        │
+│ m1_lr_b1     ┆ 10  ┆ combined ┆ 0.9586 ┆ 50   ┆ 0.1031    ┆ 0.0350       ┆ 0.2208      ┆ 0.3422       ┆ 0.0187        ┆ -0.0094        │
+│ m1_xgb       ┆ 10  ┆ combined ┆ 0.9711 ┆ 41   ┆ 0.0312    ┆ 0.0350       ┆ 0.2146      ┆ 0.3615       ┆ 0.0125        ┆ 0.0099         │
+│ m1_xgb_b1    ┆ 10  ┆ combined ┆ 0.9559 ┆ 57   ┆ 0.1526    ┆ 0.0350       ┆ 0.2317      ┆ 0.3484       ┆ 0.0296        ┆ -0.0033        │
+│ m2_lstm      ┆ 10  ┆ combined ┆ 0.9760 ┆ 46   ┆ 0.0678    ┆ 0.0350       ┆ 0.2124      ┆ 0.3420       ┆ 0.0103        ┆ -0.0097        │
+│ m2_lstm_b1   ┆ 10  ┆ combined ┆ 0.9704 ┆ 50   ┆ 0.1061    ┆ 0.0350       ┆ 0.2219      ┆ 0.3454       ┆ 0.0198        ┆ -0.0062        │
+│ m2x_nocum    ┆ 10  ┆ combined ┆ 0.9748 ┆ 42   ┆ 0.0446    ┆ 0.0350       ┆ 0.2178      ┆ 0.3608       ┆ 0.0157        ┆ 0.0092         │
+│ m2x_nocum_b1 ┆ 10  ┆ combined ┆ 0.9564 ┆ 58   ┆ 0.1573    ┆ 0.0350       ┆ 0.2354      ┆ 0.3519       ┆ 0.0333        ┆ 0.0003         │
+│ m3_bert      ┆ 10  ┆ combined ┆ 0.9970 ┆ 41   ┆ 0.0232    ┆ 0.0348       ┆ 0.2095      ┆ 0.3569       ┆ 0.0075        ┆ 0.0053         │
+│ m3_bert_b1   ┆ 10  ┆ combined ┆ 0.9422 ┆ 58   ┆ 0.1357    ┆ 0.0350       ┆ 0.2132      ┆ 0.3293       ┆ 0.0111        ┆ -0.0223        │
+│ m1_lr        ┆ 10  ┆ single   ┆ 0.9457 ┆ null ┆ 0.1473    ┆ 0.0350       ┆ 0.1562      ┆ 0.2073       ┆ -0.0459       ┆ -0.1443        │
+│ m1_lr_b1     ┆ 10  ┆ single   ┆ 0.9454 ┆ null ┆ 0.1753    ┆ 0.0350       ┆ 0.1792      ┆ 0.2393       ┆ -0.0228       ┆ -0.1123        │
+│ m1_xgb       ┆ 10  ┆ single   ┆ 0.9462 ┆ null ┆ 0.1538    ┆ 0.0350       ┆ 0.1648      ┆ 0.2171       ┆ -0.0373       ┆ -0.1345        │
+│ m1_xgb_b1    ┆ 10  ┆ single   ┆ 0.9483 ┆ null ┆ 0.1987    ┆ 0.0350       ┆ 0.1923      ┆ 0.2568       ┆ -0.0098       ┆ -0.0948        │
+│ m2_lstm      ┆ 10  ┆ single   ┆ 0.9603 ┆ null ┆ 0.1580    ┆ 0.0350       ┆ 0.1579      ┆ 0.2097       ┆ -0.0442       ┆ -0.1420        │
+│ m2_lstm_b1   ┆ 10  ┆ single   ┆ 0.9585 ┆ null ┆ 0.1828    ┆ 0.0350       ┆ 0.1799      ┆ 0.2410       ┆ -0.0222       ┆ -0.1106        │
+│ m2x_nocum    ┆ 10  ┆ single   ┆ 0.9503 ┆ null ┆ 0.1702    ┆ 0.0350       ┆ 0.1704      ┆ 0.2279       ┆ -0.0317       ┆ -0.1237        │
+│ m2x_nocum_b1 ┆ 10  ┆ single   ┆ 0.9493 ┆ null ┆ 0.2042    ┆ 0.0350       ┆ 0.1994      ┆ 0.2673       ┆ -0.0027       ┆ -0.0843        │
+│ m3_bert      ┆ 10  ┆ single   ┆ 0.9906 ┆ null ┆ 0.1429    ┆ 0.0342       ┆ 0.1305      ┆ 0.1774       ┆ -0.0716       ┆ -0.1742        │
+│ m3_bert_b1   ┆ 10  ┆ single   ┆ 0.9346 ┆ null ┆ 0.1832    ┆ 0.0349       ┆ 0.1606      ┆ 0.2186       ┆ -0.0414       ┆ -0.1330        │
+│ m1_lr        ┆ 20  ┆ combined ┆ 0.9549 ┆ 60   ┆ 0.4202    ┆ 0.0350       ┆ 0.2584      ┆ 0.4188       ┆ 0.0563        ┆ 0.0671         │
+│ m1_lr_b1     ┆ 20  ┆ combined ┆ 0.9565 ┆ 60   ┆ 0.4357    ┆ 0.0350       ┆ 0.2640      ┆ 0.4277       ┆ 0.0619        ┆ 0.0760         │
+│ m1_xgb       ┆ 20  ┆ combined ┆ 0.9554 ┆ 58   ┆ 0.4352    ┆ 0.0350       ┆ 0.2671      ┆ 0.4279       ┆ 0.0650        ┆ 0.0763         │
+│ m1_xgb_b1    ┆ 20  ┆ combined ┆ 0.9605 ┆ 58   ┆ 0.4505    ┆ 0.0350       ┆ 0.2713      ┆ 0.4361       ┆ 0.0693        ┆ 0.0845         │
+│ m2_lstm      ┆ 20  ┆ combined ┆ 0.9565 ┆ 58   ┆ 0.4142    ┆ 0.0350       ┆ 0.2626      ┆ 0.4235       ┆ 0.0606        ┆ 0.0718         │
+│ m2_lstm_b1   ┆ 20  ┆ combined ┆ 0.9642 ┆ 60   ┆ 0.4352    ┆ 0.0350       ┆ 0.2654      ┆ 0.4273       ┆ 0.0633        ┆ 0.0757         │
+│ m2x_nocum    ┆ 20  ┆ combined ┆ 0.9520 ┆ 60   ┆ 0.4754    ┆ 0.0350       ┆ 0.2782      ┆ 0.4461       ┆ 0.0761        ┆ 0.0944         │
+│ m2x_nocum_b1 ┆ 20  ┆ combined ┆ 0.9624 ┆ 60   ┆ 0.4743    ┆ 0.0350       ┆ 0.2786      ┆ 0.4463       ┆ 0.0765        ┆ 0.0947         │
+│ m3_bert      ┆ 20  ┆ combined ┆ 0.9890 ┆ 58   ┆ 0.3407    ┆ 0.0347       ┆ 0.2351      ┆ 0.3844       ┆ 0.0330        ┆ 0.0328         │
+│ m3_bert_b1   ┆ 20  ┆ combined ┆ 0.9575 ┆ 60   ┆ 0.3839    ┆ 0.0350       ┆ 0.2438      ┆ 0.3993       ┆ 0.0418        ┆ 0.0477         │
+│ m1_lr        ┆ 20  ┆ single   ┆ 0.9466 ┆ null ┆ 0.4935    ┆ 0.0350       ┆ 0.2528      ┆ 0.3965       ┆ 0.0507        ┆ 0.0448         │
+│ m1_lr_b1     ┆ 20  ┆ single   ┆ 0.9471 ┆ null ┆ 0.5155    ┆ 0.0350       ┆ 0.2606      ┆ 0.4111       ┆ 0.0585        ┆ 0.0594         │
+│ m1_xgb       ┆ 20  ┆ single   ┆ 0.9457 ┆ null ┆ 0.5095    ┆ 0.0350       ┆ 0.2620      ┆ 0.4099       ┆ 0.0599        ┆ 0.0583         │
+│ m1_xgb_b1    ┆ 20  ┆ single   ┆ 0.9489 ┆ null ┆ 0.5464    ┆ 0.0350       ┆ 0.2738      ┆ 0.4320       ┆ 0.0717        ┆ 0.0803         │
+│ m2_lstm      ┆ 20  ┆ single   ┆ 0.9457 ┆ null ┆ 0.4990    ┆ 0.0350       ┆ 0.2538      ┆ 0.3985       ┆ 0.0518        ┆ 0.0469         │
+│ m2_lstm_b1   ┆ 20  ┆ single   ┆ 0.9553 ┆ null ┆ 0.5134    ┆ 0.0350       ┆ 0.2583      ┆ 0.4064       ┆ 0.0563        ┆ 0.0548         │
+│ m2x_nocum    ┆ 20  ┆ single   ┆ 0.9420 ┆ null ┆ 0.5503    ┆ 0.0350       ┆ 0.2782      ┆ 0.4374       ┆ 0.0761        ┆ 0.0857         │
+│ m2x_nocum_b1 ┆ 20  ┆ single   ┆ 0.9530 ┆ null ┆ 0.5561    ┆ 0.0350       ┆ 0.2806      ┆ 0.4413       ┆ 0.0785        ┆ 0.0897         │
+│ m3_bert      ┆ 20  ┆ single   ┆ 0.9846 ┆ null ┆ 0.4310    ┆ 0.0338       ┆ 0.2186      ┆ 0.3439       ┆ 0.0165        ┆ -0.0077        │
+│ m3_bert_b1   ┆ 20  ┆ single   ┆ 0.9512 ┆ null ┆ 0.4548    ┆ 0.0350       ┆ 0.2213      ┆ 0.3494       ┆ 0.0192        ┆ -0.0023        │
+└──────────────┴─────┴──────────┴────────┴──────┴───────────┴──────────────┴─────────────┴──────────────┴───────────────┴────────────────┘
+shape: (3, 3)
+┌─────┬─────────┬─────────┐
+│ N   ┆ coef_m3 ┆ coef_b1 │
+│ --- ┆ ---     ┆ ---     │
+│ i64 ┆ f64     ┆ f64     │
+╞═════╪═════════╪═════════╡
+│ 5   ┆ 0.3126  ┆ 0.9111  │
+│ 10  ┆ 0.3747  ┆ 0.9286  │
+│ 20  ┆ 0.4248  ┆ 1.5245  │
+└─────┴─────────┴─────────┘
+
+개발 실행 완료. 결과를 보고한 뒤 --final 을 실행한다
+[    7.4s] 개발 실행
+{"timings": {"train 토큰 배열 (62225궤적, 토큰 74,559,515)": 1.7, "fold 모델 학습": 1870.7, "train OOF 채점·결합": 1362.7, "개발 실행": 7.4}}
